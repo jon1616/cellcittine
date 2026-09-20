@@ -256,7 +256,7 @@ export class Net {
     const map = {
       "peer-unavailable": "Stanza non trovata. Controlla il codice.",
       "timeout": "Nessuna risposta dalla stanza. Controlla il codice e la connessione.",
-      "network": "Problema di rete. Sei connessa a internet?",
+      "network": "Problema di rete. C'è connessione a internet?",
       "browser-incompatible": "Questo browser non supporta il gioco in gruppo.",
       "server-error": "Il server di collegamento non risponde. Riprova fra poco.",
       "unavailable-id": "Codice già in uso, riprova.",

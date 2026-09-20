@@ -1,6 +1,6 @@
 # Cellcittine
 
-Party game di minigiochi per telefono, giocabile da sole o insieme (2-6 giocatrici)
+Party game di minigiochi per telefono, giocabile da soli o in gruppo (2-6 persone)
 tramite codice stanza. È una pagina web installabile (PWA): niente store, aggiornamenti istantanei.
 
 **Gioco online:** https://jon1616.github.io/cellcittine/
