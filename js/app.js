@@ -285,7 +285,7 @@ function configPanel() {
     el("div", { class: "chips" }, chips),
     el("div", { class: "label", text: "Manche" }),
     segmented(
-      ROUND_OPTIONS.map((n) => ({ id: n, label: String(n) })),
+      ROUND_OPTIONS.map((n) => ({ id: n, label: n === "tutti" ? "Tutti" : String(n) })),
       cfg.rounds,
       (rounds) => updateConfig({ rounds })
     ),
@@ -294,11 +294,15 @@ function configPanel() {
   ]);
 }
 
+function roundsLabel(cfg) {
+  return cfg.rounds === "tutti" ? `${cfg.games.length} manche (tutti i minigiochi)` : `${cfg.rounds} manche`;
+}
+
 function configSummary(cfg) {
   const names = cfg.games.map((id) => getGame(id)?.title).filter(Boolean);
   return el("div", { class: "card" }, [
     el("h2", { text: "La sfida" }),
-    el("p", { text: `${cfg.rounds} manche · ${difficultyLabel(cfg.difficulty)}` }),
+    el("p", { text: `${roundsLabel(cfg)} · ${difficultyLabel(cfg.difficulty)}` }),
     el("p", { class: "small", text: names.join(" · ") }),
   ]);
 }
@@ -375,10 +379,12 @@ function startChallenge() {
   const cfg = state.config;
   const rng = seededRandom(Math.floor(Math.random() * 2 ** 31));
 
-  // Sequenza di minigiochi: cicla su quelli scelti, mescolati, evitando ripetizioni vicine.
+  // "Tutti": ogni minigioco scelto una volta, in ordine casuale.
+  // Altrimenti: cicla su quelli scelti, mescolati, evitando ripetizioni vicine.
+  const total = cfg.rounds === "tutti" ? cfg.games.length : cfg.rounds;
   const rounds = [];
   let pool = [];
-  while (rounds.length < cfg.rounds) {
+  while (rounds.length < total) {
     if (pool.length === 0) {
       pool = shuffle(cfg.games, rng);
       if (rounds.length > 0 && pool.length > 1 && pool[0] === rounds[rounds.length - 1].gameId) {

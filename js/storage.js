@@ -9,7 +9,8 @@ export const DIFFICULTIES = [
   { id: "difficile", label: "Difficile" },
 ];
 
-export const ROUND_OPTIONS = [3, 5, 7, 10];
+// "tutti" = una manche per ogni minigioco scelto
+export const ROUND_OPTIONS = [3, 5, 7, 10, "tutti"];
 
 const DEFAULT_CONFIG = { games: [], rounds: 5, difficulty: "normale" };
 
