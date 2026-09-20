@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1b1a2e">
+  <title>Tester · Cellcittine</title>
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* La pagina del tester: pannello dei risultati a sinistra, "telefono" a destra. */
+    html, body { height: auto; overflow: auto; }
+    body { background: #14132a; }
+    #app { display: none; }
+    .tester { max-width: 1100px; margin: 0 auto; padding: 16px; display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; }
+    @media (max-width: 800px) { .tester { grid-template-columns: 1fr; } }
+    .tester h1 { font-size: 24px; margin: 0 0 4px; }
+    .tester .sub { color: rgba(255,255,255,0.7); margin: 0 0 12px; font-size: 14px; }
+    .tester .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+    .tester .controls label { display: flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer; }
+    .tester select { background: #26254a; color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 8px 10px; font: inherit; }
+    .tester button { width: auto; padding: 10px 18px; margin: 0; }
+    .tester button.secondary { background: #26254a; }
+    .summary { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; font-weight: 700; }
+    .summary span { padding: 6px 12px; border-radius: 999px; background: #26254a; }
+    .summary .ok { background: #2e6b3a; }
+    .summary .warn { background: #8a6d1a; }
+    .summary .fail { background: #8b2a2a; }
+    .section { background: #26254a; border-radius: 14px; padding: 12px 14px; margin-bottom: 12px; }
+    .section h2 { font-size: 17px; margin: 0 0 8px; display: flex; justify-content: space-between; align-items: center; }
+    .section h2 small { color: rgba(255,255,255,0.6); font-weight: 400; font-size: 13px; }
+    .row { display: grid; grid-template-columns: 24px 1fr; gap: 8px; padding: 5px 0; border-top: 1px solid rgba(255,255,255,0.06); font-size: 14px; line-height: 1.35; }
+    .row .msg { color: rgba(255,255,255,0.7); font-size: 13px; }
+    .row.fail { color: #ffb4b4; }
+    .row.warn { color: #ffe08a; }
+    .row.running .msg { color: #9ad1ff; }
+    .stage-wrap { position: sticky; top: 16px; }
+    .stage-label { font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 6px; display: flex; justify-content: space-between; }
+    /* transform: così gli elementi "position: fixed" dei minigiochi restano dentro il telefono */
+    .stage { width: 360px; height: 640px; background: #1b1a2e; border: 3px solid #3a3960; border-radius: 26px; overflow: hidden; position: relative; transform: translateZ(0); }
+    .stage iframe { width: 100%; height: 100%; border: 0; display: block; }
+    .stage .game-area { position: absolute; }
+    .log { font-family: ui-monospace, Consolas, monospace; font-size: 12px; white-space: pre-wrap; color: rgba(255,255,255,0.7); background: #1b1a2e; border-radius: 10px; padding: 10px; max-height: 220px; overflow: auto; margin-top: 10px; }
+    .tap { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; border: 2px solid #ffca3a; pointer-events: none; animation: tap 0.35s ease-out forwards; z-index: 99; }
+    @keyframes tap { from { opacity: 1; transform: scale(0.6); } to { opacity: 0; transform: scale(1.6); } }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <div class="tester">
+    <div>
+      <h1>🧪 Tester di Cellcittine</h1>
+      <p class="sub">Prova in pochi secondi tutto il gioco: struttura dei file, ogni minigioco (caricamento, parametri, partita simulata) e una manche di allenamento completa.</p>
+      <div class="controls">
+        <label><input type="checkbox" id="optStruttura" checked> Struttura</label>
+        <label><input type="checkbox" id="optGiochi" checked> Minigiochi</label>
+        <label><input type="checkbox" id="optApp" checked> Allenamento (app intera)</label>
+        <select id="optGioco" title="Quale minigioco provare"></select>
+        <select id="optDifficolta" title="Difficoltà">
+          <option value="facile">Facile</option>
+          <option value="normale" selected>Normale</option>
+          <option value="difficile">Difficile</option>
+        </select>
+        <select id="optVelocita" title="Velocità dell'orologio">
+          <option value="20" selected>Orologio ×20 (velocissimo)</option>
+          <option value="5">Orologio ×5</option>
+          <option value="1">Tempo reale</option>
+        </select>
+        <button id="btnAvvia">▶ Avvia i test</button>
+        <button id="btnCopia" class="secondary" disabled>Copia rapporto</button>
+      </div>
+      <div class="summary" id="summary"></div>
+      <div id="results"></div>
+    </div>
+    <div class="stage-wrap">
+      <div class="stage-label"><span id="stageTitle">Telefono di prova</span><span id="stageClock"></span></div>
+      <div class="stage" id="stage"></div>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+  <div id="version"></div>
+  <script type="module" src="js/tester.js"></script>
+</body>
+</html>

@@ -21,7 +21,7 @@ export const BUILTIN_PACKS = [
     name: "Classici",
     icon: "⭐",
     description: "I più semplici da capire al volo.",
-    games: () => ["semaforo", "memory", "numeri", "calcoli", "bersagli", "precisione"],
+    games: () => ["semaforo", "memory", "numeri", "calcoli", "bersagli", "precisione", "tocchi", "cesto"],
   },
   {
     id: "riflessi",
@@ -50,6 +50,13 @@ export const BUILTIN_PACKS = [
     icon: "🍵",
     description: "Senza fretta, per giocare con calma.",
     games: () => ids((g) => g.pace === "tranquillo"),
+  },
+  {
+    id: "testa",
+    name: "Testa",
+    icon: "🎓",
+    description: "Parole, numeri e memoria.",
+    games: () => ids((g) => ["parole", "calcolo", "memoria"].includes(g.category)),
   },
   {
     id: "lampo",

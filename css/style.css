@@ -649,3 +649,160 @@ button.info {
 }
 .perf-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); font-weight: 800; }
 .perf-small { font-size: 12px; color: var(--muted); }
+
+/* ---------------------------------------------------------------
+   Minigiochi v0.6
+   --------------------------------------------------------------- */
+
+/* Tocchi */
+.tap-pad {
+  position: relative;
+  flex: 1;
+  min-height: 60vh;
+  border-radius: 28px;
+  background: radial-gradient(circle at 50% 40%, #3f3d8a, #26254a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  touch-action: none;
+}
+.tap-counter { font-size: 120px; font-weight: 900; color: var(--accent); font-variant-numeric: tabular-nums; pointer-events: none; }
+.ripple {
+  position: absolute;
+  width: 20px; height: 20px;
+  margin: -10px 0 0 -10px;
+  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.7);
+  animation: ripple 0.5s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes ripple { to { transform: scale(9); opacity: 0; } }
+
+/* Ritmo */
+.rhythm-feedback { text-align: center; font-size: 28px; font-weight: 900; min-height: 36px; color: var(--accent); }
+.rhythm-feedback.great { color: var(--ok); }
+.rhythm-feedback.bad { color: var(--danger); }
+.rhythm-stage { position: relative; height: 260px; display: flex; align-items: center; justify-content: center; }
+.rhythm-core {
+  width: 110px; height: 110px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 30px rgba(255,183,3,0.5);
+}
+.rhythm-core.beat { animation: beat 0.18s ease-out; }
+@keyframes beat { 0% { transform: scale(1.25); } 100% { transform: scale(1); } }
+.rhythm-ring {
+  position: absolute;
+  width: 110px; height: 110px; border-radius: 50%;
+  border: 4px solid rgba(255,255,255,0.8);
+  pointer-events: none;
+}
+.rhythm-dots { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+.rhythm-dot { width: 14px; height: 14px; border-radius: 50%; background: rgba(255,255,255,0.15); }
+.rhythm-dot.great { background: var(--ok); }
+.rhythm-dot.ok { background: var(--accent); }
+.rhythm-dot.bad { background: var(--danger); }
+
+/* Lampi */
+.flash-stage {
+  position: relative;
+  height: 300px;
+  border-radius: 20px;
+  background: rgba(0,0,0,0.25);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.flash {
+  position: absolute;
+  width: 46px; height: 46px;
+  margin: -23px 0 0 -23px;
+  border-radius: 50%;
+  box-shadow: 0 0 24px currentColor;
+  animation: flashpop 0.15s ease-out;
+}
+@keyframes flashpop { from { transform: scale(0.3); } to { transform: scale(1); } }
+.keypad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.key { font-size: 22px; padding: 14px 0; background: var(--bg-2); color: var(--text); }
+.key.ok { background: var(--ok); color: #1b1a2e; }
+.key.ko { background: var(--danger); color: white; }
+
+/* Metà */
+.half-stage {
+  position: relative;
+  height: 62vh;
+  border-radius: 20px;
+  background: rgba(0,0,0,0.2);
+  overflow: hidden;
+  touch-action: none;
+}
+.half-bar { position: absolute; height: 18px; border-radius: 9px; transform-origin: center; margin-top: -9px; }
+.half-mark, .half-truth { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; pointer-events: none; }
+.half-mark { border: 3px solid white; }
+.half-truth { background: var(--ok); }
+
+/* Cronometro cieco */
+.clock-target { text-align: center; font-size: 22px; font-weight: 800; color: var(--muted); margin-bottom: 8px; }
+.clock-display {
+  text-align: center;
+  font-size: 84px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+  transition: opacity 0.2s;
+  margin-bottom: 8px;
+}
+.clock-display.hidden { opacity: 0.06; }
+
+/* Copia */
+.copy-grid { display: grid; gap: 8px; width: 100%; max-width: 340px; margin: 0 auto 16px; }
+.copy-cell { aspect-ratio: 1; border-radius: 12px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.12); transition: background 0.1s; }
+.copy-cell.lit { background: var(--accent); border-color: var(--accent); }
+.copy-cell.on { background: #36cfc9; border-color: #36cfc9; }
+.copy-cell.ok { background: var(--ok); border-color: var(--ok); }
+.copy-cell.missed { background: rgba(255,255,255,0.1); border-color: var(--accent); border-style: dashed; }
+.copy-cell.wrong { background: var(--danger); border-color: var(--danger); }
+.copy-confirm { max-width: 340px; margin: 0 auto; width: 100%; }
+
+/* Anagrammi */
+.ana-answer { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; min-height: 56px; margin-bottom: 20px; }
+.ana-slot {
+  width: 40px; height: 52px; border-radius: 10px;
+  background: rgba(255,255,255,0.08); border-bottom: 3px solid var(--accent);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 26px; font-weight: 900;
+}
+.ana-answer.ok .ana-slot { background: var(--ok); color: #1b1a2e; }
+.ana-answer.ko .ana-slot { background: var(--danger); animation: shake 0.25s; }
+.ana-tiles { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.ana-tile { width: 52px; height: 60px; padding: 0; font-size: 28px; background: #f6f3ff; color: #1b1a2e; border-radius: 12px; }
+.ana-tile.used { opacity: 0.15; }
+
+/* Alto o basso */
+.hl-prev { text-align: center; color: var(--muted); font-size: 14px; min-height: 18px; }
+.hl-card {
+  width: 170px; height: 220px; margin: 8px auto;
+  border-radius: 20px; background: #f6f3ff; color: #1b1a2e;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 84px; font-weight: 900; font-variant-numeric: tabular-nums;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  transition: background 0.15s;
+}
+.hl-card.ok { background: var(--ok); }
+.hl-card.ko { background: var(--danger); color: white; }
+.hl-streak { text-align: center; min-height: 24px; font-weight: 800; color: var(--accent); }
+.hl-buttons { display: flex; gap: 10px; margin-top: 8px; }
+.hl-btn { flex: 1; font-size: 20px; padding: 20px 0; }
+.hl-btn.high { background: var(--ok); color: #1b1a2e; }
+.hl-btn.low { background: #1982c4; color: white; }
+
+/* Dieci */
+.ten-grid { display: grid; gap: 8px; width: 100%; }
+.ten-cell {
+  aspect-ratio: 1; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px; font-weight: 900; color: #1b1a2e;
+  transition: transform 0.12s, opacity 0.2s;
+}
+.ten-cell.sel { transform: scale(0.9); outline: 4px solid white; }
+.ten-cell.gone { opacity: 0; transform: scale(0.5); }
+.ten-cell.wrong { animation: shake 0.25s; outline: 4px solid var(--danger); }

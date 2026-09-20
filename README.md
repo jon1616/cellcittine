@@ -41,6 +41,18 @@ icons/                  icone dell'app
 | 🧭 Frecce | riflessi + logica | giuste − sbagliate in 20 s |
 | 🎈 Palloncini | azzardo | 5 palloncini, max 100 l'uno |
 | ⚖️ Di più | stima | giuste − sbagliate in 20 s |
+| 👆 Tocchi | velocità | tocchi in 10 s |
+| 🥁 Ritmo | ritmo | precisione su 16 battiti (max 1600) |
+| 🏗️ Torre | tempismo | blocchi impilati (max 20) |
+| 🚗 Frenata | tempismo | 5 frenate, max 100 l'una |
+| 🧺 Cesto | coordinazione | frutti presi su caduti in 20 s |
+| 💡 Lampi | attenzione | conteggi giusti su 8 |
+| 📏 Metà | stima | 5 barre, max 100 l'una |
+| ⏱️ Cronometro cieco | senso del tempo | 3 tentativi, max 100 l'uno |
+| 🪞 Copia | memoria visiva | schemi esatti su 6 |
+| 🔤 Anagrammi | parole | parole ricomposte in 30 s |
+| 🎴 Alto o basso | azzardo | giuste − sbagliate in 20 s |
+| 🔟 Dieci | calcolo | coppie che fanno 10 in 25 s |
 
 ## Aggiungere un minigioco
 

@@ -751,7 +751,19 @@ async function startChallenge() {
   };
 
   setStatus("Preparo i minigiochi…");
-  await preloadGames([...new Set(rounds.map((r) => r.gameId))]);
+  const ids = [...new Set(rounds.map((r) => r.gameId))];
+  const results = await preloadGames(ids);
+  if (!state.net) return; // usciti nel frattempo
+
+  // Se il codice di un minigioco non si carica (file rotto o assente), meglio
+  // fermarsi qui con un messaggio chiaro che restare appesi al conto alla rovescia.
+  const broken = ids.filter((_, i) => results[i].status === "rejected");
+  if (broken.length > 0) {
+    state.challenge = null;
+    const names = broken.map((id) => getEntry(id)?.title || id).join(", ");
+    setStatus(`Non riesco a caricare: ${names}. Prova a ricaricare la pagina o togli quel minigioco.`, true);
+    return;
+  }
   nextRound();
 }
 
@@ -797,7 +809,12 @@ async function beginRound(msg) {
   try {
     game = await loadGame(msg.gameId);
   } catch (_) {
-    setStatus("Non riesco a caricare il minigioco.", true);
+    // Niente attesa infinita sul conto alla rovescia: si torna alla lobby.
+    if (state.round?.index !== msg.index) return;
+    clearTimeout(state.round.deadline);
+    state.round = null;
+    showLobby();
+    setStatus(`Non riesco a caricare il minigioco “${getEntry(msg.gameId)?.title || msg.gameId}”. Prova a ricaricare la pagina.`, true);
     return;
   }
   if (state.round?.index !== msg.index) return; // nel frattempo è cambiato qualcosa

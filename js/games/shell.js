@@ -95,3 +95,24 @@ export function shuffle(array, rng) {
   }
   return a;
 }
+
+// Adatta un canvas all'area disponibile mantenendo le proporzioni logiche W×H.
+// Ritorna il contesto 2D già scalato: si disegna in coordinate logiche.
+export function fitCanvas(canvas, container, W, H) {
+  const g = canvas.getContext("2d");
+  const rect = container.getBoundingClientRect();
+  const scale = Math.min(rect.width / W, (rect.height || H) / H) || 1;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.style.width = `${W * scale}px`;
+  canvas.style.height = `${H * scale}px`;
+  canvas.width = Math.round(W * scale * dpr);
+  canvas.height = Math.round(H * scale * dpr);
+  g.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
+  return g;
+}
+
+// Converte le coordinate di un evento pointer in coordinate logiche del canvas.
+export function canvasPoint(canvas, ev, W, H) {
+  const r = canvas.getBoundingClientRect();
+  return { x: ((ev.clientX - r.left) / r.width) * W, y: ((ev.clientY - r.top) / r.height) * H };
+}

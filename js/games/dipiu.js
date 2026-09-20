@@ -69,9 +69,9 @@ export default {
     const { rounds } = ctx.params;
     shell = createShell(container, { title: "Di più", hint: "Punti: 0" });
 
-    const left = el("div", { class: "dots-panel" });
-    const right = el("div", { class: "dots-panel" });
-    shell.body.append(el("div", { class: "dots-wrap" }, [left, right]));
+    const leftPanel = el("div", { class: "dots-panel" });
+    const rightPanel = el("div", { class: "dots-panel" });
+    shell.body.append(el("div", { class: "dots-wrap" }, [leftPanel, rightPanel]));
 
     let index = 0;
     let score = 0;
@@ -91,8 +91,8 @@ export default {
 
     const show = () => {
       const r = rounds[index % rounds.length];
-      fill(left, r.leftDots, r.color, r.sizeL);
-      fill(right, r.rightDots, r.color, r.sizeR);
+      fill(leftPanel, r.leftDots, r.color, r.sizeL);
+      fill(rightPanel, r.rightDots, r.color, r.sizeR);
     };
 
     const pick = (side) => {
@@ -114,8 +114,8 @@ export default {
       index++;
       show();
     };
-    left.addEventListener("pointerdown", (ev) => { ev.preventDefault(); pick("left"); });
-    right.addEventListener("pointerdown", (ev) => { ev.preventDefault(); pick("right"); });
+    leftPanel.addEventListener("pointerdown", (ev) => { ev.preventDefault(); pick("left"); });
+    rightPanel.addEventListener("pointerdown", (ev) => { ev.preventDefault(); pick("right"); });
 
     stopTimer = runTimer(
       DURATION,
