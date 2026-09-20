@@ -2,8 +2,10 @@
   Semaforo: lo schermo è rosso, poi diventa verde in un momento imprevedibile.
   Vince chi tocca prima dopo il verde. Toccare prima è una falsa partenza.
 
-  Contratto di ogni minigioco (vedi registry.js):
-    id, title, icon, description, order ("asc" = punteggio basso vince), maxSeconds
+  Contratto di ogni minigioco (la scheda descrittiva sta in catalog.js):
+    id                            uguale alla voce nel catalogo
+    order                         "asc" = punteggio basso vince, "desc" = alto vince
+    maxSeconds                    durata massima, per la scadenza di sicurezza
     createParams(rng, difficulty) -> parametri decisi dall'host, uguali per tutti
     formatScore(score)            -> testo per la classifica
     isValidScore(score)           -> false se il risultato non conta per i record
@@ -21,9 +23,6 @@ let area = null;
 
 export default {
   id: "semaforo",
-  title: "Semaforo",
-  icon: "🚦",
-  description: "Tocca appena lo schermo diventa verde. Se tocchi prima, falsa partenza!",
   order: "asc",
   maxSeconds: 10,
 

@@ -23,9 +23,6 @@ let alive = false;
 
 export default {
   id: "sequenza",
-  title: "Sequenza",
-  icon: "🎵",
-  description: "Guarda i tasti che si accendono e ripeti la sequenza. Ogni volta si allunga di uno.",
   order: "desc",
   maxSeconds: 75,
 

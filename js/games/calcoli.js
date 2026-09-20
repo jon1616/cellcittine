@@ -44,9 +44,6 @@ let stopTimer = null;
 
 export default {
   id: "calcoli",
-  title: "Calcoli",
-  icon: "➕",
-  description: "Rispondi a più operazioni che puoi in 25 secondi. Gli errori tolgono un punto.",
   order: "desc",
   maxSeconds: DURATION + 2,
 

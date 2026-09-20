@@ -20,9 +20,6 @@ let spawnTimer = null;
 
 export default {
   id: "bersagli",
-  title: "Bersagli",
-  icon: "🎯",
-  description: "Tocca i bersagli prima che spariscano. Hai 20 secondi.",
   order: "desc",
   maxSeconds: DURATION + 2,
 

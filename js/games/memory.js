@@ -30,9 +30,6 @@ let flipBackTimer = null;
 
 export default {
   id: "memory",
-  title: "Memory",
-  icon: "🃏",
-  description: "Trova tutte le coppie di forme uguali. Vince chi finisce prima.",
   order: "asc",
   maxSeconds: 60,
 

@@ -19,9 +19,6 @@ let stopTimer = null;
 
 export default {
   id: "intruso",
-  title: "Intruso",
-  icon: "🔍",
-  description: "Un quadrato ha un colore leggermente diverso dagli altri: toccalo! 20 secondi.",
   order: "desc",
   maxSeconds: DURATION + 2,
 

@@ -17,9 +17,6 @@ let stopTimer = null;
 
 export default {
   id: "frecce",
-  title: "Frecce",
-  icon: "🧭",
-  description: "Scorri il dito dove indica la freccia. Se è rossa, vai dalla parte opposta! 20 secondi.",
   order: "desc",
   maxSeconds: DURATION + 2,
 

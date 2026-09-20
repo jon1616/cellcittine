@@ -15,9 +15,6 @@ let stopwatch = null;
 
 export default {
   id: "numeri",
-  title: "Numeri",
-  icon: "🔢",
-  description: "Tocca i numeri in ordine, dall'1 in su, il più in fretta possibile.",
   order: "asc",
   maxSeconds: 60,
 

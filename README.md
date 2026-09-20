@@ -12,10 +12,13 @@ index.html              pagina unica
 manifest.webmanifest    installazione come app
 sw.js                   funzionamento offline (aggiornare CACHE_VERSION a ogni release)
 css/style.css
-js/app.js               telaio: schermate, manche, punteggi
+js/app.js               telaio: schermate, sfida, manche, punteggi, scelta minigiochi
 js/net.js               collegamento P2P (PeerJS), modello host-arbitro
-js/games/registry.js    elenco minigiochi
-js/games/<nome>.js      un file per minigioco
+js/packs.js             pacchetti di minigiochi (integrati + personali)
+js/storage.js           salvataggi: configurazione, record, pacchetti personali
+js/games/catalog.js     CATALOGO: scheda di ogni minigioco + caricamento a richiesta
+js/games/shell.js       cornice comune ai minigiochi (timer, cronometro)
+js/games/<id>.js        codice di un minigioco (caricato solo quando serve)
 js/version.js           numero di versione mostrato nell'angolo
 icons/                  icone dell'app
 ```
@@ -40,9 +43,9 @@ icons/                  icone dell'app
 
 ## Aggiungere un minigioco
 
-1. Crea `js/games/<nome>.js` seguendo il contratto descritto in `semaforo.js`.
-2. Importalo e aggiungilo alla lista in `js/games/registry.js`.
-3. Aggiungilo alla lista `PRECACHE` in `sw.js`.
+1. Crea `js/games/<id>.js` seguendo il contratto descritto in `semaforo.js` (solo logica).
+2. Aggiungi la scheda in `js/games/catalog.js` (categoria, abilità, durata, tema, data…).
+3. Aggiungi il file alla lista `PRECACHE` in `sw.js`.
 4. Alza la versione in `js/version.js` e `sw.js`, commit, push.
 
 ## Pubblicare

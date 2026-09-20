@@ -1,0 +1,349 @@
+/*
+  Catalogo dei minigiochi: la "carta d'identità" di ognuno.
+
+  Qui ci sono SOLO i dati (nome, categoria, abilità, durata…), che servono
+  a elenchi, filtri, ricerca e pacchetti senza caricare il codice del gioco.
+  Il codice vero (createParams, mount…) sta in js/games/<id>.js e viene
+  caricato a richiesta con loadGame(id), solo quando si gioca.
+
+  Per aggiungere un minigioco: crea js/games/<id>.js, aggiungi una voce qui
+  e il file alla lista PRECACHE in sw.js.
+
+  Campi:
+    id           identificatore (= nome del file)
+    title, icon  come appare
+    description  una riga, per elenchi e conto alla rovescia
+    howTo        spiegazione un po' più lunga
+    category     UNA categoria principale (vedi CATEGORIES)
+    skills       abilità coinvolte (più di una)
+    theme        ambientazione / soggetto
+    duration     secondi tipici di una manche
+    pace         "frenetico" | "veloce" | "tranquillo"
+    input        come si comanda: "tocco" | "scorri" | "tieni premuto"
+    hands        "una mano" | "due mani"
+    difficultyNote  cosa cambia con la difficoltà
+    scoring      come si fa punteggio
+    added        data di arrivo (per il badge NUOVO)
+    tags         parole libere per la ricerca
+*/
+
+export const CATEGORIES = [
+  { id: "riflessi", label: "Riflessi", icon: "⚡", color: "#ffca3a" },
+  { id: "memoria", label: "Memoria", icon: "🧠", color: "#c77dff" },
+  { id: "attenzione", label: "Attenzione", icon: "👁️", color: "#36cfc9" },
+  { id: "destrezza", label: "Destrezza", icon: "🎮", color: "#8ac926" },
+  { id: "calcolo", label: "Calcolo", icon: "🔢", color: "#1982c4" },
+  { id: "azzardo", label: "Azzardo", icon: "🎲", color: "#ff595e" },
+];
+
+export const PACES = { frenetico: "Frenetico", veloce: "Veloce", tranquillo: "Tranquillo" };
+
+// Un minigioco è "nuovo" per questo numero di giorni dopo l'arrivo.
+const NEW_DAYS = 21;
+
+export const CATALOG = [
+  {
+    id: "semaforo",
+    title: "Semaforo",
+    icon: "🚦",
+    description: "Tocca appena lo schermo diventa verde. Se tocchi prima, falsa partenza!",
+    howTo: "Lo schermo è rosso. In un momento imprevedibile diventa verde: tocca il più in fretta possibile. Chi tocca col rosso fa falsa partenza e finisce ultimo.",
+    category: "riflessi",
+    skills: ["riflessi", "autocontrollo"],
+    theme: "semaforo",
+    duration: 6,
+    pace: "frenetico",
+    input: "tocco",
+    hands: "una mano",
+    difficultyNote: "Più difficile = attesa più lunga e imprevedibile.",
+    scoring: "Millisecondi di reazione: meno è meglio.",
+    added: "2026-09-19",
+    tags: ["reazione", "classico", "velocità"],
+    load: () => import("./semaforo.js"),
+  },
+  {
+    id: "memory",
+    title: "Memory",
+    icon: "🃏",
+    description: "Trova tutte le coppie di forme uguali. Vince chi finisce prima.",
+    howTo: "Le carte sono coperte. Girane due: se sono uguali restano scoperte, altrimenti si richiudono. Trova tutte le coppie nel minor tempo.",
+    category: "memoria",
+    skills: ["memoria visiva", "metodo"],
+    theme: "carte e forme",
+    duration: 45,
+    pace: "tranquillo",
+    input: "tocco",
+    hands: "una mano",
+    difficultyNote: "Più difficile = più coppie (6, 8, 10).",
+    scoring: "Tempo per completare: meno è meglio.",
+    added: "2026-09-19",
+    tags: ["coppie", "carte", "classico", "forme"],
+    load: () => import("./memory.js"),
+  },
+  {
+    id: "sequenza",
+    title: "Sequenza",
+    icon: "🎵",
+    description: "Guarda i tasti che si accendono e ripeti la sequenza. Ogni volta si allunga di uno.",
+    howTo: "Quattro tasti colorati si accendono in ordine. Ripeti la sequenza toccandoli. Ogni giro aggiunge un passo: quanto lontano arrivi?",
+    category: "memoria",
+    skills: ["memoria", "concentrazione"],
+    theme: "tasti colorati",
+    duration: 50,
+    pace: "tranquillo",
+    input: "tocco",
+    hands: "una mano",
+    difficultyNote: "Più difficile = sequenza più lunga e più veloce.",
+    scoring: "Passi completati: più è meglio.",
+    added: "2026-09-19",
+    tags: ["simon", "ritmo", "colori", "classico"],
+    load: () => import("./sequenza.js"),
+  },
+  {
+    id: "numeri",
+    title: "Numeri",
+    icon: "🔢",
+    description: "Tocca i numeri in ordine, dall'1 in su, il più in fretta possibile.",
+    howTo: "Una griglia di numeri in disordine. Toccali in ordine crescente. Ogni tocco sbagliato costa un secondo.",
+    category: "attenzione",
+    skills: ["ricerca visiva", "velocità"],
+    theme: "numeri",
+    duration: 25,
+    pace: "veloce",
+    input: "tocco",
+    hands: "una mano",
+    difficultyNote: "Più difficile = più numeri (12, 16, 20).",
+    scoring: "Tempo per finire, +1 s per errore: meno è meglio.",
+    added: "2026-09-19",
+    tags: ["ordine", "griglia", "velocità"],
+    load: () => import("./numeri.js"),
+  },
+  {
+    id: "bersagli",
+    title: "Bersagli",
+    icon: "🎯",
+    description: "Tocca i bersagli prima che spariscano. Hai 20 secondi.",
+    howTo: "Compaiono cerchi colorati in punti a caso e spariscono in fretta. Colpiscine più che puoi.",
+    category: "destrezza",
+    skills: ["precisione", "velocità"],
+    theme: "bersagli",
+    duration: 20,
+    pace: "frenetico",
+    input: "tocco",
+    hands: "due mani",
+    difficultyNote: "Più difficile = bersagli più piccoli e più brevi.",
+    scoring: "Bersagli colpiti: più è meglio.",
+    added: "2026-09-19",
+    tags: ["talpa", "colpisci", "velocità"],
+    load: () => import("./bersagli.js"),
+  },
+  {
+    id: "calcoli",
+    title: "Calcoli",
+    icon: "➕",
+    description: "Rispondi a più operazioni che puoi in 25 secondi. Gli errori tolgono un punto.",
+    howTo: "Un'operazione e tre risposte. Tocca quella giusta e passa alla prossima. Sbagliare toglie un punto.",
+    category: "calcolo",
+    skills: ["calcolo mentale", "velocità"],
+    theme: "matematica",
+    duration: 25,
+    pace: "veloce",
+    input: "tocco",
+    hands: "una mano",
+    difficultyNote: "Più difficile = numeri più grandi e moltiplicazioni.",
+    scoring: "Giuste meno sbagliate: più è meglio.",
+    added: "2026-09-19",
+    tags: ["matematica", "somme", "scuola"],
+    load: () => import("./calcoli.js"),
+  },
+  {
+    id: "colori",
+    title: "Colori",
+    icon: "🎨",
+    description: "Tocca il colore con cui è SCRITTA la parola, non quello che dice. 20 secondi.",
+    howTo: "Appare il nome di un colore scritto con un altro colore. Devi toccare il tasto del colore dell'inchiostro, ignorando la parola. Il cervello prova a fregarti.",
+    category: "attenzione",
+    skills: ["attenzione", "autocontrollo"],
+    theme: "parole e colori",
+    duration: 20,
+    pace: "veloce",
+    input: "tocco",
+    hands: "una mano",
+    difficultyNote: "Più difficile = più inganni e tasti che cambiano posto.",
+    scoring: "Giuste meno sbagliate: più è meglio.",
+    added: "2026-09-20",
+    tags: ["stroop", "parole", "inganno", "colori"],
+    load: () => import("./colori.js"),
+  },
+  {
+    id: "precisione",
+    title: "Precisione",
+    icon: "🏹",
+    description: "Ferma il cursore al centro della zona colorata. Cinque tiri, massimo 100 punti l'uno.",
+    howTo: "Un cursore scorre avanti e indietro su una barra. Tocca quando è dentro la zona verde: più vicino al centro, più punti. Cinque tiri.",
+    category: "destrezza",
+    skills: ["tempismo", "calma"],
+    theme: "barra e cursore",
+    duration: 25,
+    pace: "veloce",
+    input: "tocco",
+    hands: "una mano",
+    difficultyNote: "Più difficile = cursore più veloce e zona più stretta.",
+    scoring: "Somma dei cinque tiri (max 500): più è meglio.",
+    added: "2026-09-20",
+    tags: ["tempismo", "tiro", "barra"],
+    load: () => import("./precisione.js"),
+  },
+  {
+    id: "salta",
+    title: "Salta",
+    icon: "🦘",
+    description: "Tocca per saltare gli ostacoli. Resisti 30 secondi!",
+    howTo: "Il tuo personaggio corre da solo. Tocca per saltare gli ostacoli spinati. La corsa accelera piano piano: quanti ne superi?",
+    category: "destrezza",
+    skills: ["tempismo", "riflessi"],
+    theme: "corsa",
+    duration: 30,
+    pace: "frenetico",
+    input: "tocco",
+    hands: "una mano",
+    difficultyNote: "Più difficile = più veloce, ostacoli più vicini e più alti.",
+    scoring: "Ostacoli superati: più è meglio.",
+    added: "2026-09-20",
+    tags: ["runner", "corsa", "salto", "azione", "dino"],
+    load: () => import("./salta.js"),
+  },
+  {
+    id: "intruso",
+    title: "Intruso",
+    icon: "🔍",
+    description: "Un quadrato ha un colore leggermente diverso dagli altri: toccalo! 20 secondi.",
+    howTo: "Una griglia di quadrati tutti uguali… tranne uno, di una sfumatura diversa. Trovalo. A ogni griglia la differenza si riduce.",
+    category: "attenzione",
+    skills: ["occhio", "percezione dei colori"],
+    theme: "colori e griglie",
+    duration: 20,
+    pace: "veloce",
+    input: "tocco",
+    hands: "una mano",
+    difficultyNote: "Più difficile = griglia più grande e differenze più sottili.",
+    scoring: "Intrusi trovati meno errori: più è meglio.",
+    added: "2026-09-20",
+    tags: ["differenze", "sfumature", "occhio", "griglia"],
+    load: () => import("./intruso.js"),
+  },
+  {
+    id: "frecce",
+    title: "Frecce",
+    icon: "🧭",
+    description: "Scorri il dito dove indica la freccia. Se è rossa, vai dalla parte opposta! 20 secondi.",
+    howTo: "Appare una freccia: scorri il dito nella sua direzione. Se la freccia è rossa, scorri nella direzione opposta. Veloce!",
+    category: "riflessi",
+    skills: ["riflessi", "logica"],
+    theme: "frecce",
+    duration: 20,
+    pace: "frenetico",
+    input: "scorri",
+    hands: "una mano",
+    difficultyNote: "Più difficile = più frecce rosse.",
+    scoring: "Giuste meno sbagliate: più è meglio.",
+    added: "2026-09-20",
+    tags: ["swipe", "direzioni", "inganno", "gesto"],
+    load: () => import("./frecce.js"),
+  },
+  {
+    id: "palloncini",
+    title: "Palloncini",
+    icon: "🎈",
+    description: "Tieni premuto per gonfiare, lascia prima che scoppi! Ogni palloncino regge in modo diverso.",
+    howTo: "Tieni premuto: il palloncino si gonfia e i punti salgono. Lascia prima che scoppi, altrimenti zero. Ogni palloncino ha un limite nascosto diverso.",
+    category: "azzardo",
+    skills: ["coraggio", "autocontrollo"],
+    theme: "palloncini",
+    duration: 30,
+    pace: "tranquillo",
+    input: "tieni premuto",
+    hands: "una mano",
+    difficultyNote: "Più difficile = si gonfia più in fretta e scoppia prima.",
+    scoring: "Somma dei cinque palloncini (max 500): più è meglio.",
+    added: "2026-09-20",
+    tags: ["rischio", "suspense", "festa", "premi"],
+    load: () => import("./palloncini.js"),
+  },
+  {
+    id: "dipiu",
+    title: "Di più",
+    icon: "⚖️",
+    description: "Quale riquadro ha più pallini? Tocca in fretta! 20 secondi.",
+    howTo: "Due riquadri pieni di pallini. Tocca quello che ne ha di più, a colpo d'occhio. Attenzione: i pallini non hanno tutti la stessa dimensione.",
+    category: "attenzione",
+    skills: ["stima", "colpo d'occhio"],
+    theme: "pallini",
+    duration: 20,
+    pace: "veloce",
+    input: "tocco",
+    hands: "una mano",
+    difficultyNote: "Più difficile = quantità più vicine tra loro.",
+    scoring: "Giuste meno sbagliate: più è meglio.",
+    added: "2026-09-20",
+    tags: ["stima", "quantità", "confronto", "occhio"],
+    load: () => import("./dipiu.js"),
+  },
+];
+
+export const ALL_GAME_IDS = CATALOG.map((g) => g.id);
+
+export function getEntry(id) {
+  return CATALOG.find((g) => g.id === id);
+}
+
+export function getCategory(id) {
+  return CATEGORIES.find((c) => c.id === id);
+}
+
+export function isNew(entry, now = Date.now()) {
+  const added = Date.parse(entry.added);
+  return Number.isFinite(added) && now - added < NEW_DAYS * 86400000;
+}
+
+// Ricerca testuale su tutti i campi descrittivi.
+export function matches(entry, query) {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  const hay = [
+    entry.title, entry.description, entry.howTo, entry.theme, entry.category,
+    entry.pace, entry.input, ...entry.skills, ...entry.tags,
+    getCategory(entry.category)?.label,
+  ].join(" ").toLowerCase();
+  return q.split(/\s+/).every((word) => hay.includes(word));
+}
+
+// ---------------------------------------------------------------
+// Caricamento a richiesta del codice di un minigioco
+// ---------------------------------------------------------------
+
+const loaded = new Map();   // id -> Promise del gioco completo
+const resolved = new Map(); // id -> gioco completo, quando il caricamento è finito
+
+// Ritorna il gioco completo: scheda del catalogo + codice del modulo.
+export async function loadGame(id) {
+  if (loaded.has(id)) return loaded.get(id);
+  const entry = getEntry(id);
+  if (!entry) throw new Error(`Minigioco sconosciuto: ${id}`);
+  const promise = entry.load().then((mod) => {
+    const game = { ...entry, ...mod.default };
+    resolved.set(id, game);
+    return game;
+  });
+  loaded.set(id, promise);
+  return promise;
+}
+
+// Il gioco completo se è già stato caricato, altrimenti null (senza attese).
+export function getLoaded(id) {
+  return resolved.get(id) || null;
+}
+
+export function preloadGames(ids) {
+  return Promise.allSettled(ids.map((id) => loadGame(id)));
+}

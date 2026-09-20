@@ -25,9 +25,6 @@ let raf = null;
 
 export default {
   id: "salta",
-  title: "Salta",
-  icon: "🦘",
-  description: "Tocca per saltare gli ostacoli. Resisti 30 secondi!",
   order: "desc",
   maxSeconds: DURATION + 2,
 

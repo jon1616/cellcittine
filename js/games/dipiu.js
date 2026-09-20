@@ -33,9 +33,6 @@ function layout(count, rng) {
 
 export default {
   id: "dipiu",
-  title: "Di più",
-  icon: "⚖️",
-  description: "Quale riquadro ha più pallini? Tocca in fretta! 20 secondi.",
   order: "desc",
   maxSeconds: DURATION + 2,
 

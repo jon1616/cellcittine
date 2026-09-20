@@ -19,9 +19,6 @@ let raf = null;
 
 export default {
   id: "precisione",
-  title: "Precisione",
-  icon: "🏹",
-  description: "Ferma il cursore al centro della zona colorata. Cinque tiri, massimo 100 punti l'uno.",
   order: "desc",
   maxSeconds: 40,
 

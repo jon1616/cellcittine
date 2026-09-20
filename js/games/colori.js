@@ -22,9 +22,6 @@ let stopTimer = null;
 
 export default {
   id: "colori",
-  title: "Colori",
-  icon: "🎨",
-  description: "Tocca il colore con cui è SCRITTA la parola, non quello che dice. 20 secondi.",
   order: "desc",
   maxSeconds: DURATION + 2,
 

@@ -20,9 +20,6 @@ let raf = null;
 
 export default {
   id: "palloncini",
-  title: "Palloncini",
-  icon: "🎈",
-  description: "Tieni premuto per gonfiare, lascia prima che scoppi! Ogni palloncino regge in modo diverso.",
   order: "desc",
   maxSeconds: 45,
 

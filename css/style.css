@@ -522,3 +522,115 @@ button.link {
 
 .chips.quick { margin-bottom: 2px; }
 .chip.small { font-size: 13px; padding: 7px 12px; }
+
+/* ---------------------------------------------------------------
+   v0.4: catalogo, scelta minigiochi, pacchetti
+   --------------------------------------------------------------- */
+
+.links { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.small-btn { font-size: 15px; padding: 10px 14px; }
+.row-2 { display: flex; gap: 8px; }
+.row-2 > * { flex: 1; }
+
+/* Chip scorrevoli in orizzontale */
+.chips.scroll {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin: 0 -16px;
+  padding-left: 16px;
+  padding-right: 16px;
+  scrollbar-width: none;
+}
+.chips.scroll::-webkit-scrollbar { display: none; }
+.chips.scroll .chip { flex: 0 0 auto; white-space: nowrap; }
+.chip.pack { font-size: 14px; padding: 9px 12px; }
+.chip-wrap { display: inline-flex; align-items: center; flex: 0 0 auto; gap: 2px; }
+.chip-x {
+  font-size: 12px;
+  padding: 6px 8px;
+  border-radius: 999px;
+  background: var(--bg-2);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.sel-summary { display: flex; flex-direction: column; gap: 4px; }
+.sel-main { font-weight: 700; font-size: 17px; }
+.sel-cats { color: var(--muted); font-size: 14px; letter-spacing: 0.5px; }
+
+.save-pack { display: flex; flex-direction: column; align-items: stretch; }
+.save-row { display: flex; gap: 8px; }
+.save-row input { flex: 1; font-size: 16px; padding: 10px 12px; text-align: left; }
+
+/* Riga di un minigioco */
+.game-row {
+  display: grid;
+  grid-template-columns: 24px 36px 1fr 30px;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px;
+  border-radius: 12px;
+  background: var(--bg-2);
+  cursor: pointer;
+}
+.game-row + .game-row, .cat-section .game-row + .game-row { margin-top: 6px; }
+.card .game-row + .game-row { margin-top: 6px; }
+.game-row.on { outline: 2px solid var(--accent); background: #34325f; }
+.game-row.off { opacity: 0.6; }
+.game-row .check {
+  width: 22px; height: 22px; border-radius: 6px;
+  border: 2px solid var(--muted);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 900; color: #1b1a2e;
+}
+.game-row.on .check { background: var(--accent); border-color: var(--accent); }
+.game-icon { font-size: 26px; text-align: center; }
+.game-text { min-width: 0; }
+.game-title-row { display: flex; align-items: center; gap: 6px; }
+.game-name { font-weight: 800; font-size: 16px; }
+.game-desc { font-size: 13px; color: var(--muted); line-height: 1.3; }
+.game-meta { font-size: 12px; color: var(--muted); opacity: 0.85; margin-top: 2px; }
+.badge.new { background: var(--ok); color: #1b1a2e; margin-left: 0; }
+button.info {
+  width: 28px; height: 28px; padding: 0; border-radius: 50%;
+  background: var(--bg); color: var(--muted);
+  font-size: 14px; font-weight: 900; font-style: italic;
+}
+
+/* Scheda di un minigioco */
+.info-head { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 12px; }
+.info-icon { font-size: 64px; line-height: 1; }
+.howto { text-align: left; color: var(--text); font-size: 16px; }
+.info-row { display: grid; grid-template-columns: 110px 1fr; gap: 8px; font-size: 14px; padding: 6px 0; border-top: 1px solid var(--bg-2); }
+.info-row:first-child { border-top: none; }
+.info-k { color: var(--muted); }
+.info-v { color: var(--text); }
+
+/* Scelta minigiochi */
+.screen.picker { gap: 10px; padding-bottom: 80px; }
+.search { text-align: left; font-size: 16px; padding: 12px 14px; }
+.filters { margin-top: -2px; }
+.pick-list { display: flex; flex-direction: column; gap: 14px; }
+.cat-section { display: flex; flex-direction: column; }
+.cat-head {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 0 8px;
+  border-bottom: 2px solid var(--cat, var(--bg-2));
+  margin-bottom: 8px;
+}
+.cat-toggle { flex: 1; text-align: left; background: none; color: var(--text); font-size: 17px; padding: 6px 0; }
+.cat-count { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+.pick-footer {
+  position: fixed;
+  left: 0; right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: rgba(27,26,46,0.95);
+  border-top: 1px solid var(--bg-2);
+  backdrop-filter: blur(6px);
+}
+.pick-footer > button:last-child { padding: 12px 18px; font-size: 17px; }
