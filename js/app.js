@@ -141,8 +141,10 @@ function showHome(message = "") {
 
   statusEl = statusLine(message, !!message);
 
+  const hero = el("div", { class: "hero" }, [el("img", { src: "assets/home-hero.jpg", alt: "", width: "1000", height: "521" })]);
   show(
-    el("h1", { text: "CELLCITTINE" }),
+    hero,
+    el("h1", { class: "home-title", text: "CELLCITTINE" }),
     el("p", { text: "Sfide a minigiochi, da soli o in gruppo" }),
     el("div", { class: "card" }, [
       nameInput,

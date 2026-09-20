@@ -5,7 +5,7 @@
   salvata l'ultima volta.
 */
 
-const CACHE_VERSION = "0.7.0"; // tenere allineato a js/version.js
+const CACHE_VERSION = "0.7.1"; // tenere allineato a js/version.js
 const CACHE = `cellcittine-${CACHE_VERSION}`;
 
 const PRECACHE = [
@@ -51,6 +51,9 @@ const PRECACHE = [
   "./fonts/fredoka-latin-ext.woff2",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
+  "./icons/icon-maskable-192.png",
+  "./icons/icon-maskable-512.png",
+  "./assets/home-hero.jpg",
 ];
 
 self.addEventListener("install", (event) => {

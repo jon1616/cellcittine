@@ -17,7 +17,7 @@
 }
 
 :root {
-  --bg: #1b1a2e;
+  --bg: #1e1f34;
   --bg-2: #26254a;
   --card: #2f2e5c;
   --text: #f6f3ff;
@@ -832,3 +832,16 @@ button.info {
 .ten-cell.sel { transform: scale(0.9); outline: 4px solid white; }
 .ten-cell.gone { opacity: 0; transform: scale(0.5); }
 .ten-cell.wrong { animation: shake 0.25s; outline: 4px solid var(--danger); }
+
+/* ---------------------------------------------------------------
+   Home: illustrazione
+   --------------------------------------------------------------- */
+.hero {
+  margin: -8px -16px 0;
+  line-height: 0;
+  -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 78%, transparent 100%);
+}
+.hero img { width: 100%; height: auto; display: block; }
+.home-title { margin-top: -6px; }
+@media (max-height: 700px) { .hero { display: none; } .home-title { margin-top: 24px; } }

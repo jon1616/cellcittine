@@ -23,7 +23,8 @@ js/games/shell.js       cornice comune ai minigiochi (timer, cronometro)
 js/games/<id>.js        codice di un minigioco (caricato solo quando serve)
 js/audio.js             suoni sintetizzati (WebAudio), interruttore 🔊/🔇
 js/version.js           numero di versione mostrato nell'angolo
-icons/                  icone dell'app
+icons/                  icone dell'app (any + maskable, generate da assets/icon-source.png)
+assets/                 immagini: originali (PNG) e versioni usate dall'app (JPEG)
 fonts/                  carattere Fredoka (SIL OFL, licenza in fonts/OFL.txt)
 test.html + js/tester.js  tester nel browser: prova tutto il gioco in meno di un minuto
 tools/check.mjs         controllo rapido da riga di comando (sintassi, catalogo, sw.js, versione)
