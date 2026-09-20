@@ -5,7 +5,7 @@
   salvata l'ultima volta.
 */
 
-const CACHE_VERSION = "0.3.2"; // tenere allineato a js/version.js
+const CACHE_VERSION = "0.3.3"; // tenere allineato a js/version.js
 const CACHE = `cellcittine-${CACHE_VERSION}`;
 
 const PRECACHE = [
@@ -39,7 +39,11 @@ const PRECACHE = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)).then(() => self.skipWaiting())
+    caches
+      .open(CACHE)
+      // "reload": ignora la cache HTTP del browser, prende i file freschi dal server
+      .then((cache) => cache.addAll(PRECACHE.map((url) => new Request(url, { cache: "reload" }))))
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -56,8 +60,10 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
 
+  // "no-cache": chiede sempre al server se il file è cambiato (risposta
+  // minuscola se non lo è), invece di fidarsi della cache HTTP per 10 minuti.
   event.respondWith(
-    fetch(request)
+    fetch(request, { cache: "no-cache" })
       .then((response) => {
         if (response.ok && new URL(request.url).origin === self.location.origin) {
           const copy = response.clone();

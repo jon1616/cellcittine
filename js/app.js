@@ -773,6 +773,15 @@ function handleMessage(msg, fromId) {
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js").catch(() => {});
+  // Quando si attiva una versione nuova, ricarica una volta per usarla subito.
+  const hadController = !!navigator.serviceWorker.controller; // false alla prima installazione
+  let reloading = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (reloading || !hadController) return;
+    if (currentScreen !== "home") return; // mai a metà partita
+    reloading = true;
+    location.reload();
+  });
 }
 
 showHome();
