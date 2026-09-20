@@ -1,3 +1,21 @@
+/* Carattere del gioco: Fredoka (SIL Open Font License, vedi fonts/OFL.txt) */
+@font-face {
+  font-family: "Fredoka";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("../fonts/fredoka-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Fredoka";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("../fonts/fredoka-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
 :root {
   --bg: #1b1a2e;
   --bg-2: #26254a;
@@ -18,7 +36,7 @@ html, body {
   height: 100%;
   background: var(--bg);
   color: var(--text);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: "Fredoka", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   overscroll-behavior: none;
   user-select: none;
   -webkit-user-select: none;
@@ -119,7 +137,7 @@ button:disabled { opacity: 0.45; cursor: default; }
 
 .code-big {
   font-size: 56px;
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: 12px;
   text-align: center;
   color: var(--accent);
@@ -185,7 +203,7 @@ button:disabled { opacity: 0.45; cursor: default; }
   font-size: 18px;
 }
 .ranking li:first-child { background: linear-gradient(90deg, #6b4f00, var(--bg-2)); }
-.ranking .pos { font-weight: 900; color: var(--accent); font-size: 22px; }
+.ranking .pos { font-weight: 700; color: var(--accent); font-size: 22px; }
 .ranking .score { color: var(--muted); font-variant-numeric: tabular-nums; }
 
 .spacer { flex: 1; }
@@ -244,7 +262,7 @@ button.link {
 
 .podium { text-align: center; display: flex; flex-direction: column; gap: 4px; padding: 8px 0; }
 .podium-trophy { font-size: 72px; line-height: 1; }
-.podium-name { font-size: 32px; font-weight: 900; color: var(--accent); }
+.podium-name { font-size: 32px; font-weight: 700; color: var(--accent); }
 
 .rec-row { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 6px; align-items: center; font-size: 14px; }
 .rec-row + .rec-row { border-top: 1px solid var(--bg-2); padding-top: 8px; }
@@ -361,7 +379,7 @@ button.link {
   align-items: center;
   justify-content: center;
   font-size: 28px;
-  font-weight: 900;
+  font-weight: 700;
   transition: opacity 0.15s, background 0.1s;
 }
 .num-cell.hit { opacity: 0.15; }
@@ -389,7 +407,7 @@ button.link {
 /* Calcoli */
 .calc-question {
   font-size: 56px;
-  font-weight: 900;
+  font-weight: 700;
   text-align: center;
   margin-bottom: 24px;
   font-variant-numeric: tabular-nums;
@@ -412,7 +430,7 @@ button.link {
 /* Colori */
 .stroop-word {
   font-size: 56px;
-  font-weight: 900;
+  font-weight: 700;
   text-align: center;
   letter-spacing: 2px;
   margin-bottom: 28px;
@@ -422,7 +440,7 @@ button.link {
 .stroop-pad { height: 96px; border-radius: 18px; padding: 0; }
 
 /* Precisione */
-.prec-feedback { text-align: center; font-size: 30px; font-weight: 900; min-height: 40px; color: var(--accent); }
+.prec-feedback { text-align: center; font-size: 30px; font-weight: 700; min-height: 40px; color: var(--accent); }
 .prec-feedback.bad { color: var(--danger); }
 .prec-feedback.great { color: var(--ok); }
 .prec-bar {
@@ -456,7 +474,7 @@ button.link {
   align-items: center;
   justify-content: center;
   font-size: 32px;
-  font-weight: 900;
+  font-weight: 700;
 }
 .prec-tap:active { transform: scale(0.98); }
 
@@ -496,7 +514,7 @@ button.link {
 .arrow.red { background: #ff595e; }
 
 /* Palloncini */
-.balloon-feedback { text-align: center; font-size: 30px; font-weight: 900; min-height: 40px; color: var(--accent); }
+.balloon-feedback { text-align: center; font-size: 30px; font-weight: 700; min-height: 40px; color: var(--accent); }
 .balloon-feedback.bad { color: var(--danger); }
 .balloon-feedback.great { color: var(--ok); }
 .balloon-stage {
@@ -590,7 +608,7 @@ button.link {
   width: 22px; height: 22px; border-radius: 6px;
   border: 2px solid var(--muted);
   display: inline-flex; align-items: center; justify-content: center;
-  font-size: 14px; font-weight: 900; color: #1b1a2e;
+  font-size: 14px; font-weight: 700; color: #1b1a2e;
 }
 .game-row.on .check { background: var(--accent); border-color: var(--accent); }
 .game-icon { font-size: 26px; text-align: center; }
@@ -603,7 +621,7 @@ button.link {
 button.info {
   width: 28px; height: 28px; padding: 0; border-radius: 50%;
   background: var(--bg); color: var(--muted);
-  font-size: 14px; font-weight: 900; font-style: italic;
+  font-size: 14px; font-weight: 700; font-style: italic;
 }
 
 /* Scheda di un minigioco */
@@ -675,7 +693,7 @@ button.info {
   overflow: hidden;
   touch-action: none;
 }
-.tap-counter { font-size: 120px; font-weight: 900; color: var(--accent); font-variant-numeric: tabular-nums; pointer-events: none; }
+.tap-counter { font-size: 120px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; pointer-events: none; }
 .ripple {
   position: absolute;
   width: 20px; height: 20px;
@@ -688,7 +706,7 @@ button.info {
 @keyframes ripple { to { transform: scale(9); opacity: 0; } }
 
 /* Ritmo */
-.rhythm-feedback { text-align: center; font-size: 28px; font-weight: 900; min-height: 36px; color: var(--accent); }
+.rhythm-feedback { text-align: center; font-size: 28px; font-weight: 700; min-height: 36px; color: var(--accent); }
 .rhythm-feedback.great { color: var(--ok); }
 .rhythm-feedback.bad { color: var(--danger); }
 .rhythm-stage { position: relative; height: 260px; display: flex; align-items: center; justify-content: center; }
@@ -753,7 +771,7 @@ button.info {
 .clock-display {
   text-align: center;
   font-size: 84px;
-  font-weight: 900;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--accent);
   transition: opacity 0.2s;
@@ -777,7 +795,7 @@ button.info {
   width: 40px; height: 52px; border-radius: 10px;
   background: rgba(255,255,255,0.08); border-bottom: 3px solid var(--accent);
   display: inline-flex; align-items: center; justify-content: center;
-  font-size: 26px; font-weight: 900;
+  font-size: 26px; font-weight: 700;
 }
 .ana-answer.ok .ana-slot { background: var(--ok); color: #1b1a2e; }
 .ana-answer.ko .ana-slot { background: var(--danger); animation: shake 0.25s; }
@@ -791,7 +809,7 @@ button.info {
   width: 170px; height: 220px; margin: 8px auto;
   border-radius: 20px; background: #f6f3ff; color: #1b1a2e;
   display: flex; align-items: center; justify-content: center;
-  font-size: 84px; font-weight: 900; font-variant-numeric: tabular-nums;
+  font-size: 84px; font-weight: 700; font-variant-numeric: tabular-nums;
   box-shadow: 0 8px 24px rgba(0,0,0,0.35);
   transition: background 0.15s;
 }
@@ -808,7 +826,7 @@ button.info {
 .ten-cell {
   aspect-ratio: 1; border-radius: 14px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 30px; font-weight: 900; color: #1b1a2e;
+  font-size: 30px; font-weight: 700; color: #1b1a2e;
   transition: transform 0.12s, opacity 0.2s;
 }
 .ten-cell.sel { transform: scale(0.9); outline: 4px solid white; }

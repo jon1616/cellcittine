@@ -19,11 +19,13 @@ Una riga per idea: `- [ ] cosa` → `- [x] cosa (vX.Y.Z)`. Le decisioni prese st
 - [x] Tester nel browser (test.html) e controllo da riga di comando (tools/check.mjs) (v0.6.1)
 - [x] Nessuna manche può bloccarsi: limiti di tempo in Copia e Cronometro cieco (v0.6.1)
 
+- [x] Carattere tipografico Fredoka in tutto il gioco (v0.7.0)
+
 ## Prossimi passi (in ordine di priorità, da confermare con l'utente)
 
 - [ ] Feedback dal gruppo di test (le ragazze e amici): taratura difficoltà, suoni, minigiochi noiosi da togliere
 - [ ] Rifinitura visiva: transizioni tra schermate, coriandoli sul podio, conto alla rovescia più scenografico
-- [ ] Icona dell'app e schermata iniziale con grafica generata (Nano Banana, prompt di Claude)
+- [ ] Icona dell'app e schermata iniziale con grafica generata (Nano Banana, prompt consegnati il 21/09; in attesa dei file in assets/)
 - [ ] Sfide salvate con nome anche per manche/difficoltà (oggi i pacchetti salvano solo i minigiochi)
 - [ ] Preferiti (stellina) nella scelta dei minigiochi
 - [ ] Altri minigiochi (idee: labirinto a dito, ritmo con melodia, ordina per grandezza, trova la parola nascosta, tris veloce, pesca)

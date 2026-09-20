@@ -24,6 +24,7 @@ js/games/<id>.js        codice di un minigioco (caricato solo quando serve)
 js/audio.js             suoni sintetizzati (WebAudio), interruttore 🔊/🔇
 js/version.js           numero di versione mostrato nell'angolo
 icons/                  icone dell'app
+fonts/                  carattere Fredoka (SIL OFL, licenza in fonts/OFL.txt)
 test.html + js/tester.js  tester nel browser: prova tutto il gioco in meno di un minuto
 tools/check.mjs         controllo rapido da riga di comando (sintassi, catalogo, sw.js, versione)
 CLAUDE.md · ROADMAP.md  guida per chi lavora sul codice · elenco di fatto / da fare

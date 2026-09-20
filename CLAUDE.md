@@ -16,7 +16,7 @@ Online: https://jon1616.github.io/cellcittine/ — Repo: jon1616/cellcittine (br
 2. **Ogni minigioco ha i suoni**: usa `sfx.play("good"|"bad"|"hit"|…)` di `js/audio.js`, mai suoni propri.
 3. **Ogni minigioco dice la prestazione**: `onFinish(score, detail)` con una frase breve, e `maxScore(params)` se esiste un massimo sensato.
 4. **Parametri identici per tutti**: tutto ciò che è casuale nasce in `createParams(rng, difficulty)` dal seme dell'host; `mount` non usa `Math.random()` per nulla che influenzi il punteggio.
-5. **Niente asset esterni** per ora: grafica da codice (DOM/CSS/canvas), suoni sintetizzati. Le librerie esterne ammesse sono solo quelle già in `index.html` (PeerJS da CDN).
+5. **Asset esterni solo con licenza libera e salvati nel progetto** (font in `fonts/`, immagini in `assets/`), sempre elencati in PRECACHE. Grafica dei minigiochi da codice; suoni sintetizzati. Stile immagini: flat cartoon, contorni scuri (#1B1A2E), tinte piene, palette del gioco.
 6. **Nessuna manche può restare bloccata**: un minigioco deve finire da solo entro `maxSeconds` anche senza tocchi (timer, limiti per tentativo).
 7. **Mai credenziali** in chat, file o commit.
 
