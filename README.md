@@ -5,6 +5,8 @@ tramite codice stanza. È una pagina web installabile (PWA): niente store, aggio
 
 **Gioco online:** https://jon1616.github.io/cellcittine/
 
+Documenti di lavoro: [CLAUDE.md](CLAUDE.md) (regole e checklist per chi lavora sul codice) · [ROADMAP.md](ROADMAP.md) (cosa è fatto e cosa viene dopo).
+
 ## Struttura
 
 ```
@@ -22,6 +24,9 @@ js/games/<id>.js        codice di un minigioco (caricato solo quando serve)
 js/audio.js             suoni sintetizzati (WebAudio), interruttore 🔊/🔇
 js/version.js           numero di versione mostrato nell'angolo
 icons/                  icone dell'app
+test.html + js/tester.js  tester nel browser: prova tutto il gioco in meno di un minuto
+tools/check.mjs         controllo rapido da riga di comando (sintassi, catalogo, sw.js, versione)
+CLAUDE.md · ROADMAP.md  guida per chi lavora sul codice · elenco di fatto / da fare
 ```
 
 ## Minigiochi
@@ -60,7 +65,22 @@ icons/                  icone dell'app
    Ogni minigioco deve avere i suoni: usa `sfx.play("good"|"bad"|…)` di `js/audio.js`.
 2. Aggiungi la scheda in `js/games/catalog.js` (categoria, abilità, durata, tema, data…).
 3. Aggiungi il file alla lista `PRECACHE` in `sw.js`.
-4. Alza la versione in `js/version.js` e `sw.js`, commit, push.
+4. `node tools/check.mjs` e poi `test.html?auto` nel browser: 0 errori.
+5. Riga nella tabella qui sopra, voce spuntata in ROADMAP.md.
+6. Alza la versione in `js/version.js` e `sw.js`, commit, push.
+
+## Provare il gioco (Tester)
+
+- **Nel browser:** apri `test.html` (in locale `http://localhost:8765/test.html`, online
+  https://jon1616.github.io/cellcittine/test.html) e premi "Avvia i test". In meno di un minuto
+  controlla struttura e versione, carica ogni minigioco, ne simula una partita con tocchi a caso e
+  orologio accelerato, e gioca una manche di allenamento nell'app vera. Con `?auto` parte da solo.
+- **Da riga di comando** (per chi scrive codice, prima di ogni commit):
+  ```bash
+  node tools/check.mjs
+  ```
+  Sintassi di tutti i file, catalogo ↔ file ↔ `sw.js`, versione allineata. Un errore di sintassi in un
+  minigioco blocca l'app sul conto alla rovescia: questo controllo lo trova in un secondo.
 
 ## Pubblicare
 

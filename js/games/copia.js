@@ -9,6 +9,7 @@ import { sfx } from "../audio.js";
 import { createShell } from "./shell.js";
 
 const ROUNDS = 6;
+const INPUT_LIMIT = 12000; // ms per ricomporre uno schema, poi conferma da solo
 const SETTINGS = {
   facile: { size: 3, start: 2, show: 2000 },
   normale: { size: 4, start: 3, show: 1600 },
@@ -94,6 +95,11 @@ export default {
         phase = "input";
         confirm.disabled = false;
         shell.setHint(`Ricomponi le ${r.lit.length} caselle e conferma`);
+        // Se non si conferma in tempo, conferma da solo (così la manche finisce comunque)
+        const myIndex = index;
+        timers.push(setTimeout(() => {
+          if (!done && phase === "input" && index === myIndex) confirm.click();
+        }, INPUT_LIMIT));
       }, show));
     };
 

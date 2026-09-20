@@ -1,0 +1,44 @@
+# ROADMAP — CELLCITTINE
+
+Qui si segna ogni aggiunta futura **prima** di farla, e la si spunta quando è online.
+Una riga per idea: `- [ ] cosa` → `- [x] cosa (vX.Y.Z)`. Le decisioni prese stanno in CLAUDE.md.
+
+## Fatto
+
+- [x] Telaio: stanze con codice, P2P host-arbitro, manche sincronizzate, PWA installabile (v0.1.0)
+- [x] Sfida configurabile: minigiochi, manche, difficoltà; punti per posizione; allenamento con record (v0.2.0)
+- [x] 13 minigiochi disegnati da codice (v0.2.0–v0.3.0)
+- [x] Manche = "Tutti" (una per minigioco scelto) (v0.3.2)
+- [x] Aggiornamenti immediati: service worker senza cache HTTP + ricarica automatica (v0.3.3)
+- [x] Catalogo con scheda completa per minigioco; schermata di scelta con ricerca, filtri, categorie (v0.4.0)
+- [x] Pacchetti integrati e personali, Sorprendimi (v0.4.0)
+- [x] Caricamento a richiesta del codice dei minigiochi (v0.4.0)
+- [x] Suoni sintetizzati in telaio e minigiochi, interruttore Suoni (v0.5.0)
+- [x] Prestazione a fine manche: dettaglio + confronto col massimo (v0.5.1)
+- [x] Altri 12 minigiochi → 25 totali; categoria Parole; pacchetto Testa (v0.6.0)
+- [x] Tester nel browser (test.html) e controllo da riga di comando (tools/check.mjs) (v0.6.1)
+- [x] Nessuna manche può bloccarsi: limiti di tempo in Copia e Cronometro cieco (v0.6.1)
+
+## Prossimi passi (in ordine di priorità, da confermare con l'utente)
+
+- [ ] Feedback dal gruppo di test (le ragazze e amici): taratura difficoltà, suoni, minigiochi noiosi da togliere
+- [ ] Rifinitura visiva: transizioni tra schermate, coriandoli sul podio, conto alla rovescia più scenografico
+- [ ] Icona dell'app e schermata iniziale con grafica generata (Nano Banana, prompt di Claude)
+- [ ] Sfide salvate con nome anche per manche/difficoltà (oggi i pacchetti salvano solo i minigiochi)
+- [ ] Preferiti (stellina) nella scelta dei minigiochi
+- [ ] Altri minigiochi (idee: labirinto a dito, ritmo con melodia, ordina per grandezza, trova la parola nascosta, tris veloce, pesca)
+
+## Più avanti
+
+- [ ] Avatar: composizione a pezzi, colori, visibile in stanza e classifica
+- [ ] Classifiche tra amici nel tempo e casate/squadre (serve un piccolo archivio in rete)
+- [ ] Musica di sottofondo (asset esterni o sintetizzata)
+- [ ] Eventi a tema (Halloween, Natale…): minigiochi e colori a tempo
+- [ ] Modalità "campionato": più sfide in serie con punteggio cumulativo
+- [ ] Ponte di rete (relay) se il P2P fallisce su certe reti mobili
+- [ ] Traduzione in inglese (per amici che non parlano italiano)
+
+## Idee parcheggiate
+
+- Roblox / Google Play: no (vedi CLAUDE.md)
+- Monete e sblocchi: solo se il gruppo lo chiede

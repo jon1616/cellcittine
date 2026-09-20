@@ -11,10 +11,13 @@ import { createShell } from "./shell.js";
 const TRIES = 3;
 const VISIBLE_MS = 1000;
 const TOLERANCE = 1.5; // secondi di scarto per arrivare a zero punti
+const IDLE_LIMIT = 10000;   // ms senza avviare: il tentativo vale zero
+const RUN_LIMIT = 15000;    // ms di cronometro senza fermarlo: si ferma da solo
 
 let shell = null;
 let raf = null;
 let nextTimer = null;
+let guard = null;
 
 export default {
   id: "cinquesecondi",
@@ -62,6 +65,8 @@ export default {
     const setup = () => {
       phase = "ready";
       startedAt = null;
+      clearTimeout(guard);
+      guard = setTimeout(() => { if (!done && phase === "ready") stop(true); }, IDLE_LIMIT);
       target.textContent = `Ferma a ${targets[index].toFixed(2)} s`;
       display.textContent = "0.00";
       display.classList.remove("hidden");
@@ -88,20 +93,28 @@ export default {
         sfx.play("tick");
         vibrate(10);
         raf = requestAnimationFrame(frame);
+        clearTimeout(guard);
+        guard = setTimeout(() => { if (!done && phase === "running") stop(false); }, RUN_LIMIT);
         return;
       }
       if (phase !== "running") return;
+      stop(false);
+    });
+
+    // Chiude il tentativo corrente. forfeit = mai avviato (zero punti).
+    const stop = (forfeit) => {
       phase = "shown";
       cancelAnimationFrame(raf);
-      const t = (performance.now() - startedAt) / 1000;
+      clearTimeout(guard);
+      const t = forfeit ? Infinity : (performance.now() - startedAt) / 1000;
       const err = Math.abs(t - targets[index]);
       const points = Math.max(0, Math.round(100 * (1 - err / TOLERANCE)));
       total += points;
-      errSum += err;
+      errSum += forfeit ? TOLERANCE : err;
       if (points >= 90) perfects++;
       display.classList.remove("hidden");
-      display.textContent = t.toFixed(2);
-      feedback.textContent = points >= 90 ? `+${points} Perfetto!` : points > 0 ? `+${points} (${err >= 0 ? "" : ""}${(t - targets[index] >= 0 ? "+" : "−")}${err.toFixed(2)} s)` : "Fuori di molto!";
+      display.textContent = forfeit ? "—" : t.toFixed(2);
+      feedback.textContent = forfeit ? "Tempo scaduto" : points >= 90 ? `+${points} Perfetto!` : points > 0 ? `+${points} (${err >= 0 ? "" : ""}${(t - targets[index] >= 0 ? "+" : "−")}${err.toFixed(2)} s)` : "Fuori di molto!";
       feedback.className = `prec-feedback ${points >= 90 ? "great" : points === 0 ? "bad" : ""}`;
       sfx.play(points >= 90 ? "perfect" : points >= 40 ? "good" : "bad");
       vibrate(points >= 40 ? 12 : [60, 30, 60]);
@@ -116,7 +129,7 @@ export default {
           setup();
         }
       }, 1400);
-    });
+    };
 
     shell.setTimer("0");
     setup();
@@ -125,6 +138,7 @@ export default {
   unmount() {
     cancelAnimationFrame(raf);
     clearTimeout(nextTimer);
+    clearTimeout(guard);
     shell?.remove();
     shell = null;
   },

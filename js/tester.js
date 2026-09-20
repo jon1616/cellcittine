@@ -53,8 +53,36 @@ function installWarp(win, getFactor) {
   win.Date.now = () => Math.round(dateOffset + now());
   win.setTimeout = (fn, ms = 0, ...args) => realSetTimeout(fn, Math.max(0, ms) / getFactor(), ...args);
   win.setInterval = (fn, ms = 0, ...args) => realSetInterval(fn, Math.max(1, ms / getFactor()), ...args);
-  win.requestAnimationFrame = (cb) => realSetTimeout(() => cb(now()), 16);
-  win.cancelAnimationFrame = (id) => win.clearTimeout(id);
+  // Fotogrammi: uno ogni 16 ms di tempo *di gioco* (quindi molto fitti quando
+  // l'orologio corre), così i giochi che limitano il passo per fotogramma
+  // avanzano comunque alla velocità giusta. Sotto i 4 ms setTimeout non
+  // scende: si usa un MessageChannel, che non ha quel limite.
+  let rafId = 0;
+  const rafQueue = new Map();
+  let frameScheduled = false;
+  let frameAt = 0;
+  const channel = new win.MessageChannel();
+  const runFrame = () => {
+    if (realNow() < frameAt - 0.05) { channel.port2.postMessage(0); return; } // troppo presto: ripassa
+    frameScheduled = false;
+    const cbs = [...rafQueue.values()];
+    rafQueue.clear();
+    const t = now();
+    for (const cb of cbs) cb(t);
+  };
+  channel.port1.onmessage = runFrame;
+  win.requestAnimationFrame = (cb) => {
+    rafQueue.set(++rafId, cb);
+    if (!frameScheduled) {
+      frameScheduled = true;
+      const delay = 16 / getFactor();
+      frameAt = realNow() + delay;
+      if (delay >= 4) realSetTimeout(runFrame, delay);
+      else channel.port2.postMessage(0);
+    }
+    return rafId;
+  };
+  win.cancelAnimationFrame = (id) => { rafQueue.delete(id); };
   return { now, realNow, realSetTimeout, realSetInterval };
 }
 
@@ -282,8 +310,8 @@ function makeMonkey(container, doc = document, root = container) {
         taps++;
         ripple(p);
         fire("pointerdown", target, p);
-        // a volte tiene premuto e trascina (per "tieni premuto" e "scorri")
-        const hold = Math.random() < 0.35 ? 60 + Math.random() * 240 : 20;
+        // a volte tiene premuto e trascina (per "tieni premuto" e "scorri"); durate in tempo di gioco
+        const hold = (Math.random() < 0.35 ? 60 + Math.random() * 400 : 20) / getFactor();
         const q = Math.random() < 0.5 ? pt() : p;
         const steps = 3;
         for (let i = 1; i <= steps && !stopped; i++) {
@@ -298,7 +326,7 @@ function makeMonkey(container, doc = document, root = container) {
           up.dispatchEvent(new W.MouseEvent("click", { bubbles: true, cancelable: true, clientX: q.x, clientY: q.y }));
         }
       }
-      await realSleep(40 + Math.random() * 50);
+      await realSleep((120 + Math.random() * 300) / getFactor());
     }
   };
   loop();
