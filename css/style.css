@@ -47,18 +47,21 @@ html, body {
   inset: 0;
 }
 
-#app {
-  position: fixed;
-  inset: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  /* Sfondo del tema (menu). I minigiochi lo coprono con la loro area a schermo intero. */
+/* Sfondo del tema (menu), grande quanto lo schermo. I minigiochi lo coprono con la loro area. */
+body {
   background-color: var(--bg);
   background-image: linear-gradient(rgba(30, 31, 52, 0.25), rgba(30, 31, 52, 0.25)), var(--bg-image, none);
   background-size: cover, cover;
   background-position: center top, center top;
   background-repeat: no-repeat, no-repeat;
-  background-attachment: local, local;
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: transparent; /* lo sfondo del tema sta sul body, grande quanto lo schermo */
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   display: flex;
@@ -611,7 +614,7 @@ button.link {
 .game-row + .game-row, .cat-section .game-row + .game-row { margin-top: 6px; }
 .card .game-row + .game-row { margin-top: 6px; }
 .game-row.on { outline: 2px solid var(--accent); background: #34325f; }
-.game-row.off { opacity: 0.6; }
+.game-row.off .game-text, .game-row.off .game-icon { opacity: 0.65; }
 .game-row .check {
   width: 22px; height: 22px; border-radius: 6px;
   border: 2px solid var(--muted);
@@ -875,3 +878,198 @@ img.countdown-icon { width: 128px; height: 128px; border-radius: 28px; margin: 8
 
 /* Scelta del tema (home) */
 .theme-row { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+
+/* ===============================================================
+   v0.11 — Restyling dei menu: vetro, luce, gradienti, movimento
+   (i minigiochi non sono toccati: vivono dentro .game-area)
+   =============================================================== */
+
+:root {
+  --accent-dark: color-mix(in srgb, var(--accent) 70%, #000);
+  --accent-light: color-mix(in srgb, var(--accent) 85%, #fff);
+  --accent-glow: color-mix(in srgb, var(--accent) 45%, transparent);
+  --glass: rgba(52, 50, 96, 0.55);
+  --glass-2: rgba(38, 37, 74, 0.6);
+  --line: rgba(255, 255, 255, 0.1);
+  --line-strong: rgba(255, 255, 255, 0.18);
+}
+
+/* Entrata delle schermate */
+@keyframes screen-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+.screen { animation: screen-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+/* Titolo con luce */
+h1 {
+  background: linear-gradient(180deg, #fff2c2 0%, var(--accent) 55%, var(--accent-dark) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 4px 14px var(--accent-glow));
+  letter-spacing: 2px;
+}
+
+/* Card: vetro con bordo e riflesso in alto */
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0) 40%), var(--glass);
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Pulsanti (solo nei menu: i minigiochi tengono i loro stili) */
+.screen button, .pick-footer button {
+  background: linear-gradient(180deg, var(--accent-light) 0%, var(--accent) 45%, var(--accent-dark) 100%);
+  color: #1b1a2e;
+  box-shadow: 0 6px 18px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -2px 0 rgba(0,0,0,0.15);
+  text-shadow: 0 1px 0 rgba(255,255,255,0.25);
+  transition: transform 0.1s, box-shadow 0.15s, filter 0.15s;
+}
+.screen button:active, .pick-footer button:active { transform: translateY(1px) scale(0.98); box-shadow: 0 3px 10px var(--accent-glow), inset 0 1px 0 rgba(255,255,255,0.2); filter: brightness(0.96); }
+.screen button.secondary {
+  background: linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03)), var(--glass-2);
+  color: var(--text);
+  border: 1px solid var(--line-strong);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.08);
+  text-shadow: none;
+}
+.screen button.danger { background: linear-gradient(180deg, #ff7a91, var(--danger) 50%, #b8253f); color: #fff; box-shadow: 0 6px 18px rgba(255,77,109,0.35); text-shadow: none; }
+.screen button.link { background: none; box-shadow: none; text-shadow: none; color: var(--muted); }
+.screen button.link:active { transform: none; filter: none; color: var(--text); }
+.screen button:disabled { opacity: 0.45; box-shadow: none; filter: grayscale(0.3); }
+.screen button.small-btn { box-shadow: 0 3px 10px rgba(0,0,0,0.25); }
+.screen button.info { background: rgba(255,255,255,0.08); border: 1px solid var(--line); box-shadow: none; text-shadow: none; }
+
+/* Campi di testo */
+input[type="text"] {
+  background: rgba(20, 20, 40, 0.75);
+  border: 1px solid var(--line-strong);
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.25);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+input[type="text"]:focus { border-color: var(--accent); box-shadow: inset 0 2px 6px rgba(0,0,0,0.25), 0 0 0 3px var(--accent-glow); }
+
+/* Codice stanza: luce pulsante */
+@keyframes glow-pulse {
+  0%, 100% { filter: drop-shadow(0 0 10px var(--accent-glow)); }
+  50% { filter: drop-shadow(0 0 22px var(--accent)); }
+}
+.code-big {
+  background: linear-gradient(180deg, #fff2c2, var(--accent) 60%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: glow-pulse 2.4s ease-in-out infinite;
+}
+
+/* Chip e selettori */
+.chip {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  box-shadow: none;
+  text-shadow: none;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+}
+.chip.on {
+  background: linear-gradient(180deg, var(--accent-light), var(--accent) 50%, var(--accent-dark));
+  color: #1b1a2e;
+  border-color: transparent;
+  box-shadow: 0 4px 14px var(--accent-glow);
+}
+.seg { background: rgba(255,255,255,0.05); border: 1px solid var(--line); color: var(--muted); box-shadow: none; text-shadow: none; }
+.seg.active {
+  background: linear-gradient(180deg, var(--accent-light), var(--accent) 50%, var(--accent-dark));
+  color: #1b1a2e;
+  border-color: transparent;
+  box-shadow: 0 4px 14px var(--accent-glow);
+}
+.chip-x { background: rgba(255,255,255,0.06); border: 1px solid var(--line); box-shadow: none; }
+.screen .cat-toggle { background: none; box-shadow: none; text-shadow: none; color: var(--text); border: none; }
+.screen .chip, .screen .seg, .screen .chip-x { text-shadow: none; }
+.screen .chip:not(.on), .screen .seg:not(.active) { box-shadow: none; color: var(--muted); background: rgba(255,255,255,0.06); border: 1px solid var(--line); }
+.screen .filters .chip:not(.on), .screen .pick-footer .chip { background: rgba(30, 31, 52, 0.85); color: var(--text); }
+.screen .chip-x { background: rgba(255,255,255,0.06); }
+.screen .chip-x { color: var(--muted); }
+.screen button.info { color: var(--muted); }
+
+/* Liste: partecipanti, classifiche, righe minigioco */
+.players li, .ranking li, .game-row {
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01)), rgba(0,0,0,0.18);
+  border: 1px solid var(--line);
+}
+.pick-list .game-row, .card .game-row {
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01)), rgba(30, 31, 52, 0.82);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.cat-head { background: rgba(30, 31, 52, 0.7); border-radius: 12px 12px 0 0; padding-left: 8px; padding-right: 8px; }
+.filters .chip { background: rgba(30, 31, 52, 0.85); }
+.players li.me, .ranking li.me { outline: none; border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-glow), 0 0 18px var(--accent-glow); }
+.ranking li:first-child {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 35%, transparent), rgba(0,0,0,0.18) 70%);
+  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
+}
+.game-row.on { outline: none; border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-glow), 0 4px 16px rgba(0,0,0,0.25); background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 14%, transparent), rgba(0,0,0,0.18)); }
+.game-row .check { border-color: var(--line-strong); background: rgba(0,0,0,0.2); }
+.game-row.on .check { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
+.players li .tag { color: var(--accent); }
+.badge { box-shadow: 0 0 10px var(--accent-glow); }
+img.game-icon, img.list-icon, img.heading-icon { box-shadow: 0 2px 8px rgba(0,0,0,0.35); }
+
+/* Prestazione */
+.perf {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 16%, transparent), color-mix(in srgb, var(--accent) 6%, transparent));
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+/* Podio: trofeo che rimbalza e brilla */
+@keyframes trophy-in {
+  0% { transform: scale(0.4) rotate(-12deg); opacity: 0; }
+  60% { transform: scale(1.15) rotate(4deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); }
+}
+@keyframes trophy-glow {
+  0%, 100% { filter: drop-shadow(0 0 12px var(--accent-glow)); }
+  50% { filter: drop-shadow(0 0 30px var(--accent)); }
+}
+.podium-trophy { animation: trophy-in 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.3), trophy-glow 2.2s ease-in-out 0.7s infinite; }
+.podium-name {
+  background: linear-gradient(180deg, #fff2c2, var(--accent) 60%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 10px var(--accent-glow));
+}
+
+/* Coriandoli sul podio (elementi creati da app.js) */
+.confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 5; }
+.confetti i {
+  position: absolute;
+  top: -14px;
+  width: 9px; height: 14px;
+  border-radius: 2px;
+  opacity: 0.95;
+  animation: confetti-fall linear forwards;
+}
+@keyframes confetti-fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0.6; }
+}
+
+/* Pannello fisso della scelta */
+.pick-footer { background: rgba(30, 31, 52, 0.85); border-top: 1px solid var(--line-strong); box-shadow: 0 -10px 30px rgba(0,0,0,0.35); }
+.cat-head { border-bottom-color: color-mix(in srgb, var(--cat, var(--line)) 60%, transparent); }
+
+/* Etichette */
+.label { color: color-mix(in srgb, var(--accent) 70%, var(--muted)); }
+
+/* Meno movimento per chi lo chiede */
+@media (prefers-reduced-motion: reduce) {
+  .screen, .code-big, .podium-trophy, .confetti i { animation: none !important; }
+  button, .chip { transition: none; }
+}

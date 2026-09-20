@@ -25,11 +25,11 @@ Una riga per idea: `- [ ] cosa` → `- [x] cosa (vX.Y.Z)`. Le decisioni prese st
 - [x] Musica di sottofondo (CC0, loop di 2 min) nei menu, in pausa durante i minigiochi, interruttore 🎵 (v0.9.0)
 - [x] Sfondo illustrato dietro i menu e sistema dei temi (automatico per data o a scelta); Halloween/Natale/Estate pronti ad accogliere le immagini (v0.10.0)
 - [x] Temi stagionali attivi: Halloween (20 ott–2 nov), Natale (8 dic–6 gen), Estate (15 giu–10 set), scelta manuale in home (v0.10.1)
+- [x] Restyling dei menu: card in vetro, pulsanti con gradiente e bagliore, titolo luminoso, transizioni tra schermate, codice stanza pulsante, trofeo animato e coriandoli sul podio (v0.11.0)
 
 ## Prossimi passi (in ordine di priorità, da confermare con l'utente)
 
 - [ ] Feedback dal gruppo di test (le ragazze e amici): taratura difficoltà, suoni, minigiochi noiosi da togliere
-- [ ] Rifinitura visiva: transizioni tra schermate, coriandoli sul podio, conto alla rovescia più scenografico
 - [ ] Sfide salvate con nome anche per manche/difficoltà (oggi i pacchetti salvano solo i minigiochi)
 - [ ] Preferiti (stellina) nella scelta dei minigiochi
 - [ ] Altri minigiochi (idee: labirinto a dito, ritmo con melodia, ordina per grandezza, trova la parola nascosta, tris veloce, pesca)

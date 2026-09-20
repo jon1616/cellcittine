@@ -1100,9 +1100,23 @@ function finishChallenge() {
   showFinal(msg);
 }
 
+// Pioggia di coriandoli (podio). Elementi puramente decorativi, si rimuovono da soli.
+function confetti(count = 90) {
+  const colors = ["#ffb703", "#fb5607", "#43d17a", "#ff4d6d", "#36cfc9", "#f6f3ff"];
+  const layer = el("div", { class: "confetti" });
+  for (let i = 0; i < count; i++) {
+    const piece = el("i");
+    piece.style.cssText = `left:${Math.random() * 100}%;background:${colors[i % colors.length]};animation-duration:${2.2 + Math.random() * 2}s;animation-delay:${Math.random() * 1.2}s;transform:rotate(${Math.random() * 360}deg);width:${6 + Math.random() * 6}px;height:${10 + Math.random() * 8}px;`;
+    layer.append(piece);
+  }
+  document.body.append(layer);
+  setTimeout(() => layer.remove(), 5000);
+}
+
 function showFinal(msg) {
   currentScreen = "final";
   sfx.play("fanfare");
+  if (!isSolo() || (state.challenge?.history.length || 0) > 0) confetti();
   const net = state.net;
   const ch = state.challenge;
   const solo = isSolo();
