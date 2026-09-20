@@ -27,9 +27,10 @@ function write(key, value) {
 }
 
 export function loadConfig(allGameIds) {
-  const cfg = { ...DEFAULT_CONFIG, ...read(KEY_CONFIG, {}) };
-  cfg.games = cfg.games.filter((id) => allGameIds.includes(id));
-  if (cfg.games.length === 0) cfg.games = [...allGameIds];
+  const saved = read(KEY_CONFIG, {});
+  const cfg = { ...DEFAULT_CONFIG, ...saved };
+  // Prima volta: tutti i minigiochi. Dopo: quelli scelti (anche nessuno).
+  cfg.games = Array.isArray(saved.games) ? saved.games.filter((id) => allGameIds.includes(id)) : [...allGameIds];
   if (!ROUND_OPTIONS.includes(cfg.rounds)) cfg.rounds = DEFAULT_CONFIG.rounds;
   if (!DIFFICULTIES.some((d) => d.id === cfg.difficulty)) cfg.difficulty = DEFAULT_CONFIG.difficulty;
   return cfg;

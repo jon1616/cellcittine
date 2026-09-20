@@ -259,15 +259,29 @@ function configPanel() {
       text: `${g.icon} ${g.title}`,
       onclick: () => {
         const games = on ? cfg.games.filter((id) => id !== g.id) : [...cfg.games, g.id];
-        if (games.length === 0) return;
         updateConfig({ games });
       },
     });
   });
 
+  const allOn = cfg.games.length === ALL_GAME_IDS.length;
+  const quick = el("div", { class: "chips quick" }, [
+    el("button", {
+      class: `chip small${allOn ? " on" : ""}`,
+      text: "✓ Tutti",
+      onclick: () => updateConfig({ games: [...ALL_GAME_IDS] }),
+    }),
+    el("button", {
+      class: `chip small${cfg.games.length === 0 ? " on" : ""}`,
+      text: "✕ Nessuno",
+      onclick: () => updateConfig({ games: [] }),
+    }),
+  ]);
+
   return el("div", { class: "card" }, [
     el("h2", { text: "La sfida" }),
-    el("div", { class: "label", text: "Minigiochi" }),
+    el("div", { class: "label", text: `Minigiochi (${cfg.games.length} di ${ALL_GAME_IDS.length})` }),
+    quick,
     el("div", { class: "chips" }, chips),
     el("div", { class: "label", text: "Manche" }),
     segmented(
@@ -329,7 +343,10 @@ function showLobby() {
 
   if (net.isHost) {
     parts.push(configPanel());
-    parts.push(el("button", { text: solo ? "Inizia!" : "Inizia la sfida!", onclick: startChallenge }));
+    const startBtn = el("button", { text: solo ? "Inizia!" : "Inizia la sfida!", onclick: startChallenge });
+    startBtn.disabled = state.config.games.length === 0;
+    parts.push(startBtn);
+    if (state.config.games.length === 0) parts.push(el("p", { class: "small", text: "Scegli almeno un minigioco" }));
   } else {
     if (state.hostConfig) parts.push(configSummary(state.hostConfig));
     parts.push(el("p", { text: "Aspetta che l'host faccia partire la sfida…" }));

@@ -519,3 +519,6 @@ button.link {
 }
 .dots-panel:active { background: rgba(255,255,255,0.16); }
 .dot { position: absolute; border-radius: 50%; }
+
+.chips.quick { margin-bottom: 2px; }
+.chip.small { font-size: 13px; padding: 7px 12px; }
