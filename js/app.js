@@ -176,7 +176,7 @@ function showRecords() {
     if (games.length === 0) return null;
     const rows = games.map((g) =>
       el("div", { class: "rec-row" }, [
-        el("span", { class: "rec-name", text: `${g.icon} ${g.title}` }),
+        el("span", { class: "rec-name with-icon" }, [gameIcon(g, "list-icon"), el("span", { text: g.title })]),
         ...DIFFICULTIES.map((d) => {
           const r = getRecord(g.id, d.id);
           return el("span", { class: "rec-cell", text: r ? r.text : "—" });
@@ -225,6 +225,17 @@ function showCatalog() {
   );
 }
 
+// Icona di un minigioco: immagine disegnata se c'è, altrimenti l'emoji.
+function gameIcon(g, cls = "game-icon") {
+  if (g?.image) return el("img", { class: cls, src: g.image, alt: "", width: "160", height: "160" });
+  return el("span", { class: cls + " emoji", text: g?.icon || "" });
+}
+
+// Titolo con icona (per intestazioni)
+function gameHeading(g, tag = "h2") {
+  return el(tag, { class: "with-icon" }, [gameIcon(g, "heading-icon"), el("span", { text: g?.title || "" })]);
+}
+
 function metaLine(g) {
   const parts = [`⏱ ${g.duration} s`, PACES[g.pace] || g.pace, g.input];
   return parts.join(" · ");
@@ -235,7 +246,7 @@ function gameRow(g, { selected = null, onClick, onInfo } = {}) {
   const rec = getRecord(g.id, state.config.difficulty);
   const row = el("div", { class: `game-row${selected === true ? " on" : ""}${selected === false ? " off" : ""}` }, [
     selected === null ? el("span") : el("span", { class: "check", text: selected ? "✓" : "" }),
-    el("span", { class: "game-icon", text: g.icon }),
+    gameIcon(g),
     el("div", { class: "game-text" }, [
       el("div", { class: "game-title-row" }, [
         el("span", { class: "game-name", text: g.title }),
@@ -272,7 +283,7 @@ function showGameInfo(g, back) {
 
   show(
     el("div", { class: "info-head" }, [
-      el("div", { class: "info-icon", text: g.icon }),
+      gameIcon(g, "info-icon"),
       el("h2", { text: g.title }),
       isNew(g) ? el("span", { class: "badge new", text: "NUOVO" }) : el("span"),
     ]),
@@ -830,7 +841,8 @@ function showCountdown(entry, msg) {
   const number = el("div", { class: "big", text: "" });
   const area = el("div", { class: "game-area" }, [
     el("div", { class: "hint", text: `Manche ${msg.index + 1} di ${msg.total} · ${difficultyLabel(msg.difficulty)}` }),
-    el("div", { text: `${entry?.icon || ""} ${entry?.title || msg.gameId}` }),
+    gameIcon(entry, "countdown-icon"),
+    el("div", { text: entry?.title || msg.gameId }),
     el("div", { class: "hint", text: entry?.description || "" }),
     number,
   ]);
@@ -1004,7 +1016,7 @@ async function showResults(msg) {
     )
   );
 
-  const cards = [el("div", { class: "card" }, [el("h2", { text: `${game.icon} ${game.title}` }), roundList, performanceLine(game, round)])];
+  const cards = [el("div", { class: "card" }, [gameHeading(game), roundList, performanceLine(game, round)])];
 
   if (solo) {
     const rec = getRecord(game.id, state.challenge.difficulty);
@@ -1085,7 +1097,7 @@ function showFinal(msg) {
           const perf = game ? performanceText(game, h.myScore, h.myMax, h.myDetail) : "";
           return el("li", { class: perf ? "with-perf" : "" }, [
             el("span", { class: "pos", text: String(i + 1) }),
-            el("span", {}, [el("div", { text: `${entry?.icon || ""} ${entry?.title || h.gameId}` }), perf ? el("div", { class: "perf-small", text: perf }) : el("span")]),
+            el("span", { class: "with-icon" }, [gameIcon(entry, "list-icon"), el("span", {}, [el("div", { text: entry?.title || h.gameId }), perf ? el("div", { class: "perf-small", text: perf }) : el("span")])]),
             el("span", { class: "score", text }),
           ]);
         })),

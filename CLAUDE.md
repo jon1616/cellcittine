@@ -58,7 +58,7 @@ La scheda descrittiva (titolo, icona, categoria, abilità, durata, ritmo, comand
 ## Aggiungere un minigioco (checklist)
 
 1. `js/games/<id>.js` con logica + suoni + `onFinish(score, detail)` (+ `maxScore` se ha senso).
-2. Scheda completa in `js/games/catalog.js` (con `added: "AAAA-MM-GG"` per il badge NUOVO).
+2. Scheda completa in `js/games/catalog.js` (con `added: "AAAA-MM-GG"` per il badge NUOVO). Icona disegnata in `assets/icons/<id>.webp` (160×160, sfondo #1E1F34, stesso stile delle altre: prompt in ROADMAP/chat) e campo `image`; se manca, l'emoji `icon` fa da riserva.
 3. Riga in `PRECACHE` di `sw.js`.
 4. Stili in `css/style.css` (sezione del minigioco).
 5. `node tools/check.mjs` → 0 errori; poi `test.html?auto` nel browser → 0 errori, 0 avvisi.

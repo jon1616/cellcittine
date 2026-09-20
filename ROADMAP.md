@@ -21,6 +21,7 @@ Una riga per idea: `- [ ] cosa` → `- [x] cosa (vX.Y.Z)`. Le decisioni prese st
 
 - [x] Carattere tipografico Fredoka in tutto il gioco (v0.7.0)
 - [x] Icona dell'app (normale + maskable) e illustrazione della home generate con Nano Banana (v0.7.1)
+- [x] Icone disegnate dei 25 minigiochi (foglio unico 5×5 da Nano Banana, ritagliate in WebP) in elenchi, scelta, scheda, conto alla rovescia, risultati, record (v0.8.0)
 
 ## Prossimi passi (in ordine di priorità, da confermare con l'utente)
 

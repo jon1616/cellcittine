@@ -11,7 +11,8 @@
 
   Campi:
     id           identificatore (= nome del file)
-    title, icon  come appare
+    title, icon  come appare (icon = emoji di riserva)
+    image        icona disegnata (assets/icons/<id>.webp); se manca si usa l'emoji
     description  una riga, per elenchi e conto alla rovescia
     howTo        spiegazione un po' più lunga
     category     UNA categoria principale (vedi CATEGORIES)
@@ -45,6 +46,7 @@ const NEW_DAYS = 21;
 export const CATALOG = [
   {
     id: "semaforo",
+    image: "assets/icons/semaforo.webp",
     title: "Semaforo",
     icon: "🚦",
     description: "Tocca appena lo schermo diventa verde. Se tocchi prima, falsa partenza!",
@@ -64,6 +66,7 @@ export const CATALOG = [
   },
   {
     id: "memory",
+    image: "assets/icons/memory.webp",
     title: "Memory",
     icon: "🃏",
     description: "Trova tutte le coppie di forme uguali. Vince chi finisce prima.",
@@ -83,6 +86,7 @@ export const CATALOG = [
   },
   {
     id: "sequenza",
+    image: "assets/icons/sequenza.webp",
     title: "Sequenza",
     icon: "🎵",
     description: "Guarda i tasti che si accendono e ripeti la sequenza. Ogni volta si allunga di uno.",
@@ -102,6 +106,7 @@ export const CATALOG = [
   },
   {
     id: "numeri",
+    image: "assets/icons/numeri.webp",
     title: "Numeri",
     icon: "🔢",
     description: "Tocca i numeri in ordine, dall'1 in su, il più in fretta possibile.",
@@ -121,6 +126,7 @@ export const CATALOG = [
   },
   {
     id: "bersagli",
+    image: "assets/icons/bersagli.webp",
     title: "Bersagli",
     icon: "🎯",
     description: "Tocca i bersagli prima che spariscano. Hai 20 secondi.",
@@ -140,6 +146,7 @@ export const CATALOG = [
   },
   {
     id: "calcoli",
+    image: "assets/icons/calcoli.webp",
     title: "Calcoli",
     icon: "➕",
     description: "Rispondi a più operazioni che puoi in 25 secondi. Gli errori tolgono un punto.",
@@ -159,6 +166,7 @@ export const CATALOG = [
   },
   {
     id: "colori",
+    image: "assets/icons/colori.webp",
     title: "Colori",
     icon: "🎨",
     description: "Tocca il colore con cui è SCRITTA la parola, non quello che dice. 20 secondi.",
@@ -178,6 +186,7 @@ export const CATALOG = [
   },
   {
     id: "precisione",
+    image: "assets/icons/precisione.webp",
     title: "Precisione",
     icon: "🏹",
     description: "Ferma il cursore al centro della zona colorata. Cinque tiri, massimo 100 punti l'uno.",
@@ -197,6 +206,7 @@ export const CATALOG = [
   },
   {
     id: "salta",
+    image: "assets/icons/salta.webp",
     title: "Salta",
     icon: "🦘",
     description: "Tocca per saltare gli ostacoli. Resisti 30 secondi!",
@@ -216,6 +226,7 @@ export const CATALOG = [
   },
   {
     id: "intruso",
+    image: "assets/icons/intruso.webp",
     title: "Intruso",
     icon: "🔍",
     description: "Un quadrato ha un colore leggermente diverso dagli altri: toccalo! 20 secondi.",
@@ -235,6 +246,7 @@ export const CATALOG = [
   },
   {
     id: "frecce",
+    image: "assets/icons/frecce.webp",
     title: "Frecce",
     icon: "🧭",
     description: "Scorri il dito dove indica la freccia. Se è rossa, vai dalla parte opposta! 20 secondi.",
@@ -254,6 +266,7 @@ export const CATALOG = [
   },
   {
     id: "palloncini",
+    image: "assets/icons/palloncini.webp",
     title: "Palloncini",
     icon: "🎈",
     description: "Tieni premuto per gonfiare, lascia prima che scoppi! Ogni palloncino regge in modo diverso.",
@@ -273,6 +286,7 @@ export const CATALOG = [
   },
   {
     id: "dipiu",
+    image: "assets/icons/dipiu.webp",
     title: "Di più",
     icon: "⚖️",
     description: "Quale riquadro ha più pallini? Tocca in fretta! 20 secondi.",
@@ -292,6 +306,7 @@ export const CATALOG = [
   },
   {
     id: "tocchi",
+    image: "assets/icons/tocchi.webp",
     title: "Tocchi",
     icon: "👆",
     description: "Quanti tocchi riesci a fare in 10 secondi? Tutto lo schermo è il pulsante.",
@@ -311,6 +326,7 @@ export const CATALOG = [
   },
   {
     id: "ritmo",
+    image: "assets/icons/ritmo.webp",
     title: "Ritmo",
     icon: "🥁",
     description: "Tocca a tempo con il battito: 16 colpi, più sei preciso più punti.",
@@ -330,6 +346,7 @@ export const CATALOG = [
   },
   {
     id: "torre",
+    image: "assets/icons/torre.webp",
     title: "Torre",
     icon: "🏗️",
     description: "Un blocco scorre: toccalo per farlo cadere sulla torre. La parte che sporge si perde!",
@@ -349,6 +366,7 @@ export const CATALOG = [
   },
   {
     id: "frenata",
+    image: "assets/icons/frenata.webp",
     title: "Frenata",
     icon: "🚗",
     description: "L'auto accelera verso la riga: tocca per frenare e fermati il più vicino possibile.",
@@ -368,6 +386,7 @@ export const CATALOG = [
   },
   {
     id: "cesto",
+    image: "assets/icons/cesto.webp",
     title: "Cesto",
     icon: "🧺",
     description: "Trascina il cesto e prendi la frutta che cade. 20 secondi.",
@@ -387,6 +406,7 @@ export const CATALOG = [
   },
   {
     id: "lampi",
+    image: "assets/icons/lampi.webp",
     title: "Lampi",
     icon: "💡",
     description: "Alcuni lampi appaiono in un attimo: quanti erano? Otto giri.",
@@ -406,6 +426,7 @@ export const CATALOG = [
   },
   {
     id: "meta",
+    image: "assets/icons/meta.webp",
     title: "Metà",
     icon: "📏",
     description: "Tocca il punto esatto a metà della barra. Cinque barre.",
@@ -425,6 +446,7 @@ export const CATALOG = [
   },
   {
     id: "cinquesecondi",
+    image: "assets/icons/cinquesecondi.webp",
     title: "Cronometro cieco",
     icon: "⏱️",
     description: "Il cronometro sparisce dopo un secondo: fermalo a 5,00 s a occhi chiusi.",
@@ -444,6 +466,7 @@ export const CATALOG = [
   },
   {
     id: "copia",
+    image: "assets/icons/copia.webp",
     title: "Copia",
     icon: "🪞",
     description: "Guarda lo schema di caselle accese, poi ricopialo. Sei schemi sempre più grandi.",
@@ -463,6 +486,7 @@ export const CATALOG = [
   },
   {
     id: "anagrammi",
+    image: "assets/icons/anagrammi.webp",
     title: "Anagrammi",
     icon: "🔤",
     description: "Le lettere sono in disordine: tocca nell'ordine giusto per ricomporre la parola. 30 secondi.",
@@ -482,6 +506,7 @@ export const CATALOG = [
   },
   {
     id: "altobasso",
+    image: "assets/icons/altobasso.webp",
     title: "Alto o basso",
     icon: "🎴",
     description: "Il prossimo numero sarà più alto o più basso? 20 secondi di scommesse.",
@@ -501,6 +526,7 @@ export const CATALOG = [
   },
   {
     id: "dieci",
+    image: "assets/icons/dieci.webp",
     title: "Dieci",
     icon: "🔟",
     description: "Tocca due numeri che sommati fanno 10. Spariscono e ne arrivano altri. 25 secondi.",

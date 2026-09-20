@@ -24,7 +24,7 @@ js/games/<id>.js        codice di un minigioco (caricato solo quando serve)
 js/audio.js             suoni sintetizzati (WebAudio), interruttore 🔊/🔇
 js/version.js           numero di versione mostrato nell'angolo
 icons/                  icone dell'app (any + maskable, generate da assets/icon-source.png)
-assets/                 immagini: originali (PNG) e versioni usate dall'app (JPEG)
+assets/                 immagini: originali (PNG), versioni usate dall'app (JPEG), icone dei minigiochi (assets/icons/<id>.webp)
 fonts/                  carattere Fredoka (SIL OFL, licenza in fonts/OFL.txt)
 test.html + js/tester.js  tester nel browser: prova tutto il gioco in meno di un minuto
 tools/check.mjs         controllo rapido da riga di comando (sintassi, catalogo, sw.js, versione)
@@ -65,7 +65,7 @@ CLAUDE.md · ROADMAP.md  guida per chi lavora sul codice · elenco di fatto / da
 
 1. Crea `js/games/<id>.js` seguendo il contratto descritto in `semaforo.js` (solo logica).
    Ogni minigioco deve avere i suoni: usa `sfx.play("good"|"bad"|…)` di `js/audio.js`.
-2. Aggiungi la scheda in `js/games/catalog.js` (categoria, abilità, durata, tema, data…).
+2. Aggiungi la scheda in `js/games/catalog.js` (categoria, abilità, durata, tema, data…). Icona: `assets/icons/<id>.webp` 160×160 (campo `image`); senza, si usa l'emoji.
 3. Aggiungi il file alla lista `PRECACHE` in `sw.js`.
 4. `node tools/check.mjs` e poi `test.html?auto` nel browser: 0 errori.
 5. Riga nella tabella qui sopra, voce spuntata in ROADMAP.md.

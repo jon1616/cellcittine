@@ -845,3 +845,22 @@ button.info {
 .hero img { width: 100%; height: auto; display: block; }
 .home-title { margin-top: -6px; }
 @media (max-height: 700px) { .hero { display: none; } .home-title { margin-top: 24px; } }
+
+/* ---------------------------------------------------------------
+   Icone disegnate dei minigiochi
+   --------------------------------------------------------------- */
+img.game-icon { width: 44px; height: 44px; border-radius: 10px; display: block; }
+.game-icon.emoji { font-size: 26px; text-align: center; }
+.game-row { grid-template-columns: 24px 44px 1fr 30px; }
+.with-icon { display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
+h2.with-icon { width: 100%; }
+img.heading-icon { width: 34px; height: 34px; border-radius: 8px; }
+.heading-icon.emoji { font-size: 22px; }
+img.list-icon { width: 28px; height: 28px; border-radius: 7px; flex: 0 0 auto; }
+.list-icon.emoji { font-size: 18px; }
+.rec-name.with-icon { justify-content: flex-start; }
+.ranking li .with-icon { justify-content: flex-start; }
+img.info-icon { width: 120px; height: 120px; border-radius: 26px; box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
+.info-icon.emoji { font-size: 64px; }
+img.countdown-icon { width: 128px; height: 128px; border-radius: 28px; margin: 8px 0 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+.countdown-icon.emoji { font-size: 72px; }
