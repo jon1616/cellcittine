@@ -24,6 +24,7 @@ js/games/<id>.js        codice di un minigioco (caricato solo quando serve)
 js/audio.js             suoni sintetizzati (WebAudio), interruttore 🔊/🔇
 js/version.js           numero di versione mostrato nell'angolo
 icons/                  icone dell'app (any + maskable, generate da assets/icon-source.png)
+assets/music/           sottofondo.mp3 (CC0, vedi LICENSE.txt); l'originale resta fuori da Git
 assets/                 immagini: originali (PNG), versioni usate dall'app (JPEG), icone dei minigiochi (assets/icons/<id>.webp)
 fonts/                  carattere Fredoka (SIL OFL, licenza in fonts/OFL.txt)
 test.html + js/tester.js  tester nel browser: prova tutto il gioco in meno di un minuto

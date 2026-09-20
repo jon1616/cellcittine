@@ -27,7 +27,7 @@ index.html · manifest.webmanifest · sw.js (service worker, PRECACHE + CACHE_VE
 css/style.css
 js/app.js            telaio: schermate, sfida, manche, punteggi, scelta minigiochi, pacchetti
 js/net.js            P2P (PeerJS): host(), join(), broadcast(), sendToHost(), now() sincronizzato
-js/audio.js          suoni sintetizzati (WebAudio), sfx.play(nome), sfx.pad(i), sfx.step(i,n), inflate*
+js/audio.js          effetti sintetizzati (sfx.play/pad/step/inflate*) + musica di sottofondo (sfx.setScene("menu"|"game"), setMusicEnabled)
 js/storage.js        localStorage: config sfida, record {score,text}, pacchetti personali
 js/packs.js          pacchetti integrati (alcuni calcolati dal catalogo) + utilità
 js/games/catalog.js  CATALOGO: scheda di ogni minigioco + loadGame(id) con import() a richiesta

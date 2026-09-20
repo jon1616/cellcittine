@@ -22,6 +22,7 @@ Una riga per idea: `- [ ] cosa` → `- [x] cosa (vX.Y.Z)`. Le decisioni prese st
 - [x] Carattere tipografico Fredoka in tutto il gioco (v0.7.0)
 - [x] Icona dell'app (normale + maskable) e illustrazione della home generate con Nano Banana (v0.7.1)
 - [x] Icone disegnate dei 25 minigiochi (foglio unico 5×5 da Nano Banana, ritagliate in WebP) in elenchi, scelta, scheda, conto alla rovescia, risultati, record (v0.8.0)
+- [x] Musica di sottofondo (CC0, loop di 2 min) nei menu, in pausa durante i minigiochi, interruttore 🎵 (v0.9.0)
 
 ## Prossimi passi (in ordine di priorità, da confermare con l'utente)
 
@@ -35,7 +36,6 @@ Una riga per idea: `- [ ] cosa` → `- [x] cosa (vX.Y.Z)`. Le decisioni prese st
 
 - [ ] Avatar: composizione a pezzi, colori, visibile in stanza e classifica
 - [ ] Classifiche tra amici nel tempo e casate/squadre (serve un piccolo archivio in rete)
-- [ ] Musica di sottofondo (asset esterni o sintetizzata)
 - [ ] Eventi a tema (Halloween, Natale…): minigiochi e colori a tempo
 - [ ] Modalità "campionato": più sfide in serie con punteggio cumulativo
 - [ ] Ponte di rete (relay) se il P2P fallisce su certe reti mobili

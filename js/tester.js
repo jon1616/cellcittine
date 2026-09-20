@@ -460,6 +460,7 @@ async function testAllenamento(gameId, difficulty) {
     for (const [k, v] of Object.entries(backup)) localStorage.setItem(k, v);
   };
   localStorage.setItem("name", "Tester");
+  localStorage.setItem("music", "off"); // niente musica durante il test
   localStorage.setItem("config", JSON.stringify({ games: [gameId], rounds: "tutti", difficulty, pack: null }));
 
   const iframe = el("iframe", { src: `index.html?tester=${Date.now()}`, title: "app" });

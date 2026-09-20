@@ -52,6 +52,7 @@ if (!state.config.pack) state.config.pack = detectPack(state.config.games);
 
 function show(...children) {
   app.replaceChildren(el("div", { class: "screen" }, children));
+  sfx.setScene("menu");
 }
 
 function statusLine(text = "", isError = false) {
@@ -159,6 +160,11 @@ function showHome(message = "") {
         text: sfx.isEnabled() ? "🔊 Suoni" : "🔇 Suoni",
         class: "link",
         onclick: () => { sfx.setEnabled(!sfx.isEnabled()); showHome(); },
+      }),
+      el("button", {
+        text: sfx.isMusicEnabled() ? "🎵 Musica" : "🎵 Musica (off)",
+        class: "link",
+        onclick: () => { sfx.setMusicEnabled(!sfx.isMusicEnabled()); showHome(); },
       }),
     ]),
     statusEl
@@ -658,6 +664,7 @@ function showPicker() {
   // Torna alla scelta conservando selezione e filtri (dopo una scheda info).
   const showPickerAgain = () => {
     currentScreen = "picker";
+    sfx.setScene("menu");
     app.replaceChildren(
       el("div", { class: "screen picker" }, [
         el("h2", { text: "Scegli i minigiochi" }),
@@ -837,6 +844,7 @@ async function beginRound(msg) {
 
 function showCountdown(entry, msg) {
   currentScreen = "countdown";
+  sfx.setScene("game");
   const net = state.net;
   const number = el("div", { class: "big", text: "" });
   const area = el("div", { class: "game-area" }, [

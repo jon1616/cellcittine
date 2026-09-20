@@ -1,6 +1,7 @@
 /*
-  Audio: tutti i suoni del gioco, sintetizzati al volo con WebAudio.
-  Nessun file esterno. I minigiochi non producono suoni da soli: chiamano
+  Audio: effetti sonori sintetizzati al volo con WebAudio (nessun file) e
+  musica di sottofondo da file (assets/music/sottofondo.mp3, in loop nei menu).
+  I minigiochi non producono suoni da soli: chiamano
   sfx.play("good"), sfx.play("bad")… così, per cambiare un suono (o sostituirlo
   con un file vero), si tocca solo questo modulo.
 
@@ -9,10 +10,55 @@
 */
 
 const KEY = "sound";
+const KEY_MUSIC = "music";
 let ctx = null;
 let master = null;
 let enabled = localStorage.getItem(KEY) !== "off";
 let inflateOsc = null;
+
+// ---------------------------------------------------------------
+// Musica di sottofondo (file MP3, in loop): suona nei menu, si ferma nei minigiochi
+// ---------------------------------------------------------------
+const MUSIC_SRC = "assets/music/sottofondo.mp3";
+const MUSIC_VOLUME = 0.32;
+let musicEnabled = localStorage.getItem(KEY_MUSIC) !== "off";
+let musicEl = null;
+let musicScene = "menu"; // "menu" | "game"
+let musicFade = null;
+let musicUnlocked = false; // il primo play deve avvenire dentro un tocco dell'utente
+
+function musicElement() {
+  if (!musicEl) {
+    musicEl = new Audio(MUSIC_SRC);
+    musicEl.loop = true;
+    musicEl.preload = "auto";
+    musicEl.volume = 0;
+  }
+  return musicEl;
+}
+
+function fadeTo(target, ms, then) {
+  clearInterval(musicFade);
+  const m = musicElement();
+  const start = m.volume;
+  const t0 = performance.now();
+  musicFade = setInterval(() => {
+    const k = Math.min(1, (performance.now() - t0) / ms);
+    m.volume = start + (target - start) * k;
+    if (k >= 1) { clearInterval(musicFade); then?.(); }
+  }, 50);
+}
+
+function musicUpdate() {
+  const m = musicElement();
+  const wantPlaying = musicEnabled && musicUnlocked && musicScene === "menu";
+  if (wantPlaying) {
+    if (m.paused) m.play().catch((e) => console.warn("musica:", e.name, e.message));
+    fadeTo(MUSIC_VOLUME, 900);
+  } else if (!m.paused) {
+    fadeTo(0, 500, () => m.pause());
+  }
+}
 
 function ensure() {
   if (!ctx) {
@@ -28,7 +74,15 @@ function ensure() {
 }
 
 // Sblocco al primo tocco (in cattura, così arriva prima di qualsiasi altro handler)
-document.addEventListener("pointerdown", () => { if (enabled) ensure(); }, { capture: true, passive: true });
+document.addEventListener("pointerdown", () => {
+  if (enabled) ensure();
+  if (!musicUnlocked) { musicUnlocked = true; musicUpdate(); }
+}, { capture: true, passive: true });
+// Se l'app va in secondo piano, la musica si ferma; al ritorno riparte se serve
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) { clearInterval(musicFade); musicEl?.pause(); }
+  else musicUpdate();
+});
 
 // ---------------------------------------------------------------
 // Mattoni: un tono con inviluppo, un soffio di rumore
@@ -145,6 +199,20 @@ export const sfx = {
     inflateOsc = null;
     g.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.02);
     osc.stop(ctx.currentTime + 0.1);
+  },
+
+  // Musica: scena corrente ("menu" suona, "game" tace) e interruttore
+  setScene(scene) {
+    if (musicScene === scene) return;
+    musicScene = scene;
+    musicUpdate();
+  },
+  isMusicEnabled() { return musicEnabled; },
+  musicState() { return { playing: !!musicEl && !musicEl.paused, volume: musicEl ? Math.round(musicEl.volume * 100) / 100 : 0, scene: musicScene, unlocked: musicUnlocked }; },
+  setMusicEnabled(on) {
+    musicEnabled = !!on;
+    localStorage.setItem(KEY_MUSIC, musicEnabled ? "on" : "off");
+    musicUpdate();
   },
 
   isEnabled() { return enabled; },

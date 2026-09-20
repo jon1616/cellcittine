@@ -1,0 +1,7 @@
+sottofondo.mp3 — musica di sottofondo dei menu
+
+Licenza: CC0 1.0 (dominio pubblico), come dichiarato da chi l'ha fornita.
+Origine / autore: (da indicare)
+Elaborazione: primi 120 s del brano originale, volume normalizzato (-18 LUFS),
+dissolvenza in entrata (1 s) e in uscita (2 s), MP3 112 kbps 44,1 kHz.
+L'originale (4 min, 320 kbps) è conservato fuori dal repository in assets/music/originale/.
