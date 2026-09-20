@@ -57,6 +57,7 @@ export default {
 
     let index = 0;
     let score = 0;
+    let wrong = 0;
     let done = false;
 
     const build = () => {
@@ -79,6 +80,7 @@ export default {
               build();
             } else {
               score = Math.max(0, score - 1);
+              wrong++;
               vibrate([60, 30, 60]);
               sfx.play("bad");
               cell.classList.add("wrong");
@@ -97,7 +99,7 @@ export default {
       () => {
         done = true;
         shell.showDone(this.formatScore(score));
-        ctx.onFinish(score);
+        ctx.onFinish(score, `${index} trovati, ${wrong} tocchi sbagliati`);
       }
     );
     build();

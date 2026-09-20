@@ -9,7 +9,9 @@
     createParams(rng, difficulty) -> parametri decisi dall'host, uguali per tutti
     formatScore(score)            -> testo per la classifica
     isValidScore(score)           -> false se il risultato non conta per i record
-    mount(container, ctx)         -> ctx.params, ctx.difficulty, ctx.onFinish(score)
+    maxScore(params)              -> (facoltativo) massimo ottenibile, se ha senso
+    mount(container, ctx)         -> ctx.params, ctx.difficulty, ctx.onFinish(score, detail)
+                                     detail = frase breve sulla prestazione ("12 giuste, 2 sbagliate")
     unmount()
 
   Suoni: ogni minigioco usa sfx (audio.js) per gli esiti — sfx.play("good"),
@@ -61,7 +63,8 @@ export default {
       area.style.background = "#3a0ca3";
       label.textContent = this.formatScore(score);
       hint.textContent = "In attesa degli altri…";
-      ctx.onFinish(score);
+      const rating = score >= FALSE_START ? "Troppo presto!" : score < 200 ? "Fulmine!" : score < 280 ? "Velocissimo" : score < 380 ? "Buono" : score < 500 ? "Nella media" : "Un po' lento";
+      ctx.onFinish(score, rating);
     };
 
     area.addEventListener("pointerdown", (ev) => {

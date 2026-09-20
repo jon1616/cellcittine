@@ -48,6 +48,8 @@ export default {
 
     let index = 0;
     let score = 0;
+    let right = 0;
+    let wrong = 0;
     let done = false;
     let start = null;
 
@@ -62,12 +64,14 @@ export default {
       const expected = it.red ? (it.dir + 2) % 4 : it.dir;
       if (swipeDir === expected) {
         score++;
+        right++;
         vibrate(10);
         sfx.play("good");
         pad.classList.add("ok");
         setTimeout(() => pad.classList.remove("ok"), 150);
       } else {
         score = Math.max(0, score - 1);
+        wrong++;
         vibrate([60, 30, 60]);
         sfx.play("bad");
         pad.classList.add("ko");
@@ -103,7 +107,7 @@ export default {
       () => {
         done = true;
         shell.showDone(this.formatScore(score));
-        ctx.onFinish(score);
+        ctx.onFinish(score, `${right} giuste, ${wrong} sbagliate`);
       }
     );
     show();

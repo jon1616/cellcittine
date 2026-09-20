@@ -59,6 +59,8 @@ export default {
 
     let index = 0;
     let score = 0;
+    let right = 0;
+    let wrong = 0;
     let done = false;
     let order = [0, 1, 2, 3];
 
@@ -82,10 +84,12 @@ export default {
             if (done) return;
             if (ci === item.ink) {
               score++;
+              right++;
               vibrate(10);
               sfx.play("good");
             } else {
               score = Math.max(0, score - 1);
+              wrong++;
               vibrate([60, 30, 60]);
               sfx.play("bad");
               word.classList.add("shake");
@@ -106,7 +110,7 @@ export default {
       () => {
         done = true;
         shell.showDone(this.formatScore(score));
-        ctx.onFinish(score);
+        ctx.onFinish(score, `${right} giuste, ${wrong} sbagliate`);
       }
     );
     next();

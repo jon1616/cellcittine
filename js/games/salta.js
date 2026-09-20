@@ -48,6 +48,18 @@ export default {
     return score > 0;
   },
 
+  // Quanti ostacoli si incontrano in 30 s, data velocità e accelerazione
+  maxScore(params) {
+    const travel = params.speed * DURATION + 0.5 * params.accel * DURATION * DURATION;
+    let x = W + 320;
+    let n = 0;
+    for (const o of params.obstacles) {
+      x += o.gap;
+      if (x + o.width < HERO.x + travel) n++;
+    }
+    return n;
+  },
+
   mount(container, ctx) {
     const { speed: baseSpeed, accel, obstacles } = ctx.params;
     shell = createShell(container, { title: "Salta", hint: "Superati: 0", color: "#1b1a2e" });
@@ -107,7 +119,7 @@ export default {
       cancelAnimationFrame(raf);
       setTimeout(() => {
         shell.showDone(this.formatScore(score));
-        ctx.onFinish(score);
+        ctx.onFinish(score, elapsed >= DURATION ? "Arrivato alla fine!" : `Caduto dopo ${Math.round(elapsed)} s`);
       }, 500);
     };
 

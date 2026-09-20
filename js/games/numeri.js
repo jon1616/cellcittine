@@ -49,7 +49,8 @@ export default {
       if (done) return;
       done = true;
       shell.showDone(this.formatScore(score));
-      ctx.onFinish(score);
+      const errors = Math.round(penalty / PENALTY);
+      ctx.onFinish(score, score >= NOT_FINISHED ? `Arrivato al ${next - 1} su ${count}` : errors === 0 ? "Nessun errore" : `${errors} ${errors === 1 ? "errore" : "errori"} (+${errors} s)`);
     };
 
     for (const n of order) {

@@ -40,6 +40,10 @@ export default {
     return score > 0;
   },
 
+  maxScore() {
+    return SHOTS * 100;
+  },
+
   mount(container, ctx) {
     const { zone, shots } = ctx.params;
     shell = createShell(container, { title: "Precisione", hint: `Tiro 1 di ${SHOTS}` });
@@ -54,6 +58,8 @@ export default {
 
     let shot = 0;
     let total = 0;
+    let perfects = 0;
+    let misses = 0;
     let startedAt = performance.now();
     let armed = true;
     let done = false;
@@ -88,6 +94,8 @@ export default {
       const dist = Math.abs(pos - shots[shot].center) / (zone / 2); // 0 = centro, 1 = bordo
       const points = dist >= 1 ? 0 : Math.round(100 * (1 - dist));
       total += points;
+      if (points === 0) misses++;
+      if (points >= 90) perfects++;
       feedback.textContent = points === 0 ? "Fuori!" : points >= 90 ? `+${points} Perfetto!` : `+${points}`;
       feedback.className = `prec-feedback ${points === 0 ? "bad" : points >= 90 ? "great" : ""}`;
       vibrate(points === 0 ? [60, 30, 60] : 15);
@@ -100,7 +108,7 @@ export default {
         if (shot >= SHOTS) {
           done = true;
           shell.showDone(this.formatScore(total));
-          ctx.onFinish(total);
+          ctx.onFinish(total, `${perfects} perfetti, ${misses} fuori`);
         } else {
           feedback.textContent = "";
           setup();

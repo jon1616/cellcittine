@@ -634,3 +634,18 @@ button.info {
   backdrop-filter: blur(6px);
 }
 .pick-footer > button:last-child { padding: 12px 18px; font-size: 17px; }
+
+/* Prestazione personale a fine manche */
+.perf {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 183, 3, 0.12);
+  border: 1px solid rgba(255, 183, 3, 0.35);
+  font-size: 15px;
+  text-align: center;
+}
+.perf-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); font-weight: 800; }
+.perf-small { font-size: 12px; color: var(--muted); }

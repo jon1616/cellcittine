@@ -45,6 +45,10 @@ export default {
     return score > 0;
   },
 
+  maxScore(params) {
+    return Math.floor((DURATION * 1000) / params.gap) + 1;
+  },
+
   mount(container, ctx) {
     const { size, life, gap, targets } = ctx.params;
     shell = createShell(container, { title: "Bersagli", hint: "Colpiti: 0" });

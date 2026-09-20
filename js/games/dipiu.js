@@ -75,6 +75,8 @@ export default {
 
     let index = 0;
     let score = 0;
+    let right = 0;
+    let wrong = 0;
     let done = false;
 
     const fill = (panel, dots, color, sizeMul) => {
@@ -99,10 +101,12 @@ export default {
       const correct = (side === "left" && r.left > r.right) || (side === "right" && r.right > r.left);
       if (correct) {
         score++;
+        right++;
         vibrate(10);
         sfx.play("good");
       } else {
         score = Math.max(0, score - 1);
+        wrong++;
         vibrate([60, 30, 60]);
         sfx.play("bad");
       }
@@ -119,7 +123,7 @@ export default {
       () => {
         done = true;
         shell.showDone(this.formatScore(score));
-        ctx.onFinish(score);
+        ctx.onFinish(score, `${right} giuste, ${wrong} sbagliate`);
       }
     );
     show();

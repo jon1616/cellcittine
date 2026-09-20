@@ -60,6 +60,7 @@ export default {
 
     let open = [];
     let found = 0;
+    let attempts = 0;
     let locked = false;
     let done = false;
 
@@ -68,7 +69,7 @@ export default {
       done = true;
       clearTimeout(flipBackTimer);
       shell.showDone(this.formatScore(score));
-      ctx.onFinish(score);
+      ctx.onFinish(score, score >= NOT_FINISHED ? `${found} coppie su ${pairs}` : `${pairs} coppie in ${attempts} tentativi`);
     };
 
     const cards = deck.map((item) => {
@@ -85,6 +86,7 @@ export default {
         sfx.play("flip");
 
         if (open.length === 2) {
+          attempts++;
           const [a, b] = open;
           if (a.item.shape === b.item.shape) {
             a.card.classList.add("found");

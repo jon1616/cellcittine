@@ -38,6 +38,10 @@ export default {
     return score > 0;
   },
 
+  maxScore() {
+    return BALLOONS * 100;
+  },
+
   mount(container, ctx) {
     const { limits, rate } = ctx.params;
     shell = createShell(container, { title: "Palloncini", hint: `Palloncino 1 di ${BALLOONS}` });
@@ -53,6 +57,7 @@ export default {
 
     let index = 0;
     let total = 0;
+    let poppedCount = 0;
     let size = 0;          // 0..1
     let holding = false;
     let settled = false;   // palloncino corrente concluso
@@ -72,7 +77,7 @@ export default {
       if (index >= BALLOONS) {
         done = true;
         shell.showDone(this.formatScore(total));
-        ctx.onFinish(total);
+        ctx.onFinish(total, poppedCount === 0 ? "Nessuno scoppiato!" : `${poppedCount} ${poppedCount === 1 ? "scoppiato" : "scoppiati"} su ${BALLOONS}`);
         return;
       }
       size = 0;
@@ -91,6 +96,7 @@ export default {
       shell.setTimer(`${total}`);
       sfx.inflateStop();
       if (popped) {
+        poppedCount++;
         sfx.play("pop");
         balloon.classList.add("pop");
         feedback.textContent = "BOOM! 0";

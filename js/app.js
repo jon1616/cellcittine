@@ -107,13 +107,7 @@ function exitButton(text = "Esci") {
     class: "secondary",
     onclick: () => {
       leaveRoom();
-      // Click leggero su ogni pulsante dell'interfaccia (i minigiochi hanno i loro suoni)
-document.addEventListener("pointerdown", (ev) => {
-  const btn = ev.target.closest("button");
-  if (btn && !btn.closest(".game-area")) sfx.play("click");
-}, { passive: true });
-
-showHome();
+      showHome();
     },
   });
 }
@@ -860,15 +854,17 @@ function mountGame() {
     difficulty: state.challenge.difficulty,
     me: net.me,
     now: () => net.now(),
-    onFinish: (score) => submitScore(score),
+    onFinish: (score, detail) => submitScore(score, detail),
   });
 }
 
-function submitScore(score) {
+function submitScore(score, detail = null) {
   const net = state.net;
   const round = state.round;
   if (!round || !net) return;
   round.myScore = score;
+  round.myDetail = detail;
+  round.myMax = typeof round.game.maxScore === "function" ? round.game.maxScore(round.params) : null;
   round.isRecord = updateRecord(round.game, state.challenge.difficulty, score);
 
   if (net.isHost) {
@@ -966,6 +962,8 @@ async function showResults(msg) {
     state.challenge.standings = new Map(msg.standings.map((s) => [s.id, { name: s.name, points: s.points }]));
     state.challenge.history.push({ gameId: msg.gameId, ranking: msg.ranking });
   }
+  const last = state.challenge?.history[state.challenge.history.length - 1];
+  if (last && round) { last.myDetail = round.myDetail; last.myMax = round.myMax; last.myScore = round.myScore; }
 
   const solo = isSolo();
   const meId = net.me.id;
@@ -987,7 +985,7 @@ async function showResults(msg) {
     )
   );
 
-  const cards = [el("div", { class: "card" }, [el("h2", { text: `${game.icon} ${game.title}` }), roundList])];
+  const cards = [el("div", { class: "card" }, [el("h2", { text: `${game.icon} ${game.title}` }), roundList, performanceLine(game, round)])];
 
   if (solo) {
     const rec = getRecord(game.id, state.challenge.difficulty);
@@ -1007,6 +1005,24 @@ async function showResults(msg) {
     el("div", { class: "spacer" }),
     el("button", { text: "Abbandona", class: "link", onclick: () => { leaveRoom(); showHome(); } })
   );
+}
+
+// "La tua prestazione": dettaglio del minigioco e confronto col massimo, dove esiste.
+function performanceText(game, score, max, detail) {
+  const parts = [];
+  if (detail) parts.push(detail);
+  if (max && score !== null && score !== undefined && game.isValidScore(score)) {
+    const pct = Math.round((Math.min(score, max) / max) * 100);
+    parts.push(`${score} su ${max} (${pct}%)`);
+  }
+  return parts.join(" · ");
+}
+
+function performanceLine(game, round) {
+  if (!round || round.myScore === undefined) return el("span");
+  const text = performanceText(game, round.myScore, round.myMax, round.myDetail);
+  if (!text) return el("span");
+  return el("div", { class: "perf" }, [el("span", { class: "perf-label", text: "La tua prestazione" }), el("span", { text })]);
 }
 
 function standingsList(standings, meId) {
@@ -1047,9 +1063,10 @@ function showFinal(msg) {
           const mine = h.ranking.find((r) => r.id === meId);
           const game = getLoaded(h.gameId);
           const text = mine?.score === null || mine?.score === undefined ? "—" : game ? game.formatScore(mine.score) : String(mine.score);
-          return el("li", {}, [
+          const perf = game ? performanceText(game, h.myScore, h.myMax, h.myDetail) : "";
+          return el("li", { class: perf ? "with-perf" : "" }, [
             el("span", { class: "pos", text: String(i + 1) }),
-            el("span", { text: `${entry?.icon || ""} ${entry?.title || h.gameId}` }),
+            el("span", {}, [el("div", { text: `${entry?.icon || ""} ${entry?.title || h.gameId}` }), perf ? el("div", { class: "perf-small", text: perf }) : el("span")]),
             el("span", { class: "score", text }),
           ]);
         })),
@@ -1137,5 +1154,11 @@ if ("serviceWorker" in navigator) {
     location.reload();
   });
 }
+
+// Click leggero su ogni pulsante dell'interfaccia (i minigiochi hanno i loro suoni)
+document.addEventListener("pointerdown", (ev) => {
+  const btn = ev.target.closest("button");
+  if (btn && !btn.closest(".game-area")) sfx.play("click");
+}, { passive: true });
 
 showHome();

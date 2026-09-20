@@ -41,6 +41,10 @@ export default {
     return score > 0;
   },
 
+  maxScore(params) {
+    return params.maxLevel;
+  },
+
   mount(container, ctx) {
     const { sequence, maxLevel, speed } = ctx.params;
     alive = true;
@@ -75,7 +79,7 @@ export default {
       accepting = false;
       clearTimeout(inputTimer);
       shell.showDone(this.formatScore(score));
-      ctx.onFinish(score);
+      ctx.onFinish(score, score >= maxLevel ? "Sequenza completa!" : `Sbagliato al passo ${score + 1}`);
     };
 
     const armTimeout = () => {
