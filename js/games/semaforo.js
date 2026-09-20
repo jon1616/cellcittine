@@ -11,9 +11,14 @@
     isValidScore(score)           -> false se il risultato non conta per i record
     mount(container, ctx)         -> ctx.params, ctx.difficulty, ctx.onFinish(score)
     unmount()
+
+  Suoni: ogni minigioco usa sfx (audio.js) per gli esiti — sfx.play("good"),
+  "bad", "hit", "flip", "jump", "pop"… — mai suoni propri. I tic degli ultimi
+  secondi, il conto alla rovescia, fine manche, record e podio li fa il telaio.
 */
 
 import { el, vibrate } from "../utils.js";
+import { sfx } from "../audio.js";
 
 const FALSE_START = 9999;
 const DELAYS = { facile: [1500, 4000], normale: [1000, 5000], difficile: [800, 6000] };
@@ -63,9 +68,11 @@ export default {
       ev.preventDefault();
       if (phase === "wait") {
         vibrate([80, 40, 80]);
+        sfx.play("bad");
         finish(FALSE_START);
       } else if (phase === "go") {
         vibrate(30);
+        sfx.play("good");
         finish(Math.max(1, Math.round(performance.now() - greenAt)));
       }
     });
@@ -76,6 +83,7 @@ export default {
       greenAt = performance.now();
       area.style.background = "#2dc653";
       label.textContent = "TOCCA!";
+      sfx.play("go");
     }, ctx.params.delayMs);
   },
 

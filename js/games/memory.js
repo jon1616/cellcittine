@@ -5,6 +5,7 @@
 */
 
 import { el, vibrate } from "../utils.js";
+import { sfx } from "../audio.js";
 import { createShell, runStopwatch, formatSeconds, shuffle } from "./shell.js";
 
 const NOT_FINISHED = 9999;
@@ -81,6 +82,7 @@ export default {
         card.classList.add("open");
         open.push({ card, item });
         vibrate(10);
+        sfx.play("flip");
 
         if (open.length === 2) {
           const [a, b] = open;
@@ -89,6 +91,7 @@ export default {
             b.card.classList.add("found");
             open = [];
             found++;
+            sfx.play("good");
             shell.setHint(`Coppie trovate: ${found} / ${pairs}`);
             if (found === pairs) {
               const seconds = stopwatch.stop();
@@ -96,6 +99,7 @@ export default {
             }
           } else {
             locked = true;
+            sfx.play("blip");
             flipBackTimer = setTimeout(() => {
               a.card.classList.remove("open");
               b.card.classList.remove("open");

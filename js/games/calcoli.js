@@ -4,6 +4,7 @@
 */
 
 import { el, vibrate } from "../utils.js";
+import { sfx } from "../audio.js";
 import { createShell, runTimer, shuffle } from "./shell.js";
 
 const DURATION = 25;
@@ -84,10 +85,12 @@ export default {
             if (opt === q.answer) {
               score++;
               vibrate(10);
+              sfx.play("good");
               questionEl.classList.remove("flash-wrong");
             } else {
               score = Math.max(0, score - 1);
               vibrate([60, 30, 60]);
+              sfx.play("bad");
               questionEl.classList.add("flash-wrong");
               setTimeout(() => questionEl.classList.remove("flash-wrong"), 250);
             }

@@ -5,6 +5,7 @@
 */
 
 import { el, vibrate } from "../utils.js";
+import { sfx } from "../audio.js";
 import { createShell } from "./shell.js";
 
 const DURATION = 30;
@@ -93,6 +94,7 @@ export default {
         vy = -JUMP;
         onGround = false;
         vibrate(8);
+        sfx.play("jump");
       } else {
         jumpQueued = true; // salto "in memoria" se tocchi poco prima di atterrare
       }
@@ -204,6 +206,7 @@ export default {
         if (!o.passed && sx + o.width < HERO.x) {
           o.passed = true;
           passed++;
+          sfx.play("blip");
           shell.setHint(`Superati: ${passed}`);
         }
         if (hx2 > sx && hx1 < sx + o.width && hy2 > GROUND - h) {
@@ -211,6 +214,7 @@ export default {
           g.fillStyle = "rgba(255,80,80,0.35)";
           g.fillRect(0, 0, W, H);
           vibrate([80, 40, 80]);
+          sfx.play("crash");
           finish(passed);
           return;
         }

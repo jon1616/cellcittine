@@ -5,6 +5,7 @@
 */
 
 import { el, vibrate } from "../utils.js";
+import { sfx } from "../audio.js";
 import { createShell, runTimer } from "./shell.js";
 
 const DURATION = 20;
@@ -82,9 +83,11 @@ export default {
             if (ci === item.ink) {
               score++;
               vibrate(10);
+              sfx.play("good");
             } else {
               score = Math.max(0, score - 1);
               vibrate([60, 30, 60]);
+              sfx.play("bad");
               word.classList.add("shake");
               setTimeout(() => word.classList.remove("shake"), 250);
             }

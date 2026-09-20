@@ -4,6 +4,7 @@
 */
 
 import { el, vibrate } from "../utils.js";
+import { sfx } from "../audio.js";
 import { createShell, runStopwatch, formatSeconds, shuffle } from "./shell.js";
 
 const NOT_FINISHED = 9999;
@@ -59,6 +60,7 @@ export default {
         if (n === next) {
           cell.classList.add("hit");
           vibrate(10);
+          sfx.step(n, count);
           next++;
           shell.setHint(next > count ? "Fatto!" : `Prossimo: ${next}`);
           if (next > count) {
@@ -67,6 +69,7 @@ export default {
           }
         } else {
           penalty += PENALTY;
+          sfx.play("bad");
           cell.classList.add("wrong");
           setTimeout(() => cell.classList.remove("wrong"), 300);
           vibrate([60, 30, 60]);

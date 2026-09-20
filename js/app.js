@@ -25,6 +25,7 @@ import {
   getUserPacks, saveUserPack, deleteUserPack,
 } from "./storage.js";
 import { shuffle } from "./games/shell.js";
+import { sfx } from "./audio.js";
 
 const app = document.getElementById("app");
 document.getElementById("version").textContent = `v${VERSION}`;
@@ -106,7 +107,13 @@ function exitButton(text = "Esci") {
     class: "secondary",
     onclick: () => {
       leaveRoom();
-      showHome();
+      // Click leggero su ogni pulsante dell'interfaccia (i minigiochi hanno i loro suoni)
+document.addEventListener("pointerdown", (ev) => {
+  const btn = ev.target.closest("button");
+  if (btn && !btn.closest(".game-area")) sfx.play("click");
+}, { passive: true });
+
+showHome();
     },
   });
 }
@@ -152,6 +159,11 @@ function showHome(message = "") {
     el("div", { class: "links" }, [
       el("button", { text: "I miei record", class: "link", onclick: showRecords }),
       el("button", { text: `${CATALOG.length} minigiochi`, class: "link", onclick: () => showCatalog() }),
+      el("button", {
+        text: sfx.isEnabled() ? "🔊 Suoni" : "🔇 Suoni",
+        class: "link",
+        onclick: () => { sfx.setEnabled(!sfx.isEnabled()); showHome(); },
+      }),
     ]),
     statusEl
   );
@@ -821,10 +833,13 @@ function showCountdown(entry, msg) {
         return;
       }
       area.remove();
+      sfx.play("go");
       mountGame();
       return;
     }
-    number.textContent = Math.ceil(remaining / 1000);
+    const n = Math.ceil(remaining / 1000);
+    if (number.textContent !== String(n)) sfx.play("tick");
+    number.textContent = n;
     setTimeout(tick, Math.min(100, remaining));
   };
   tick();
@@ -954,6 +969,7 @@ async function showResults(msg) {
 
   const solo = isSolo();
   const meId = net.me.id;
+  sfx.play(round?.isRecord ? "record" : "roundEnd");
 
   const roundList = el(
     "ol",
@@ -1015,6 +1031,7 @@ function finishChallenge() {
 
 function showFinal(msg) {
   currentScreen = "final";
+  sfx.play("fanfare");
   const net = state.net;
   const ch = state.challenge;
   const solo = isSolo();

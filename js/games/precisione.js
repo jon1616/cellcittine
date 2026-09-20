@@ -5,6 +5,7 @@
 */
 
 import { el, vibrate } from "../utils.js";
+import { sfx } from "../audio.js";
 import { createShell } from "./shell.js";
 
 const SHOTS = 5;
@@ -90,6 +91,7 @@ export default {
       feedback.textContent = points === 0 ? "Fuori!" : points >= 90 ? `+${points} Perfetto!` : `+${points}`;
       feedback.className = `prec-feedback ${points === 0 ? "bad" : points >= 90 ? "great" : ""}`;
       vibrate(points === 0 ? [60, 30, 60] : 15);
+      sfx.play(points === 0 ? "bad" : points >= 90 ? "perfect" : "good");
       shell.setTimer(`${total}`);
 
       shot++;

@@ -5,6 +5,7 @@
 */
 
 import { el, vibrate } from "../utils.js";
+import { sfx } from "../audio.js";
 import { createShell, runTimer } from "./shell.js";
 
 const DURATION = 20;
@@ -72,12 +73,14 @@ export default {
             if (i === gd.odd) {
               score++;
               vibrate(10);
+              sfx.play("good");
               index++;
               shell.setHint(`Trovati: ${score}`);
               build();
             } else {
               score = Math.max(0, score - 1);
               vibrate([60, 30, 60]);
+              sfx.play("bad");
               cell.classList.add("wrong");
               setTimeout(() => cell.classList.remove("wrong"), 250);
               shell.setHint(`Trovati: ${score}`);

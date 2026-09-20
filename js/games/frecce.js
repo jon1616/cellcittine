@@ -4,6 +4,7 @@
 */
 
 import { el, vibrate } from "../utils.js";
+import { sfx } from "../audio.js";
 import { createShell, runTimer } from "./shell.js";
 
 const DURATION = 20;
@@ -62,11 +63,13 @@ export default {
       if (swipeDir === expected) {
         score++;
         vibrate(10);
+        sfx.play("good");
         pad.classList.add("ok");
         setTimeout(() => pad.classList.remove("ok"), 150);
       } else {
         score = Math.max(0, score - 1);
         vibrate([60, 30, 60]);
+        sfx.play("bad");
         pad.classList.add("ko");
         setTimeout(() => pad.classList.remove("ko"), 200);
       }

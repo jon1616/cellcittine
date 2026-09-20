@@ -5,6 +5,7 @@
 */
 
 import { el } from "../utils.js";
+import { sfx } from "../audio.js";
 
 export function createShell(container, { title, hint = "", color = "#26254a" }) {
   const timerEl = el("span", { class: "game-timer" });
@@ -41,9 +42,16 @@ export function createShell(container, { title, hint = "", color = "#26254a" }) 
 export function runTimer(seconds, onTick, onEnd) {
   const endAt = performance.now() + seconds * 1000;
   let stopped = false;
+  let lastWhole = Math.ceil(seconds);
   const tick = () => {
     if (stopped) return;
     const remaining = Math.max(0, endAt - performance.now());
+    // Tic negli ultimi tre secondi
+    const whole = Math.ceil(remaining / 1000);
+    if (whole !== lastWhole) {
+      lastWhole = whole;
+      if (whole > 0 && whole <= 3) sfx.play("tock");
+    }
     onTick(remaining / 1000);
     if (remaining <= 0) {
       stopped = true;

@@ -4,6 +4,7 @@
 */
 
 import { el, vibrate } from "../utils.js";
+import { sfx } from "../audio.js";
 import { createShell, runTimer } from "./shell.js";
 
 const DURATION = 20;
@@ -74,6 +75,7 @@ export default {
         setTimeout(() => target.remove(), 120);
         hits++;
         vibrate(10);
+        sfx.play("hit");
         shell.setHint(`Colpiti: ${hits}`);
       });
 

@@ -19,6 +19,7 @@ js/storage.js           salvataggi: configurazione, record, pacchetti personali
 js/games/catalog.js     CATALOGO: scheda di ogni minigioco + caricamento a richiesta
 js/games/shell.js       cornice comune ai minigiochi (timer, cronometro)
 js/games/<id>.js        codice di un minigioco (caricato solo quando serve)
+js/audio.js             suoni sintetizzati (WebAudio), interruttore 🔊/🔇
 js/version.js           numero di versione mostrato nell'angolo
 icons/                  icone dell'app
 ```
@@ -44,6 +45,7 @@ icons/                  icone dell'app
 ## Aggiungere un minigioco
 
 1. Crea `js/games/<id>.js` seguendo il contratto descritto in `semaforo.js` (solo logica).
+   Ogni minigioco deve avere i suoni: usa `sfx.play("good"|"bad"|…)` di `js/audio.js`.
 2. Aggiungi la scheda in `js/games/catalog.js` (categoria, abilità, durata, tema, data…).
 3. Aggiungi il file alla lista `PRECACHE` in `sw.js`.
 4. Alza la versione in `js/version.js` e `sw.js`, commit, push.

@@ -5,6 +5,7 @@
 */
 
 import { el, vibrate, sleep } from "../utils.js";
+import { sfx } from "../audio.js";
 import { createShell } from "./shell.js";
 
 const LEVELS = { facile: 8, normale: 10, difficile: 14 };
@@ -62,6 +63,7 @@ export default {
     let done = false;
 
     const light = async (i, ms) => {
+      sfx.pad(i, Math.max(0.12, ms / 1000));
       pads[i].classList.add("lit");
       await sleep(ms);
       pads[i].classList.remove("lit");
@@ -108,6 +110,7 @@ export default {
 
       if (i !== sequence[inputPos]) {
         vibrate([80, 40, 80]);
+        sfx.play("bad");
         finish(level);
         return;
       }
@@ -116,6 +119,7 @@ export default {
       if (inputPos > level) {
         level++;
         clearTimeout(inputTimer);
+        setTimeout(() => sfx.play("good"), 200);
         if (level >= maxLevel) {
           finish(level);
         } else {

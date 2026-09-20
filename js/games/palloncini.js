@@ -5,6 +5,7 @@
 */
 
 import { el, vibrate } from "../utils.js";
+import { sfx } from "../audio.js";
 import { createShell } from "./shell.js";
 
 const BALLOONS = 5;
@@ -88,7 +89,9 @@ export default {
       holding = false;
       total += points;
       shell.setTimer(`${total}`);
+      sfx.inflateStop();
       if (popped) {
+        sfx.play("pop");
         balloon.classList.add("pop");
         feedback.textContent = "BOOM! 0";
         feedback.className = "balloon-feedback bad";
@@ -97,6 +100,7 @@ export default {
         feedback.textContent = `+${points}`;
         feedback.className = `balloon-feedback ${points >= 80 ? "great" : ""}`;
         vibrate(15);
+        sfx.play(points >= 80 ? "perfect" : "good");
       }
       setTimeout(nextBalloon, 900);
     };
@@ -107,6 +111,7 @@ export default {
       last = now;
       if (holding && !settled) {
         size = Math.min(1, size + rate * dt);
+        sfx.inflateUpdate(size);
         render();
         if (size >= limits[index]) settle(0, true);
       }
@@ -117,6 +122,7 @@ export default {
       ev.preventDefault();
       if (done || settled) return;
       holding = true;
+      sfx.inflateStart();
     };
     const release = () => {
       if (done || settled || !holding) return;
@@ -135,6 +141,7 @@ export default {
 
   unmount() {
     cancelAnimationFrame(raf);
+    sfx.inflateStop();
     shell?.remove();
     shell = null;
   },

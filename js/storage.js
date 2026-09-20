@@ -58,7 +58,7 @@ export function getRecord(gameId, difficulty) {
   const r = all[`${gameId}:${difficulty}`];
   if (r === undefined || r === null) return null;
   // Formato vecchio (solo numero): lo mostriamo così com'è
-  if (typeof r === "number") return { score: r, text: String(r) };
+  if (typeof r === "number") return { score: r, text: String(r), legacy: true };
   return r;
 }
 
@@ -67,6 +67,12 @@ export function updateRecord(game, difficulty, score) {
   if (score === null || score === undefined || !game.isValidScore(score)) return false;
   const current = getRecord(game.id, difficulty);
   const better = current === null || (game.order === "asc" ? score < current.score : score > current.score);
+  if (!better && current?.legacy) {
+    // Record in formato vecchio (solo numero): lo riscriviamo col testo giusto
+    const all = read(KEY_RECORDS, {});
+    all[`${game.id}:${difficulty}`] = { score: current.score, text: game.formatScore(current.score) };
+    write(KEY_RECORDS, all);
+  }
   if (better) {
     const all = read(KEY_RECORDS, {});
     all[`${game.id}:${difficulty}`] = { score, text: game.formatScore(score) };
