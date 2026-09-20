@@ -24,6 +24,7 @@ Una riga per idea: `- [ ] cosa` → `- [x] cosa (vX.Y.Z)`. Le decisioni prese st
 - [x] Icone disegnate dei 25 minigiochi (foglio unico 5×5 da Nano Banana, ritagliate in WebP) in elenchi, scelta, scheda, conto alla rovescia, risultati, record (v0.8.0)
 - [x] Musica di sottofondo (CC0, loop di 2 min) nei menu, in pausa durante i minigiochi, interruttore 🎵 (v0.9.0)
 - [x] Sfondo illustrato dietro i menu e sistema dei temi (automatico per data o a scelta); Halloween/Natale/Estate pronti ad accogliere le immagini (v0.10.0)
+- [x] Temi stagionali attivi: Halloween (20 ott–2 nov), Natale (8 dic–6 gen), Estate (15 giu–10 set), scelta manuale in home (v0.10.1)
 
 ## Prossimi passi (in ordine di priorità, da confermare con l'utente)
 
@@ -33,7 +34,6 @@ Una riga per idea: `- [ ] cosa` → `- [x] cosa (vX.Y.Z)`. Le decisioni prese st
 - [ ] Preferiti (stellina) nella scelta dei minigiochi
 - [ ] Altri minigiochi (idee: labirinto a dito, ritmo con melodia, ordina per grandezza, trova la parola nascosta, tris veloce, pesca)
 
-- [ ] Immagini dei temi stagionali: assets/bg-halloween.webp, bg-natale.webp, bg-estate.webp (prompt consegnati; poi togliere `missing: true` in js/theme.js)
 
 ## Più avanti
 

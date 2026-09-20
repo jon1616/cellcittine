@@ -5,7 +5,7 @@
   salvata l'ultima volta.
 */
 
-const CACHE_VERSION = "0.10.0"; // tenere allineato a js/version.js
+const CACHE_VERSION = "0.10.1"; // tenere allineato a js/version.js
 const CACHE = `cellcittine-${CACHE_VERSION}`;
 
 const PRECACHE = [
@@ -56,6 +56,9 @@ const PRECACHE = [
   "./icons/icon-maskable-512.png",
   "./assets/home-hero.jpg",
   "./assets/bg-base.webp",
+  "./assets/bg-halloween.webp",
+  "./assets/bg-natale.webp",
+  "./assets/bg-estate.webp",
   "./assets/music/sottofondo.mp3",
   "./assets/icons/semaforo.webp",
   "./assets/icons/memory.webp",

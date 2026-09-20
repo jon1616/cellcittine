@@ -19,10 +19,10 @@ export const THEMES = [
     accent: null, // null = colori standard dell'app
   },
   // Stagionali: attivi da soli nel periodo indicato (mese-giorno, estremi inclusi).
-  // Le voci con `missing: true` restano nascoste finché non arriva l'immagine.
-  { id: "halloween", name: "Halloween", icon: "🎃", bg: "assets/bg-halloween.webp", accent: "#ff924c", from: "10-20", to: "11-02", missing: true },
-  { id: "natale", name: "Natale", icon: "🎄", bg: "assets/bg-natale.webp", accent: "#ff4d6d", from: "12-08", to: "01-06", missing: true },
-  { id: "estate", name: "Estate", icon: "🌞", bg: "assets/bg-estate.webp", accent: "#36cfc9", from: "06-15", to: "09-10", missing: true },
+  // Un tema senza immagine pronta si può nascondere con `missing: true`.
+  { id: "halloween", name: "Halloween", icon: "🎃", bg: "assets/bg-halloween.webp", accent: "#ff924c", from: "10-20", to: "11-02" },
+  { id: "natale", name: "Natale", icon: "🎄", bg: "assets/bg-natale.webp", accent: "#ff4d6d", from: "12-08", to: "01-06" },
+  { id: "estate", name: "Estate", icon: "🌞", bg: "assets/bg-estate.webp", accent: "#36cfc9", from: "06-15", to: "09-10" },
 ];
 
 export function availableThemes() {
