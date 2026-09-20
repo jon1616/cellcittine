@@ -20,6 +20,24 @@ js/version.js           numero di versione mostrato nell'angolo
 icons/                  icone dell'app
 ```
 
+## Minigiochi
+
+| | Abilità | Punteggio |
+|---|---|---|
+| 🚦 Semaforo | riflessi | ms (meno è meglio) |
+| 🃏 Memory | memoria visiva | tempo |
+| 🎵 Sequenza | memoria | passi |
+| 🔢 Numeri | velocità | tempo (+1 s per errore) |
+| 🎯 Bersagli | destrezza | colpiti in 20 s |
+| ➕ Calcoli | calcolo | giuste − sbagliate in 25 s |
+| 🎨 Colori | attenzione (Stroop) | giuste − sbagliate in 20 s |
+| 🏹 Precisione | tempismo | 5 tiri, max 100 l'uno |
+| 🦘 Salta | destrezza | ostacoli superati in 30 s |
+| 🔍 Intruso | occhio | trovati in 20 s |
+| 🧭 Frecce | riflessi + logica | giuste − sbagliate in 20 s |
+| 🎈 Palloncini | azzardo | 5 palloncini, max 100 l'uno |
+| ⚖️ Di più | stima | giuste − sbagliate in 20 s |
+
 ## Aggiungere un minigioco
 
 1. Crea `js/games/<nome>.js` seguendo il contratto descritto in `semaforo.js`.
