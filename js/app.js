@@ -26,9 +26,11 @@ import {
 } from "./storage.js";
 import { shuffle } from "./games/shell.js";
 import { sfx } from "./audio.js";
+import { THEMES, availableThemes, applyTheme, getChoice, setChoice, seasonalTheme } from "./theme.js";
 
 const app = document.getElementById("app");
 document.getElementById("version").textContent = `v${VERSION}`;
+applyTheme();
 
 const state = {
   net: null,
@@ -167,8 +169,22 @@ function showHome(message = "") {
         onclick: () => { sfx.setMusicEnabled(!sfx.isMusicEnabled()); showHome(); },
       }),
     ]),
+    themeRow(),
     statusEl
   );
+}
+
+// Scelta del tema: compare solo quando esiste più di un tema.
+function themeRow() {
+  const themes = availableThemes();
+  if (themes.length < 2) return el("span");
+  const choice = getChoice();
+  const seasonal = seasonalTheme();
+  const chip = (id, label) => el("button", { class: `chip small${choice === id ? " on" : ""}`, text: label, onclick: () => { setChoice(id); showHome(); } });
+  return el("div", { class: "theme-row" }, [
+    chip("auto", seasonal ? `🗓️ Automatico (${seasonal.name})` : "🗓️ Automatico"),
+    ...themes.map((t) => chip(t.id, `${t.icon} ${t.name}`)),
+  ]);
 }
 
 // ---------------------------------------------------------------

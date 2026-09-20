@@ -1,0 +1,76 @@
+/*
+  Temi: sfondo illustrato dietro le schermate dei menu (mai dietro i minigiochi,
+  che coprono tutto con la loro area) e piccole variazioni di colore.
+
+  Un tema può essere stagionale: si attiva da solo tra due date (mese-giorno).
+  Chi gioca può anche sceglierne uno a mano dalla home ("auto" = per data).
+  Per aggiungere un tema: immagine in assets/bg-<id>.webp (verticale 9:16,
+  stessa regola di stile dello sfondo base) e una voce in THEMES.
+*/
+
+const KEY = "theme";
+
+export const THEMES = [
+  {
+    id: "base",
+    name: "Classico",
+    icon: "✨",
+    bg: "assets/bg-base.webp",
+    accent: null, // null = colori standard dell'app
+  },
+  // Stagionali: attivi da soli nel periodo indicato (mese-giorno, estremi inclusi).
+  // Le voci con `missing: true` restano nascoste finché non arriva l'immagine.
+  { id: "halloween", name: "Halloween", icon: "🎃", bg: "assets/bg-halloween.webp", accent: "#ff924c", from: "10-20", to: "11-02", missing: true },
+  { id: "natale", name: "Natale", icon: "🎄", bg: "assets/bg-natale.webp", accent: "#ff4d6d", from: "12-08", to: "01-06", missing: true },
+  { id: "estate", name: "Estate", icon: "🌞", bg: "assets/bg-estate.webp", accent: "#36cfc9", from: "06-15", to: "09-10", missing: true },
+];
+
+export function availableThemes() {
+  return THEMES.filter((t) => !t.missing);
+}
+
+// "MM-DD" di oggi
+function today(now = new Date()) {
+  return `${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+}
+
+// Un periodo può scavalcare l'anno (es. 12-08 → 01-06)
+function inPeriod(t, day) {
+  if (!t.from || !t.to) return false;
+  return t.from <= t.to ? day >= t.from && day <= t.to : day >= t.from || day <= t.to;
+}
+
+export function seasonalTheme(now = new Date()) {
+  const day = today(now);
+  return availableThemes().find((t) => inPeriod(t, day)) || null;
+}
+
+export function getChoice() {
+  return localStorage.getItem(KEY) || "auto";
+}
+
+export function setChoice(id) {
+  localStorage.setItem(KEY, id);
+  applyTheme();
+}
+
+// Il tema effettivo: scelta manuale se valida, altrimenti stagionale, altrimenti base.
+export function currentTheme() {
+  const choice = getChoice();
+  if (choice !== "auto") {
+    const chosen = availableThemes().find((t) => t.id === choice);
+    if (chosen) return chosen;
+  }
+  return seasonalTheme() || THEMES[0];
+}
+
+export function applyTheme() {
+  const t = currentTheme();
+  const root = document.documentElement;
+  // Indirizzo assoluto: dentro il CSS, un url() relativo verrebbe risolto rispetto al foglio di stile
+  root.style.setProperty("--bg-image", `url("${new URL(t.bg, document.baseURI).href}")`);
+  if (t.accent) root.style.setProperty("--accent", t.accent);
+  else root.style.removeProperty("--accent");
+  root.dataset.theme = t.id;
+  return t;
+}

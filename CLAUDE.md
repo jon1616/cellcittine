@@ -33,6 +33,7 @@ js/packs.js          pacchetti integrati (alcuni calcolati dal catalogo) + utili
 js/games/catalog.js  CATALOGO: scheda di ogni minigioco + loadGame(id) con import() a richiesta
 js/games/shell.js    cornice comune: createShell, runTimer, runStopwatch, shuffle, fitCanvas, canvasPoint
 js/games/<id>.js     logica di un minigioco (vedi contratto in semaforo.js)
+js/theme.js          temi: sfondo dei menu (assets/bg-<id>.webp), stagionali per data, scelta manuale
 js/version.js        VERSION mostrata nell'angolo
 js/tester.js + test.html   tester nel browser (struttura, ogni minigioco, allenamento completo)
 tools/check.mjs      controllo da riga di comando (sintassi, catalogo ↔ file ↔ sw.js, versione)

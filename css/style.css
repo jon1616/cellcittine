@@ -52,6 +52,13 @@ html, body {
   inset: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  /* Sfondo del tema (menu). I minigiochi lo coprono con la loro area a schermo intero. */
+  background-color: var(--bg);
+  background-image: linear-gradient(rgba(30, 31, 52, 0.25), rgba(30, 31, 52, 0.25)), var(--bg-image, none);
+  background-size: cover, cover;
+  background-position: center top, center top;
+  background-repeat: no-repeat, no-repeat;
+  background-attachment: local, local;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   display: flex;
@@ -172,10 +179,11 @@ button:disabled { opacity: 0.45; cursor: default; }
 .status { font-size: 14px; color: var(--muted); text-align: center; min-height: 1.4em; }
 .error { color: var(--danger); }
 
-/* Area di gioco: occupa tutto lo schermo */
+/* Area di gioco: occupa tutto lo schermo e copre lo sfondo del tema */
 .game-area {
   position: fixed;
   inset: 0;
+  background: var(--bg);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -839,8 +847,8 @@ button.info {
 .hero {
   margin: -8px -16px 0;
   line-height: 0;
-  -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 78%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 62% 58% at 50% 48%, #000 60%, transparent 100%);
+  mask-image: radial-gradient(ellipse 62% 58% at 50% 48%, #000 60%, transparent 100%);
 }
 .hero img { width: 100%; height: auto; display: block; }
 .home-title { margin-top: -6px; }
@@ -864,3 +872,6 @@ img.info-icon { width: 120px; height: 120px; border-radius: 26px; box-shadow: 0 
 .info-icon.emoji { font-size: 64px; }
 img.countdown-icon { width: 128px; height: 128px; border-radius: 28px; margin: 8px 0 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
 .countdown-icon.emoji { font-size: 72px; }
+
+/* Scelta del tema (home) */
+.theme-row { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }

@@ -21,7 +21,8 @@ js/storage.js           salvataggi: configurazione, record, pacchetti personali
 js/games/catalog.js     CATALOGO: scheda di ogni minigioco + caricamento a richiesta
 js/games/shell.js       cornice comune ai minigiochi (timer, cronometro)
 js/games/<id>.js        codice di un minigioco (caricato solo quando serve)
-js/audio.js             suoni sintetizzati (WebAudio), interruttore 🔊/🔇
+js/audio.js             suoni sintetizzati (WebAudio) + musica di sottofondo, interruttori 🔊 e 🎵
+js/theme.js             temi: sfondo illustrato dei menu, stagionali per data o a scelta
 js/version.js           numero di versione mostrato nell'angolo
 icons/                  icone dell'app (any + maskable, generate da assets/icon-source.png)
 assets/music/           sottofondo.mp3 (CC0, vedi LICENSE.txt); l'originale resta fuori da Git
