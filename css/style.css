@@ -23,11 +23,19 @@ html, body {
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
+  /* La pagina non scorre mai: scorre solo #app, e solo se il contenuto è più lungo dello schermo */
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
 }
 
 #app {
-  min-height: 100%;
-  min-height: 100dvh;
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
   padding: calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
