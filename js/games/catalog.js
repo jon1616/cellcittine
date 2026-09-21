@@ -685,6 +685,7 @@ export const CATALOG = [
   },
   {
     id: "talpe",
+    image: "assets/icons/talpe.webp",
     title: "Talpe",
     icon: "🐹",
     description: "Le talpe spuntano dalle buche per un attimo: toccale! Le bombe invece no.",
@@ -704,6 +705,7 @@ export const CATALOG = [
   },
   {
     id: "lampadine",
+    image: "assets/icons/lampadine.webp",
     title: "Lampadine",
     icon: "💡",
     description: "Le lampadine si accendono una alla volta, sempre più in fretta: spegnile al volo.",
@@ -723,6 +725,7 @@ export const CATALOG = [
   },
   {
     id: "sfuggente",
+    image: "assets/icons/sfuggente.webp",
     title: "Sfuggente",
     icon: "🏓",
     description: "Una pallina rimbalza per lo schermo: toccala! Ogni presa la rende più veloce e più piccola.",
@@ -742,6 +745,7 @@ export const CATALOG = [
   },
   {
     id: "suoni",
+    image: "assets/icons/suoni.webp",
     title: "Suoni",
     icon: "🔔",
     description: "Un memory per le orecchie: le tessere sono tutte uguali, ognuna nasconde una nota.",
@@ -761,6 +765,7 @@ export const CATALOG = [
   },
   {
     id: "cosamanca",
+    image: "assets/icons/cosamanca.webp",
     title: "Cosa manca",
     icon: "🔎",
     description: "Guarda le forme, poi una sparisce e le altre si mescolano: quale manca?",
@@ -780,6 +785,7 @@ export const CATALOG = [
   },
   {
     id: "cifre",
+    image: "assets/icons/cifre.webp",
     title: "Cifre",
     icon: "🔢",
     description: "Un numero compare e sparisce: riscrivilo. Ogni volta ha una cifra in più.",
@@ -799,6 +805,7 @@ export const CATALOG = [
   },
   {
     id: "quanti",
+    image: "assets/icons/quanti.webp",
     title: "Quanti",
     icon: "🔺",
     description: "Tante forme sparse: quanti sono i triangoli? Conta e rispondi.",
@@ -818,6 +825,7 @@ export const CATALOG = [
   },
   {
     id: "gemelli",
+    image: "assets/icons/gemelli.webp",
     title: "Gemelli",
     icon: "🪞",
     description: "Due griglie colorate: sono identiche o c'è una casella diversa? Decidi al volo.",
@@ -837,6 +845,7 @@ export const CATALOG = [
   },
   {
     id: "bussolotti",
+    image: "assets/icons/bussolotti.webp",
     title: "Bussolotti",
     icon: "🥤",
     description: "La pallina va sotto un bicchiere, i bicchieri si mescolano: seguila con gli occhi.",
@@ -856,6 +865,7 @@ export const CATALOG = [
   },
   {
     id: "equilibrio",
+    image: "assets/icons/equilibrio.webp",
     title: "Equilibrio",
     icon: "⚖️",
     description: "Tieni la pallina in equilibrio sull'asse inclinandola col tocco. Resisti 30 secondi.",
@@ -875,6 +885,7 @@ export const CATALOG = [
   },
   {
     id: "serpente",
+    image: "assets/icons/serpente.webp",
     title: "Serpente",
     icon: "🐍",
     description: "Il classico serpente: scorri per girare, mangia i frutti, non sbattere.",
@@ -894,6 +905,7 @@ export const CATALOG = [
   },
   {
     id: "strada",
+    image: "assets/icons/strada.webp",
     title: "Strada",
     icon: "🚙",
     description: "La strada curva: tieni la macchina sull'asfalto toccando a sinistra o a destra.",
@@ -913,6 +925,7 @@ export const CATALOG = [
   },
   {
     id: "bilancia",
+    image: "assets/icons/bilancia.webp",
     title: "Bilancia",
     icon: "🧮",
     description: "Due conti sui piatti: quale pesa di più? O sono uguali?",
@@ -932,6 +945,7 @@ export const CATALOG = [
   },
   {
     id: "prossimo",
+    image: "assets/icons/prossimo.webp",
     title: "Prossimo",
     icon: "➡️",
     description: "Una sequenza di numeri segue una regola: qual è il prossimo?",
@@ -951,6 +965,7 @@ export const CATALOG = [
   },
   {
     id: "orologio",
+    image: "assets/icons/orologio.webp",
     title: "Orologio",
     icon: "🕒",
     description: "Che ora segna l'orologio a lancette? Scegli tra le quattro in cifre.",
@@ -970,6 +985,7 @@ export const CATALOG = [
   },
   {
     id: "ortografia",
+    image: "assets/icons/ortografia.webp",
     title: "Ortografia",
     icon: "✏️",
     description: "Quattro modi di scrivere la stessa parola: uno solo è giusto.",
@@ -989,6 +1005,7 @@ export const CATALOG = [
   },
   {
     id: "rime",
+    image: "assets/icons/rime.webp",
     title: "Rime",
     icon: "🎤",
     description: "Quale delle quattro parole fa rima con quella in alto?",
@@ -1008,6 +1025,7 @@ export const CATALOG = [
   },
   {
     id: "contrari",
+    image: "assets/icons/contrari.webp",
     title: "Contrari",
     icon: "↔️",
     description: "Caldo… freddo! Tocca il contrario della parola in alto.",
