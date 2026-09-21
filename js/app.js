@@ -40,6 +40,7 @@ const state = {
   challenge: null,                  // { total, difficulty, index, standings: Map, history: [] }
   round: null,                      // { index, game, params, startAt, scores: Map, participants, deadline }
   picker: null,                     // stato della schermata di scelta minigiochi
+  infoBack: null,                   // dove torna la scheda di un minigioco
 };
 
 let currentScreen = "home";
@@ -55,7 +56,98 @@ if (!state.config.pack) state.config.pack = detectPack(state.config.games);
 function show(...children) {
   app.replaceChildren(el("div", { class: "screen" }, children));
   sfx.setScene("menu");
+  syncBackGuard();
 }
+
+// ---------------------------------------------------------------
+// Tasto "indietro" di Android (e del browser)
+// Fuori dalla home teniamo una voce fittizia nella cronologia: premere
+// indietro la consuma e noi decidiamo dove andare (schermata precedente,
+// oppure conferma con doppia pressione quando si perderebbe qualcosa).
+// In home non c'è guardia: indietro chiude l'app, come sempre.
+// ---------------------------------------------------------------
+
+let backGuard = false;     // c'è una voce fittizia in cima alla cronologia?
+let ignoreNextPop = false; // stiamo consumando noi la guardia, non l'utente
+let backArmedAt = 0;       // istante della prima pressione, per la doppia conferma
+let toastEl = null;
+let toastTimer = null;
+
+function syncBackGuard() {
+  if (currentScreen !== "home" && !backGuard) {
+    backGuard = true;
+    history.pushState({ guard: true }, "");
+  } else if (currentScreen === "home" && backGuard) {
+    backGuard = false;
+    ignoreNextPop = true;
+    history.back();
+  }
+}
+
+function toast(text) {
+  if (!toastEl) {
+    toastEl = el("div", { class: "toast" });
+    document.body.append(toastEl);
+  }
+  toastEl.textContent = text;
+  toastEl.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2200);
+}
+
+// Azione da fare solo se si preme indietro due volte di seguito.
+function confirmBack(text, action) {
+  if (Date.now() - backArmedAt < 2500) {
+    backArmedAt = 0;
+    toastEl?.classList.remove("show");
+    action();
+  } else {
+    backArmedAt = Date.now();
+    toast(text);
+  }
+}
+
+function goBack() {
+  const inRoom = state.net && !isSolo();
+  switch (currentScreen) {
+    case "records":
+    case "catalog":
+    case "join":
+      showHome();
+      break;
+    case "info":
+      (state.infoBack || showHome)();
+      break;
+    case "list":
+      showLobby();
+      break;
+    case "picker":
+      state.picker?.done ? state.picker.done() : showLobby();
+      break;
+    case "lobby":
+      if (!inRoom) { leaveRoom(); showHome(); }
+      else confirmBack("Premi ancora ◀ per uscire dalla stanza", () => { leaveRoom(); showHome(); });
+      break;
+    case "countdown":
+    case "game":
+    case "results":
+    case "final":
+      confirmBack(inRoom ? "Premi ancora ◀ per abbandonare la sfida" : "Premi ancora ◀ per interrompere l'allenamento", () => { leaveRoom(); showHome(); });
+      break;
+    default:
+      showHome();
+  }
+}
+
+window.addEventListener("popstate", () => {
+  if (ignoreNextPop) { ignoreNextPop = false; return; }
+  backGuard = false; // la voce fittizia è stata consumata dalla pressione
+  if (currentScreen === "home") return;
+  goBack();
+  syncBackGuard(); // se siamo ancora fuori dalla home, rimetti la guardia
+});
+// Una guardia rimasta da una sessione precedente (ricarica) non conta.
+history.replaceState(null, "");
 
 function statusLine(text = "", isError = false) {
   return el("div", { class: `status${isError ? " error" : ""}`, text });
@@ -285,6 +377,7 @@ function gameRow(g, { selected = null, onClick, onInfo } = {}) {
 
 function showGameInfo(g, back) {
   currentScreen = "info";
+  state.infoBack = back;
   const cat = getCategory(g.category);
   const rows = [
     ["Categoria", `${cat?.icon || ""} ${cat?.label || g.category}`],
@@ -619,19 +712,20 @@ function showPicker() {
     });
   };
 
+  // Conferma la selezione e torna alla stanza (anche col tasto indietro).
+  state.picker.done = () => {
+    const p = state.picker;
+    updateConfig({ games: CATALOG.filter((g) => p.selected.has(g.id)).map((g) => g.id) }, { rerender: false });
+    showLobby();
+  };
+
   const renderFooter = () => {
     const p = state.picker;
     footer.replaceChildren(
       el("button", { class: "chip small", text: "✓ Tutti", onclick: () => { visibleGames().forEach((g) => p.selected.add(g.id)); renderList(); } }),
       el("button", { class: "chip small", text: "✕ Nessuno", onclick: () => { visibleGames().forEach((g) => p.selected.delete(g.id)); renderList(); } }),
       el("div", { class: "spacer" }),
-      el("button", {
-        text: `Fatto · ${p.selected.size}`,
-        onclick: () => {
-          updateConfig({ games: CATALOG.filter((g) => p.selected.has(g.id)).map((g) => g.id) }, { rerender: false });
-          showLobby();
-        },
-      })
+      el("button", { text: `Fatto · ${p.selected.size}`, onclick: () => state.picker.done() })
     );
   };
 
@@ -692,6 +786,7 @@ function showPicker() {
     );
     search.value = state.picker.query;
     renderList();
+    syncBackGuard();
   };
 
   showPickerAgain();
@@ -871,6 +966,7 @@ function showCountdown(entry, msg) {
     number,
   ]);
   app.replaceChildren(area);
+  syncBackGuard();
 
   const tick = () => {
     if (state.round?.index !== msg.index || !state.net) return; // manche annullata

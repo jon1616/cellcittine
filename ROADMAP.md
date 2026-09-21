@@ -26,6 +26,7 @@ Una riga per idea: `- [ ] cosa` → `- [x] cosa (vX.Y.Z)`. Le decisioni prese st
 - [x] Sfondo illustrato dietro i menu e sistema dei temi (automatico per data o a scelta); Halloween/Natale/Estate pronti ad accogliere le immagini (v0.10.0)
 - [x] Temi stagionali attivi: Halloween (20 ott–2 nov), Natale (8 dic–6 gen), Estate (15 giu–10 set), scelta manuale in home (v0.10.1)
 - [x] Restyling dei menu: card in vetro, pulsanti con gradiente e bagliore, titolo luminoso, transizioni tra schermate, codice stanza pulsante, trofeo animato e coriandoli sul podio (v0.11.0)
+- [x] Tasto indietro di Android: torna alla schermata precedente; in stanza e durante la sfida chiede una seconda pressione prima di uscire (v0.12.0)
 
 ## Prossimi passi (in ordine di priorità, da confermare con l'utente)
 

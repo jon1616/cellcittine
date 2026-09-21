@@ -1073,3 +1073,25 @@ img.game-icon, img.list-icon, img.heading-icon { box-shadow: 0 2px 8px rgba(0,0,
   .screen, .code-big, .podium-trophy, .confetti i { animation: none !important; }
   button, .chip { transition: none; }
 }
+
+/* Avviso breve in basso (es. "Premi ancora ◀ per uscire") */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(28px + env(safe-area-inset-bottom));
+  transform: translate(-50%, 12px);
+  max-width: calc(100% - 48px);
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(30, 31, 52, 0.92);
+  border: 1px solid var(--line-strong, rgba(255,255,255,0.18));
+  color: var(--text);
+  font-size: 15px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 30;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
