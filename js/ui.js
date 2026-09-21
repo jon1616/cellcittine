@@ -92,6 +92,21 @@ export function confetti(count = 90) {
 }
 
 // ---------------------------------------------------------------
+// Colore per persona (indice assegnato dall'host in ordine di ingresso)
+// ---------------------------------------------------------------
+
+export const PLAYER_COLORS = ["#ffb703", "#36cfc9", "#ff4d6d", "#8ac926", "#c77dff", "#ff924c", "#1982c4", "#f15bb5"];
+
+export function playerColor(index) {
+  return PLAYER_COLORS[(Number.isInteger(index) ? index : 0) % PLAYER_COLORS.length];
+}
+
+// Pallino colorato davanti al nome
+export function colorDot(index) {
+  return el("span", { class: "dot-color", style: `--c: ${playerColor(index)}` });
+}
+
+// ---------------------------------------------------------------
 // Testi
 // ---------------------------------------------------------------
 

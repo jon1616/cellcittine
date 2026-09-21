@@ -6,7 +6,7 @@
 
 import { el } from "../utils.js";
 import { state, setScreen, isSolo } from "../state.js";
-import { show, statusLine, segmented, difficultyLabel } from "../ui.js";
+import { show, statusLine, segmented, difficultyLabel, colorDot } from "../ui.js";
 import { CATALOG, CATEGORIES, getEntry } from "../games/catalog.js";
 import { BUILTIN_PACKS, getBuiltinPack, resolvePack, randomSelection, sameSelection } from "../packs.js";
 import { DIFFICULTIES, ROUND_OPTIONS, AUTO_MIN, AUTO_MAX, saveConfig, getUserPacks, saveUserPack, deleteUserPack } from "../storage.js";
@@ -209,7 +209,7 @@ function playersList(players, meId) {
     { class: "players" },
     players.map((p) =>
       el("li", { class: p.id === meId ? "me" : "" }, [
-        el("span", { text: p.name }),
+        el("span", { class: "who" }, [colorDot(p.color), el("span", { text: p.name })]),
         el("span", { class: "tag", text: p.isHost ? "host" : "" }),
       ])
     )

@@ -11,6 +11,7 @@
 */
 
 const PREFIX = "cellcittine-";
+const COLORS = 8; // quante tinte diverse esistono (la palette sta in ui.js)
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ"; // senza I e O: si confondono con 1 e 0
 
 export function randomCode() {
@@ -44,7 +45,7 @@ export class Net {
   // ---------------------------------------------------------------
   solo(name) {
     this.isHost = true;
-    this.me = { id: "me", name, isHost: true };
+    this.me = { id: "me", name, isHost: true, color: 0 };
     this.players = [this.me];
     return Promise.resolve(null);
   }
@@ -61,7 +62,7 @@ export class Net {
         this.peer = peer;
         this.isHost = true;
         this.code = code;
-        this.me = { id, name, isHost: true };
+        this.me = { id, name, isHost: true, color: 0 };
         this.players = [this.me];
         this._status(`Stanza ${code} aperta`);
         resolve(code);
@@ -97,9 +98,10 @@ export class Net {
 
       switch (msg.type) {
         case "join": {
-          const name = String(msg.name || "Ospite").slice(0, 16);
-          const player = { id: conn.peer, name, isHost: false };
           this.players = this.players.filter((p) => p.id !== conn.peer);
+          // Nome unico in stanza ("Giulia", "Giulia 2"…) e prima tinta libera
+          const name = this._uniqueName(String(msg.name || "Ospite").trim().slice(0, 16) || "Ospite");
+          const player = { id: conn.peer, name, isHost: false, color: this._freeColor() };
           this.players.push(player);
           conn.send({ type: "welcome", you: player, players: this.players, hostTime: Date.now() });
           this.broadcast({ type: "players", players: this.players });
@@ -127,7 +129,20 @@ export class Net {
     conn.on("error", drop);
   }
 
-  // Host → tutte le giocatrici
+  _uniqueName(base) {
+    const taken = (n) => this.players.some((p) => p.name.toLowerCase() === n.toLowerCase());
+    let name = base;
+    for (let i = 2; taken(name); i++) name = `${base} ${i}`.slice(0, 16 + 3);
+    return name;
+  }
+
+  _freeColor() {
+    const used = new Set(this.players.map((p) => p.color));
+    for (let i = 0; i < COLORS; i++) if (!used.has(i)) return i;
+    return this.players.length % COLORS;
+  }
+
+  // Host → tutti
   broadcast(msg) {
     for (const conn of this.conns.values()) {
       if (conn.open) conn.send(msg);

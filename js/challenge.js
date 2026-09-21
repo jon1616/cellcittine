@@ -232,11 +232,11 @@ function publishResults() {
   if (!round || !round.game || state.screen === "results") return;
   clearTimeout(round.deadline);
 
-  const nameOf = (id) => net.players.find((p) => p.id === id)?.name || ch.standings.get(id)?.name || "?";
+  const infoOf = (id) => net.players.find((p) => p.id === id) || ch.standings.get(id) || { name: "?", color: 0 };
   const order = round.game.order;
 
   const ranking = round.participants
-    .map((id) => ({ id, name: nameOf(id), score: round.scores.has(id) ? round.scores.get(id) : null }))
+    .map((id) => ({ id, name: infoOf(id).name, color: infoOf(id).color, score: round.scores.has(id) ? round.scores.get(id) : null }))
     .sort((a, b) => {
       if (a.score === null) return 1;
       if (b.score === null) return -1;
@@ -252,8 +252,9 @@ function publishResults() {
   });
 
   for (const r of ranking) {
-    const entry = ch.standings.get(r.id) || { name: r.name, points: 0 };
+    const entry = ch.standings.get(r.id) || { name: r.name, color: r.color, points: 0 };
     entry.name = r.name;
+    entry.color = r.color;
     entry.points += r.points;
     ch.standings.set(r.id, entry);
   }
@@ -273,7 +274,7 @@ function publishResults() {
 
 export function standingsArray() {
   return [...state.challenge.standings.entries()]
-    .map(([id, e]) => ({ id, name: e.name, points: e.points }))
+    .map(([id, e]) => ({ id, name: e.name, color: e.color, points: e.points }))
     .sort((a, b) => b.points - a.points);
 }
 

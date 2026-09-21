@@ -6,7 +6,7 @@
 import { el } from "../utils.js";
 import { sfx } from "../audio.js";
 import { state, setScreen, isSolo } from "../state.js";
-import { show, gameIcon, gameHeading, confetti } from "../ui.js";
+import { show, gameIcon, gameHeading, confetti, colorDot, playerColor } from "../ui.js";
 import { getEntry, loadGame, getLoaded } from "../games/catalog.js";
 import { getRecord } from "../storage.js";
 import { leaveRoom, exitButton } from "../room.js";
@@ -42,7 +42,7 @@ function standingsList(standings, meId) {
     standings.map((s, i) =>
       el("li", { class: s.id === meId ? "me" : "" }, [
         el("span", { class: "pos", text: String(i + 1) }),
-        el("span", { text: s.name }),
+        el("span", { class: "who" }, [colorDot(s.color), el("span", { text: s.name })]),
         el("span", { class: "score", text: `${s.points} pt` }),
       ])
     )
@@ -88,7 +88,7 @@ export async function showResults(msg) {
   if (!state.net) return;
 
   if (!net.isHost && state.challenge) {
-    state.challenge.standings = new Map(msg.standings.map((s) => [s.id, { name: s.name, points: s.points }]));
+    state.challenge.standings = new Map(msg.standings.map((s) => [s.id, { name: s.name, color: s.color, points: s.points }]));
     state.challenge.history.push({ gameId: msg.gameId, ranking: msg.ranking });
   }
   const last = state.challenge?.history[state.challenge.history.length - 1];
@@ -104,7 +104,8 @@ export async function showResults(msg) {
     msg.ranking.map((r, i) =>
       el("li", { class: r.id === meId ? "me" : "" }, [
         el("span", { class: "pos", text: solo ? "" : i === 0 ? "🏆" : String(i + 1) }),
-        el("span", {}, [
+        el("span", { class: "who" }, [
+          solo ? el("span") : colorDot(r.color),
           el("span", { text: r.name }),
           r.id === meId && round?.isRecord ? el("span", { class: "badge", text: "★ record" }) : el("span"),
         ]),
@@ -190,7 +191,7 @@ export function showFinal(msg) {
     parts.push(
       el("div", { class: "podium" }, [
         el("div", { class: "podium-trophy", text: "🏆" }),
-        el("div", { class: "podium-name", text: winner?.name || "" }),
+        el("div", { class: "podium-name", text: winner?.name || "", style: `--c: ${playerColor(winner?.color)}` }),
         el("div", { class: "hint", text: winner ? `${winner.points} punti` : "" }),
       ])
     );
