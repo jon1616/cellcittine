@@ -42,6 +42,17 @@ document.addEventListener("pointerdown", (ev) => {
   if (btn && !btn.closest(".game-area")) sfx.play("click");
 }, { passive: true });
 
+// Installazione: il browser (Android/Chrome) ci passa l'evento da usare col pulsante in home
+window.addEventListener("beforeinstallprompt", (ev) => {
+  ev.preventDefault();
+  state.installPrompt = ev;
+  if (state.screen === "home") showHome();
+});
+window.addEventListener("appinstalled", () => {
+  state.installPrompt = null;
+  if (state.screen === "home") showHome();
+});
+
 // In locale, lo stato è raggiungibile dalla console per prove e diagnosi
 if (location.hostname === "localhost") window.cellcittine = { state };
 

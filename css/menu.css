@@ -182,6 +182,7 @@
 .home-title { margin-top: -6px; }
 @media (max-height: 700px) { .hero { display: none; } .home-title { margin-top: 24px; } }
 .theme-row { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+.screen button.link.install { align-self: center; color: var(--accent); text-decoration: none; border: 1px dashed color-mix(in srgb, var(--accent) 50%, transparent); border-radius: 999px; padding: 8px 14px; }
 .card.invite { border-color: color-mix(in srgb, var(--accent) 60%, transparent); box-shadow: 0 0 0 1px var(--accent-glow), 0 10px 30px rgba(0,0,0,0.35), 0 0 24px var(--accent-glow); }
 .screen .invite-btn { align-self: center; }
 

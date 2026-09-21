@@ -20,6 +20,7 @@ export const state = {
   picker: null,                     // stato della schermata di scelta minigiochi
   infoBack: null,                   // dove torna la scheda di un minigioco
   pendingCode: null,                // codice stanza arrivato da un link di invito (?stanza=XXXX)
+  installPrompt: null,              // evento beforeinstallprompt (Android/Chrome), se il browser lo offre
 };
 
 export function setScreen(name) {

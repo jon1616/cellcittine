@@ -42,7 +42,7 @@ M = due-tre passi, L = più passi). L'ordine dentro ogni blocco è quello consig
 - [x] **Nomi doppi**: se in stanza c'è già "Giulia", chi entra diventa "Giulia 2" (v0.16.0)
 - [x] **Colore per persona** (8 tinte, in ordine di ingresso): pallino accanto al nome in stanza e nelle classifiche, alone del vincitore sul podio (v0.16.0)
 - [x] **Messaggi chiari quando il collegamento non riesce**: distinguono server non raggiunto, stanza non trovata (con promemoria su I/O) e telefoni che non si collegano tra loro (stesso Wi‑Fi, VPN, hotspot) (v0.14.2)
-- [ ] **Pulsante "Installa"** in home quando il browser lo permette (beforeinstallprompt), con una riga di istruzioni per iPhone. Come: `screens/home.js`, `app.js`. — S
+- [x] **Pulsante "Installa l'app"** in home: su Android apre la finestra di installazione, su iPhone spiega Condividi → Aggiungi alla schermata Home; sparisce quando l'app è installata (v0.17.1)
 
 ## 2. Più divertimento (priorità media)
 

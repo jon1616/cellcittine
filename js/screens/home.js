@@ -6,7 +6,7 @@
 import { el } from "../utils.js";
 import { sfx } from "../audio.js";
 import { state, setScreen } from "../state.js";
-import { show, statusLine, setStatus } from "../ui.js";
+import { show, statusLine, setStatus, toast } from "../ui.js";
 import { CATALOG } from "../games/catalog.js";
 import { availableThemes, getChoice, setChoice, seasonalTheme } from "../theme.js";
 import { createRoom, playSolo, joinRoom } from "../room.js";
@@ -67,8 +67,41 @@ export function showHome(message = "", isError = !!message) {
       }),
     ]),
     themeRow(),
+    installRow(),
     status
   );
+}
+
+// Installazione sulla schermata Home: pulsante quando il browser lo permette
+// (Android/Chrome), istruzioni su iPhone; niente se l'app è già installata.
+function isInstalled() {
+  return window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+}
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+function installRow() {
+  if (isInstalled()) return el("span");
+  if (state.installPrompt) {
+    return el("button", {
+      text: "📲 Installa l'app sul telefono",
+      class: "link install",
+      onclick: async () => {
+        const ev = state.installPrompt;
+        state.installPrompt = null;
+        try { await ev.prompt(); await ev.userChoice; } catch (_) { /* rifiutato o non disponibile */ }
+        showHome();
+      },
+    });
+  }
+  if (isIOS()) {
+    return el("button", {
+      text: "📲 Installa l'app sul telefono",
+      class: "link install",
+      onclick: () => toast("Su iPhone: tocca Condividi (il quadrato con la freccia) → “Aggiungi alla schermata Home”"),
+    });
+  }
+  return el("span");
 }
 
 // Invito arrivato da un link (?stanza=XXXX): riquadro in evidenza con "Entra".
