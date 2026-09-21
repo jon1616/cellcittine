@@ -1,0 +1,314 @@
+/*
+  Sfida e manche.
+
+  Una "sfida" è una sequenza di manche. L'host la configura (minigiochi,
+  numero di manche, difficoltà), poi per ogni manche:
+    host annuncia il minigioco -> tutti partono allo stesso istante ->
+    ognuno manda il punteggio all'host -> l'host pubblica classifica della
+    manche e classifica generale (punti per posizione).
+
+  Messaggi di rete (host → tutti): start, results, final, lobby, config.
+  (guest → host): result.
+*/
+
+import { el, seededRandom } from "./utils.js";
+import { sfx } from "./audio.js";
+import { state, setScreen } from "./state.js";
+import { setStatus, gameIcon, difficultyLabel, appRoot } from "./ui.js";
+import { syncBackGuard } from "./nav.js";
+import { getEntry, loadGame, preloadGames } from "./games/catalog.js";
+import { shuffle } from "./games/shell.js";
+import { updateRecord } from "./storage.js";
+import { showLobby } from "./screens/lobby.js";
+import { showResults, showFinal } from "./screens/results.js";
+
+const COUNTDOWN_MS = 3500; // dal messaggio "start" al via
+const GRACE_SECONDS = 8;   // margine oltre maxSeconds prima di chiudere la manche
+
+// ---------------------------------------------------------------
+// Avvio (host)
+// ---------------------------------------------------------------
+
+export async function startChallenge() {
+  const cfg = state.config;
+  const rng = seededRandom(Math.floor(Math.random() * 2 ** 31));
+
+  // "Tutti": ogni minigioco scelto una volta, in ordine casuale.
+  // Altrimenti: cicla su quelli scelti, mescolati, evitando ripetizioni vicine.
+  const total = cfg.rounds === "tutti" ? cfg.games.length : cfg.rounds;
+  const rounds = [];
+  let pool = [];
+  while (rounds.length < total) {
+    if (pool.length === 0) {
+      pool = shuffle(cfg.games, rng);
+      if (rounds.length > 0 && pool.length > 1 && pool[0] === rounds[rounds.length - 1].gameId) {
+        pool.push(pool.shift());
+      }
+    }
+    rounds.push({ gameId: pool.shift(), seed: Math.floor(rng() * 2 ** 31) });
+  }
+
+  state.challenge = {
+    rounds,
+    total: rounds.length,
+    difficulty: cfg.difficulty,
+    index: -1,
+    standings: new Map(),
+    history: [],
+  };
+
+  setStatus("Preparo i minigiochi…");
+  const ids = [...new Set(rounds.map((r) => r.gameId))];
+  const results = await preloadGames(ids);
+  if (!state.net) return; // usciti nel frattempo
+
+  // Se il codice di un minigioco non si carica (file rotto o assente), meglio
+  // fermarsi qui con un messaggio chiaro che restare appesi al conto alla rovescia.
+  const broken = ids.filter((_, i) => results[i].status === "rejected");
+  if (broken.length > 0) {
+    state.challenge = null;
+    const names = broken.map((id) => getEntry(id)?.title || id).join(", ");
+    setStatus(`Non riesco a caricare: ${names}. Prova a ricaricare la pagina o togli quel minigioco.`, true);
+    return;
+  }
+  nextRound();
+}
+
+export function nextRound() {
+  const ch = state.challenge;
+  const net = state.net;
+  ch.index++;
+  const r = ch.rounds[ch.index];
+  const msg = {
+    type: "start",
+    index: ch.index,
+    total: ch.total,
+    gameId: r.gameId,
+    seed: r.seed,
+    difficulty: ch.difficulty,
+    startAt: net.now() + COUNTDOWN_MS,
+  };
+  net.broadcast(msg);
+  beginRound(msg);
+}
+
+export function finishChallenge() {
+  const msg = { type: "final", standings: standingsArray() };
+  state.net.broadcast(msg);
+  showFinal(msg);
+}
+
+// ---------------------------------------------------------------
+// Manche: comune a host e guest
+// ---------------------------------------------------------------
+
+async function beginRound(msg) {
+  const net = state.net;
+  if (!net) return;
+
+  // Un guest arrivato a sfida iniziata crea la propria vista della sfida qui.
+  if (!net.isHost && (!state.challenge || msg.index === 0)) {
+    state.challenge = { total: msg.total, difficulty: msg.difficulty, index: msg.index, standings: new Map(), history: [] };
+  }
+  state.challenge.index = msg.index;
+
+  // Segnaposto subito (così i messaggi di questa manche non vengono scartati)…
+  state.round = { index: msg.index, game: null, params: null, startAt: msg.startAt, scores: new Map(), participants: net.players.map((p) => p.id), deadline: null };
+  showCountdown(getEntry(msg.gameId), msg);
+
+  // …poi il codice del minigioco, caricato a richiesta.
+  let game;
+  try {
+    game = await loadGame(msg.gameId);
+  } catch (_) {
+    // Niente attesa infinita sul conto alla rovescia: si torna alla lobby.
+    if (state.round?.index !== msg.index) return;
+    clearTimeout(state.round.deadline);
+    state.round = null;
+    showLobby();
+    setStatus(`Non riesco a caricare il minigioco “${getEntry(msg.gameId)?.title || msg.gameId}”. Prova a ricaricare la pagina.`, true);
+    return;
+  }
+  if (state.round?.index !== msg.index) return; // nel frattempo è cambiato qualcosa
+  state.round.game = game;
+  state.round.params = game.createParams(seededRandom(msg.seed), msg.difficulty);
+}
+
+function showCountdown(entry, msg) {
+  setScreen("countdown");
+  sfx.setScene("game");
+  const net = state.net;
+  const number = el("div", { class: "big", text: "" });
+  const area = el("div", { class: "game-area" }, [
+    el("div", { class: "hint", text: `Manche ${msg.index + 1} di ${msg.total} · ${difficultyLabel(msg.difficulty)}` }),
+    gameIcon(entry, "countdown-icon"),
+    el("div", { text: entry?.title || msg.gameId }),
+    el("div", { class: "hint", text: entry?.description || "" }),
+    number,
+  ]);
+  appRoot().replaceChildren(area);
+  syncBackGuard();
+
+  const tick = () => {
+    if (state.round?.index !== msg.index || !state.net) return; // manche annullata
+    const remaining = msg.startAt - net.now();
+    if (remaining <= 0) {
+      if (!state.round.game) {
+        number.textContent = "…"; // codice non ancora arrivato: aspetta
+        setTimeout(tick, 100);
+        return;
+      }
+      area.remove();
+      sfx.play("go");
+      mountGame();
+      return;
+    }
+    const n = Math.ceil(remaining / 1000);
+    if (number.textContent !== String(n)) sfx.play("tick");
+    number.textContent = n;
+    setTimeout(tick, Math.min(100, remaining));
+  };
+  tick();
+}
+
+function mountGame() {
+  setScreen("game");
+  const round = state.round;
+  const net = state.net;
+
+  if (net.isHost) {
+    // Scadenza di sicurezza: se qualcuno non risponde, si chiude comunque.
+    round.deadline = setTimeout(publishResults, (round.game.maxSeconds + GRACE_SECONDS) * 1000);
+  }
+
+  round.game.mount(appRoot(), {
+    params: round.params,
+    difficulty: state.challenge.difficulty,
+    me: net.me,
+    now: () => net.now(),
+    onFinish: (score, detail) => submitScore(score, detail),
+  });
+}
+
+function submitScore(score, detail = null) {
+  const net = state.net;
+  const round = state.round;
+  if (!round || !net) return;
+  round.myScore = score;
+  round.myDetail = detail;
+  round.myMax = typeof round.game.maxScore === "function" ? round.game.maxScore(round.params) : null;
+  round.isRecord = updateRecord(round.game, state.challenge.difficulty, score);
+
+  if (net.isHost) {
+    recordScore(net.me.id, score);
+  } else {
+    net.sendToHost({ type: "result", index: round.index, score });
+  }
+}
+
+// ---------------------------------------------------------------
+// Raccolta punteggi e classifiche (host)
+// ---------------------------------------------------------------
+
+function recordScore(playerId, score) {
+  const round = state.round;
+  if (!round || round.scores.has(playerId)) return;
+  round.scores.set(playerId, score);
+  checkRoundComplete();
+}
+
+export function checkRoundComplete() {
+  const round = state.round;
+  if (!round || !state.net?.isHost || state.screen === "results") return;
+  const present = new Set(state.net.players.map((p) => p.id));
+  const waiting = round.participants.filter((id) => present.has(id) && !round.scores.has(id));
+  if (waiting.length === 0 && round.scores.size > 0) publishResults();
+}
+
+function publishResults() {
+  const round = state.round;
+  const ch = state.challenge;
+  const net = state.net;
+  if (!round || !round.game || state.screen === "results") return;
+  clearTimeout(round.deadline);
+
+  const nameOf = (id) => net.players.find((p) => p.id === id)?.name || ch.standings.get(id)?.name || "?";
+  const order = round.game.order;
+
+  const ranking = round.participants
+    .map((id) => ({ id, name: nameOf(id), score: round.scores.has(id) ? round.scores.get(id) : null }))
+    .sort((a, b) => {
+      if (a.score === null) return 1;
+      if (b.score === null) return -1;
+      return order === "asc" ? a.score - b.score : b.score - a.score;
+    });
+
+  // Punti per posizione: primo = N, secondo = N-1… A pari punteggio, pari punti.
+  const n = ranking.length;
+  let pos = 0;
+  ranking.forEach((r, i) => {
+    if (i === 0 || r.score !== ranking[i - 1].score) pos = i;
+    r.points = r.score === null ? 0 : n - pos;
+  });
+
+  for (const r of ranking) {
+    const entry = ch.standings.get(r.id) || { name: r.name, points: 0 };
+    entry.name = r.name;
+    entry.points += r.points;
+    ch.standings.set(r.id, entry);
+  }
+  ch.history.push({ gameId: round.game.id, ranking });
+
+  const msg = {
+    type: "results",
+    index: round.index,
+    gameId: round.game.id,
+    ranking,
+    standings: standingsArray(),
+    last: round.index === ch.total - 1,
+  };
+  net.broadcast(msg);
+  showResults(msg);
+}
+
+export function standingsArray() {
+  return [...state.challenge.standings.entries()]
+    .map(([id, e]) => ({ id, name: e.name, points: e.points }))
+    .sort((a, b) => b.points - a.points);
+}
+
+// ---------------------------------------------------------------
+// Messaggi ricevuti dalla rete
+// ---------------------------------------------------------------
+
+export function handleMessage(msg, fromId) {
+  const net = state.net;
+  if (!net) return;
+
+  if (net.isHost) {
+    if (msg.type === "result" && msg.index === state.round?.index) recordScore(fromId, msg.score);
+    return;
+  }
+
+  switch (msg.type) {
+    case "config":
+      state.hostConfig = msg.config;
+      if (state.screen === "lobby") showLobby();
+      break;
+    case "start":
+      state.round?.game?.unmount();
+      beginRound(msg);
+      break;
+    case "results":
+      showResults(msg);
+      break;
+    case "final":
+      showFinal(msg);
+      break;
+    case "lobby":
+      state.challenge = null;
+      state.round = null;
+      showLobby();
+      break;
+  }
+}

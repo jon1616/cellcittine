@@ -5,22 +5,37 @@
   salvata l'ultima volta.
 */
 
-const CACHE_VERSION = "0.12.0"; // tenere allineato a js/version.js
+const CACHE_VERSION = "0.12.1"; // tenere allineato a js/version.js
 const CACHE = `cellcittine-${CACHE_VERSION}`;
 
 const PRECACHE = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
-  "./css/style.css",
+  "./css/base.css",
+  "./css/menu.css",
+  "./css/games.css",
   "./js/app.js",
+  "./js/state.js",
+  "./js/ui.js",
+  "./js/nav.js",
+  "./js/room.js",
+  "./js/challenge.js",
+  "./js/screens/home.js",
+  "./js/screens/join.js",
+  "./js/screens/lobby.js",
+  "./js/screens/picker.js",
+  "./js/screens/catalog.js",
+  "./js/screens/records.js",
+  "./js/screens/results.js",
   "./js/net.js",
   "./js/utils.js",
   "./js/version.js",
-  "./js/games/catalog.js",
+  "./js/storage.js",
   "./js/packs.js",
   "./js/audio.js",
   "./js/theme.js",
+  "./js/games/catalog.js",
   "./js/games/shell.js",
   "./js/games/semaforo.js",
   "./js/games/memory.js",
@@ -47,7 +62,6 @@ const PRECACHE = [
   "./js/games/anagrammi.js",
   "./js/games/altobasso.js",
   "./js/games/dieci.js",
-  "./js/storage.js",
   "./fonts/fredoka-latin.woff2",
   "./fonts/fredoka-latin-ext.woff2",
   "./icons/icon-192.png",

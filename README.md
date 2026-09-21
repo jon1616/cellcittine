@@ -12,24 +12,32 @@ Documenti di lavoro: [CLAUDE.md](CLAUDE.md) (regole e checklist per chi lavora s
 ```
 index.html              pagina unica
 manifest.webmanifest    installazione come app
-sw.js                   funzionamento offline (aggiornare CACHE_VERSION a ogni release)
-css/style.css
-js/app.js               telaio: schermate, sfida, manche, punteggi, scelta minigiochi
+sw.js                   funzionamento offline (PRECACHE di tutti i file; CACHE_VERSION a ogni release)
+css/base.css            carattere, colori, pagina, pulsanti e campi di base, icone, toast, coriandoli
+css/menu.css            schermate dei menu (card, pulsanti con luce, stanza, scelta, classifiche, podio)
+css/games.css           area di gioco, cornice comune e una sezione per minigioco
+js/app.js               avvio (versione, tema, service worker, suono click)
+js/state.js             stato condiviso dell'app
+js/ui.js                mattoni dell'interfaccia (schermate, stato, toast, icone, righe)
+js/nav.js               tasto indietro di Android
+js/room.js              stanza: crea / entra / allenamento / esci
+js/challenge.js         sfida e manche: avvio, conto alla rovescia, punteggi, classifiche, messaggi
+js/screens/*.js         una schermata per file: home, join, lobby, picker, catalog, records, results
 js/net.js               collegamento P2P (PeerJS), modello host-arbitro
 js/packs.js             pacchetti di minigiochi (integrati + personali)
 js/storage.js           salvataggi: configurazione, record, pacchetti personali
 js/games/catalog.js     CATALOGO: scheda di ogni minigioco + caricamento a richiesta
-js/games/shell.js       cornice comune ai minigiochi (timer, cronometro)
+js/games/shell.js       cornice comune ai minigiochi (timer, cronometro, canvas)
 js/games/<id>.js        codice di un minigioco (caricato solo quando serve)
 js/audio.js             suoni sintetizzati (WebAudio) + musica di sottofondo, interruttori 🔊 e 🎵
 js/theme.js             temi: sfondo illustrato dei menu, stagionali per data o a scelta
 js/version.js           numero di versione mostrato nell'angolo
 icons/                  icone dell'app (any + maskable, generate da assets/icon-source.png)
 assets/music/           sottofondo.mp3 (CC0, vedi LICENSE.txt); l'originale resta fuori da Git
-assets/                 immagini: originali (PNG), versioni usate dall'app (JPEG), icone dei minigiochi (assets/icons/<id>.webp)
+assets/                 immagini: originali (PNG), versioni usate dall app (JPEG/WebP), icone dei minigiochi (assets/icons/<id>.webp)
 fonts/                  carattere Fredoka (SIL OFL, licenza in fonts/OFL.txt)
 test.html + js/tester.js  tester nel browser: prova tutto il gioco in meno di un minuto
-tools/check.mjs         controllo rapido da riga di comando (sintassi, catalogo, sw.js, versione)
+tools/check.mjs         controllo rapido da riga di comando (sintassi, catalogo, PRECACHE completa, versione)
 CLAUDE.md · ROADMAP.md  guida per chi lavora sul codice · elenco di fatto / da fare
 ```
 
@@ -68,7 +76,7 @@ CLAUDE.md · ROADMAP.md  guida per chi lavora sul codice · elenco di fatto / da
 1. Crea `js/games/<id>.js` seguendo il contratto descritto in `semaforo.js` (solo logica).
    Ogni minigioco deve avere i suoni: usa `sfx.play("good"|"bad"|…)` di `js/audio.js`.
 2. Aggiungi la scheda in `js/games/catalog.js` (categoria, abilità, durata, tema, data…). Icona: `assets/icons/<id>.webp` 160×160 (campo `image`); senza, si usa l'emoji.
-3. Aggiungi il file alla lista `PRECACHE` in `sw.js`.
+3. Aggiungi il file js e l'icona alla lista `PRECACHE` in `sw.js`; stili in una sezione nuova di `css/games.css`.
 4. `node tools/check.mjs` e poi `test.html?auto` nel browser: 0 errori.
 5. Riga nella tabella qui sopra, voce spuntata in ROADMAP.md.
 6. Alza la versione in `js/version.js` e `sw.js`, commit, push.
@@ -83,7 +91,7 @@ CLAUDE.md · ROADMAP.md  guida per chi lavora sul codice · elenco di fatto / da
   ```bash
   node tools/check.mjs
   ```
-  Sintassi di tutti i file, catalogo ↔ file ↔ `sw.js`, versione allineata. Un errore di sintassi in un
+  Sintassi di tutti i file, catalogo ↔ file ↔ `sw.js`, ogni file dell'app in PRECACHE, versione allineata. Un errore di sintassi in un
   minigioco blocca l'app sul conto alla rovescia: questo controllo lo trova in un secondo.
 
 ## Pubblicare

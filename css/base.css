@@ -1,0 +1,229 @@
+/* ===============================================================
+   BASE — carattere, colori, pagina, tipografia, elementi comuni
+   a menu e minigiochi. Le schermate dei menu stanno in menu.css,
+   i minigiochi in games.css.
+   =============================================================== */
+
+/* Carattere del gioco: Fredoka (SIL Open Font License, vedi fonts/OFL.txt) */
+@font-face {
+  font-family: "Fredoka";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("../fonts/fredoka-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Fredoka";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("../fonts/fredoka-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ---------------------------------------------------------------
+   Colori e misure. --accent cambia col tema (theme.js); i derivati
+   (--accent-dark/-light/-glow) seguono da soli.
+   --------------------------------------------------------------- */
+:root {
+  --bg: #1e1f34;
+  --bg-2: #26254a;
+  --card: #2f2e5c;
+  --text: #f6f3ff;
+  --muted: #b3aed6;
+  --accent: #ffb703;
+  --accent-2: #fb5607;
+  --ok: #43d17a;
+  --danger: #ff4d6d;
+  --ink: #1b1a2e;                 /* testo scuro sui pulsanti chiari */
+  --radius: 18px;
+
+  --accent-dark: color-mix(in srgb, var(--accent) 70%, #000);
+  --accent-light: color-mix(in srgb, var(--accent) 85%, #fff);
+  --accent-glow: color-mix(in srgb, var(--accent) 45%, transparent);
+  --glass: rgba(52, 50, 96, 0.55);     /* card in vetro */
+  --glass-2: rgba(38, 37, 74, 0.6);    /* pulsanti secondari */
+  --solid: rgba(30, 31, 52, 0.85);     /* elementi coprenti sullo sfondo illustrato */
+  --line: rgba(255, 255, 255, 0.1);
+  --line-strong: rgba(255, 255, 255, 0.18);
+  --gradient-accent: linear-gradient(180deg, var(--accent-light) 0%, var(--accent) 45%, var(--accent-dark) 100%);
+}
+
+/* ---------------------------------------------------------------
+   Pagina
+   --------------------------------------------------------------- */
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Fredoka", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  overscroll-behavior: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  /* La pagina non scorre mai: scorre solo #app, e solo se il contenuto è più lungo dello schermo */
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+}
+
+/* Sfondo del tema (menu), grande quanto lo schermo. I minigiochi lo coprono con la loro area. */
+body {
+  background-color: var(--bg);
+  background-image: linear-gradient(rgba(30, 31, 52, 0.25), rgba(30, 31, 52, 0.25)), var(--bg-image, none);
+  background-size: cover, cover;
+  background-position: center top, center top;
+  background-repeat: no-repeat, no-repeat;
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: transparent;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  padding: calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
+}
+
+#version {
+  position: fixed;
+  right: 8px;
+  bottom: calc(4px + env(safe-area-inset-bottom));
+  font-size: 11px;
+  color: var(--muted);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------------
+   Tipografia e testi comuni
+   --------------------------------------------------------------- */
+h1 {
+  margin: 24px 0 4px;
+  font-size: 40px;
+  text-align: center;
+  letter-spacing: 2px;
+  background: linear-gradient(180deg, #fff2c2 0%, var(--accent) 55%, var(--accent-dark) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 4px 14px var(--accent-glow));
+}
+h2 { margin: 0; font-size: 22px; text-align: center; }
+p { margin: 0; color: var(--muted); text-align: center; line-height: 1.4; }
+p.small { font-size: 14px; }
+.label { font-size: 13px; color: color-mix(in srgb, var(--accent) 70%, var(--muted)); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+.status { font-size: 14px; color: var(--muted); text-align: center; min-height: 1.4em; }
+.error { color: var(--danger); }
+.spacer { flex: 1; }
+
+/* ---------------------------------------------------------------
+   Pulsanti e campi: aspetto di base (valido anche nei minigiochi).
+   L'aspetto "con luce" dei menu è in menu.css.
+   --------------------------------------------------------------- */
+button {
+  font: inherit;
+  font-size: 20px;
+  font-weight: 700;
+  padding: 16px;
+  border: none;
+  border-radius: 14px;
+  background: var(--accent);
+  color: var(--ink);
+  cursor: pointer;
+  transition: transform 0.08s;
+}
+button:active { transform: scale(0.97); }
+button:disabled { opacity: 0.45; cursor: default; }
+
+input[type="text"] {
+  width: 100%;
+  font-size: 20px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--line-strong);
+  background: rgba(20, 20, 40, 0.75);
+  color: var(--text);
+  text-align: center;
+  outline: none;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.25);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+input[type="text"]:focus { border-color: var(--accent); box-shadow: inset 0 2px 6px rgba(0,0,0,0.25), 0 0 0 3px var(--accent-glow); }
+
+/* ---------------------------------------------------------------
+   Icone dei minigiochi (immagine disegnata o emoji di riserva)
+   --------------------------------------------------------------- */
+img.game-icon { width: 44px; height: 44px; border-radius: 10px; display: block; }
+.game-icon.emoji { font-size: 26px; text-align: center; }
+img.heading-icon { width: 34px; height: 34px; border-radius: 8px; }
+.heading-icon.emoji { font-size: 22px; }
+img.list-icon { width: 28px; height: 28px; border-radius: 7px; flex: 0 0 auto; }
+.list-icon.emoji { font-size: 18px; }
+img.info-icon { width: 120px; height: 120px; border-radius: 26px; box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
+.info-icon.emoji { font-size: 64px; }
+img.countdown-icon { width: 128px; height: 128px; border-radius: 28px; margin: 8px 0 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+.countdown-icon.emoji { font-size: 72px; }
+img.game-icon, img.list-icon, img.heading-icon { box-shadow: 0 2px 8px rgba(0,0,0,0.35); }
+.with-icon { display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
+h2.with-icon { width: 100%; }
+
+/* ---------------------------------------------------------------
+   Sovrapposizioni: avviso breve, coriandoli
+   --------------------------------------------------------------- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(28px + env(safe-area-inset-bottom));
+  transform: translate(-50%, 12px);
+  max-width: calc(100% - 48px);
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(30, 31, 52, 0.92);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  font-size: 15px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 30;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+.confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 5; }
+.confetti i {
+  position: absolute;
+  top: -14px;
+  width: 9px; height: 14px;
+  border-radius: 2px;
+  opacity: 0.95;
+  animation: confetti-fall linear forwards;
+}
+@keyframes confetti-fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0.6; }
+}
+
+/* Animazioni comuni */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+.shake { animation: shake 0.25s; }
+
+/* Meno movimento per chi lo chiede nelle impostazioni del telefono */
+@media (prefers-reduced-motion: reduce) {
+  .screen, .code-big, .podium-trophy, .confetti i { animation: none !important; }
+  button, .chip { transition: none; }
+}

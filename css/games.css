@@ -1,0 +1,335 @@
+/* ===============================================================
+   MINIGIOCHI — area di gioco, cornice comune (shell.js) e una
+   sezione per minigioco, nell'ordine del catalogo.
+   Per aggiungere un minigioco: una nuova sezione in fondo, con il
+   prefisso della classe uguale per tutte le sue regole.
+   =============================================================== */
+
+/* ---------------------------------------------------------------
+   Area di gioco: occupa tutto lo schermo e copre lo sfondo del tema
+   --------------------------------------------------------------- */
+.game-area {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 800;
+  transition: background 0.1s;
+}
+.game-area .hint { font-size: 16px; font-weight: 400; color: rgba(255,255,255,0.75); }
+.game-area .big { font-size: 64px; }
+
+/* Cornice comune (createShell): titolo, timer, suggerimento, corpo */
+.game-shell {
+  justify-content: flex-start;
+  padding: calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom));
+  gap: 8px;
+  font-weight: 600;
+  font-size: 18px;
+}
+.game-header { width: 100%; display: flex; justify-content: space-between; align-items: center; font-size: 20px; font-weight: 800; }
+.game-timer { font-variant-numeric: tabular-nums; color: var(--accent); }
+.game-hint { font-size: 16px; color: rgba(255,255,255,0.8); font-weight: 500; }
+.game-body {
+  flex: 1;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  min-height: 0;
+}
+.game-done { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.game-done .big { font-size: 44px; }
+
+/* Elementi condivisi da più minigiochi */
+.keypad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.key { font-size: 22px; padding: 14px 0; background: var(--bg-2); color: var(--text); }
+.key.ok { background: var(--ok); color: var(--ink); }
+.key.ko { background: var(--danger); color: white; }
+
+/* ---------------------------------------------------------------
+   Memory (memory.js)
+   --------------------------------------------------------------- */
+.memory-grid { display: grid; gap: 8px; width: 100%; }
+.memory-card { aspect-ratio: 3 / 4; position: relative; border-radius: 12px; perspective: 600px; }
+.memory-back, .memory-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  backface-visibility: hidden;
+  transition: transform 0.25s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.memory-back { background: linear-gradient(135deg, #3f3d8a, #2a2860); border: 2px solid rgba(255,255,255,0.12); }
+.memory-face { background: #f6f3ff; transform: rotateY(180deg); }
+.memory-card.open .memory-back, .memory-card.found .memory-back { transform: rotateY(180deg); }
+.memory-card.open .memory-face, .memory-card.found .memory-face { transform: rotateY(0); }
+.memory-card.found .memory-face { opacity: 0.55; }
+/* Forme disegnate in CSS: il colore arriva da --shape-color */
+.memory-face::before { content: ""; width: 58%; aspect-ratio: 1; background: var(--shape-color); }
+.shape-circle::before   { border-radius: 50%; }
+.shape-square::before   { border-radius: 8%; }
+.shape-triangle::before { clip-path: polygon(50% 5%, 97% 95%, 3% 95%); }
+.shape-star::before     { clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+.shape-diamond::before  { clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+.shape-hexagon::before  { clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0% 50%); }
+.shape-cross::before    { clip-path: polygon(35% 0%, 65% 0%, 65% 35%, 100% 35%, 100% 65%, 65% 65%, 65% 100%, 35% 100%, 35% 65%, 0% 65%, 0% 35%, 35% 35%); }
+.shape-pentagon::before { clip-path: polygon(50% 0%, 100% 38%, 81% 100%, 19% 100%, 0% 38%); }
+.shape-ring::before     { border-radius: 50%; background: transparent; border: 10px solid var(--shape-color); box-sizing: border-box; }
+.shape-pill::before     { border-radius: 999px; width: 70%; aspect-ratio: 2 / 1; }
+
+/* ---------------------------------------------------------------
+   Sequenza (sequenza.js)
+   --------------------------------------------------------------- */
+.seq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 360px; margin: 0 auto; }
+.seq-pad { aspect-ratio: 1; border-radius: 20px; background: var(--pad); opacity: 0.55; transition: opacity 0.08s, transform 0.08s, background 0.08s; }
+.seq-pad.lit { opacity: 1; background: var(--pad-bright); transform: scale(0.96); }
+
+/* ---------------------------------------------------------------
+   Numeri (numeri.js)
+   --------------------------------------------------------------- */
+.num-grid { display: grid; gap: 8px; width: 100%; }
+.num-cell {
+  aspect-ratio: 1;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.12);
+  border: 2px solid rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 700;
+  transition: opacity 0.15s, background 0.1s;
+}
+.num-cell.hit { opacity: 0.15; }
+.num-cell.wrong { background: var(--danger); }
+
+/* ---------------------------------------------------------------
+   Bersagli (bersagli.js)
+   --------------------------------------------------------------- */
+.target-field { position: relative; width: 100%; height: 100%; min-height: 60vh; border-radius: 16px; background: rgba(0,0,0,0.2); overflow: hidden; }
+.target { position: absolute; border-radius: 50%; box-shadow: inset 0 0 0 6px rgba(255,255,255,0.35), 0 4px 12px rgba(0,0,0,0.3); animation: pop 0.15s ease-out; }
+.target.hit { transform: scale(1.3); opacity: 0; transition: transform 0.12s, opacity 0.12s; }
+@keyframes pop { from { transform: scale(0.3); } to { transform: scale(1); } }
+
+/* ---------------------------------------------------------------
+   Calcoli (calcoli.js)
+   --------------------------------------------------------------- */
+.calc-question { font-size: 56px; font-weight: 700; text-align: center; margin-bottom: 24px; font-variant-numeric: tabular-nums; }
+.calc-question.flash-wrong { color: var(--danger); }
+.calc-answers { display: flex; flex-direction: column; gap: 12px; }
+.calc-answer { font-size: 32px; padding: 20px; background: rgba(255,255,255,0.12); border: 2px solid rgba(255,255,255,0.15); color: var(--text); }
+
+/* ---------------------------------------------------------------
+   Colori (colori.js)
+   --------------------------------------------------------------- */
+.stroop-word { font-size: 56px; font-weight: 700; text-align: center; letter-spacing: 2px; margin-bottom: 28px; text-shadow: 0 2px 0 rgba(0,0,0,0.3); }
+.stroop-pads { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.stroop-pad { height: 96px; border-radius: 18px; padding: 0; }
+
+/* ---------------------------------------------------------------
+   Precisione (precisione.js)
+   --------------------------------------------------------------- */
+.prec-feedback { text-align: center; font-size: 30px; font-weight: 700; min-height: 40px; color: var(--accent); }
+.prec-feedback.bad { color: var(--danger); }
+.prec-feedback.great { color: var(--ok); }
+.prec-bar { position: relative; height: 44px; border-radius: 22px; background: rgba(255,255,255,0.12); margin: 12px 0 24px; overflow: hidden; }
+.prec-zone { position: absolute; top: 0; bottom: 0; background: linear-gradient(90deg, rgba(67,209,122,0.35), #43d17a, rgba(67,209,122,0.35)); }
+.prec-marker { position: absolute; top: -4px; bottom: -4px; width: 8px; margin-left: -4px; background: white; border-radius: 4px; box-shadow: 0 0 8px rgba(255,255,255,0.8); }
+.prec-tap { height: 160px; border-radius: 24px; background: var(--accent); color: var(--ink); display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; }
+.prec-tap:active { transform: scale(0.98); }
+
+/* ---------------------------------------------------------------
+   Salta (salta.js) — canvas
+   --------------------------------------------------------------- */
+.run-canvas { display: block; margin: 0 auto; border-radius: 16px; touch-action: none; }
+
+/* ---------------------------------------------------------------
+   Intruso (intruso.js)
+   --------------------------------------------------------------- */
+.odd-grid { display: grid; gap: 6px; width: 100%; }
+.odd-cell { aspect-ratio: 1; border-radius: 10px; transition: transform 0.1s; }
+.odd-cell.wrong { transform: scale(0.85); }
+
+/* ---------------------------------------------------------------
+   Frecce (frecce.js)
+   --------------------------------------------------------------- */
+.swipe-pad {
+  flex: 1;
+  min-height: 60vh;
+  border-radius: 24px;
+  background: rgba(255,255,255,0.08);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;
+  touch-action: none;
+  transition: background 0.1s;
+}
+.swipe-pad.ok { background: rgba(67,209,122,0.35); }
+.swipe-pad.ko { background: rgba(255,77,109,0.35); }
+.swipe-help { font-size: 14px; color: var(--muted); font-weight: 500; }
+.arrow {
+  width: 150px; height: 150px;
+  background: #36cfc9;
+  clip-path: polygon(50% 0%, 100% 50%, 70% 50%, 70% 100%, 30% 100%, 30% 50%, 0% 50%);
+  transition: transform 0.08s;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.35));
+}
+.arrow.red { background: #ff595e; }
+
+/* ---------------------------------------------------------------
+   Palloncini (palloncini.js)
+   --------------------------------------------------------------- */
+.balloon-feedback { text-align: center; font-size: 30px; font-weight: 700; min-height: 40px; color: var(--accent); }
+.balloon-feedback.bad { color: var(--danger); }
+.balloon-feedback.great { color: var(--ok); }
+.balloon-stage { height: 380px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+.balloon {
+  border-radius: 50% 50% 50% 50% / 45% 45% 55% 55%;
+  box-shadow: inset -12px -14px 0 rgba(0,0,0,0.12), inset 10px 12px 0 rgba(255,255,255,0.25);
+  transition: transform 0.15s;
+}
+.balloon.pop { transform: scale(1.4); opacity: 0 !important; transition: transform 0.12s, opacity 0.12s; }
+.balloon-knot { width: 14px; height: 10px; background: rgba(255,255,255,0.5); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.balloon-string { width: 2px; height: 60px; background: rgba(255,255,255,0.45); }
+
+/* ---------------------------------------------------------------
+   Di più (dipiu.js)
+   --------------------------------------------------------------- */
+.dots-wrap { display: flex; gap: 12px; height: 62vh; }
+.dots-panel { flex: 1; position: relative; border-radius: 18px; background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.12); overflow: hidden; }
+.dots-panel:active { background: rgba(255,255,255,0.16); }
+.dot { position: absolute; border-radius: 50%; }
+
+/* ---------------------------------------------------------------
+   Tocchi (tocchi.js)
+   --------------------------------------------------------------- */
+.tap-pad {
+  position: relative;
+  flex: 1;
+  min-height: 60vh;
+  border-radius: 28px;
+  background: radial-gradient(circle at 50% 40%, #3f3d8a, #26254a);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  touch-action: none;
+}
+.tap-counter { font-size: 120px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; pointer-events: none; }
+.ripple {
+  position: absolute;
+  width: 20px; height: 20px;
+  margin: -10px 0 0 -10px;
+  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.7);
+  animation: ripple 0.5s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes ripple { to { transform: scale(9); opacity: 0; } }
+
+/* ---------------------------------------------------------------
+   Ritmo (ritmo.js)
+   --------------------------------------------------------------- */
+.rhythm-feedback { text-align: center; font-size: 28px; font-weight: 700; min-height: 36px; color: var(--accent); }
+.rhythm-feedback.great { color: var(--ok); }
+.rhythm-feedback.bad { color: var(--danger); }
+.rhythm-stage { position: relative; height: 260px; display: flex; align-items: center; justify-content: center; }
+.rhythm-core { width: 110px; height: 110px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 30px rgba(255,183,3,0.5); }
+.rhythm-core.beat { animation: beat 0.18s ease-out; }
+@keyframes beat { 0% { transform: scale(1.25); } 100% { transform: scale(1); } }
+.rhythm-ring { position: absolute; width: 110px; height: 110px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.8); pointer-events: none; }
+.rhythm-dots { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+.rhythm-dot { width: 14px; height: 14px; border-radius: 50%; background: rgba(255,255,255,0.15); }
+.rhythm-dot.great { background: var(--ok); }
+.rhythm-dot.ok { background: var(--accent); }
+.rhythm-dot.bad { background: var(--danger); }
+
+/* ---------------------------------------------------------------
+   Torre (torre.js), Frenata (frenata.js), Cesto (cesto.js) — canvas
+   (usano .run-canvas)
+   --------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------
+   Lampi (lampi.js) — usa anche .keypad
+   --------------------------------------------------------------- */
+.flash-stage { position: relative; height: 300px; border-radius: 20px; background: rgba(0,0,0,0.25); overflow: hidden; margin-bottom: 12px; }
+.flash { position: absolute; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; box-shadow: 0 0 24px currentColor; animation: flashpop 0.15s ease-out; }
+@keyframes flashpop { from { transform: scale(0.3); } to { transform: scale(1); } }
+
+/* ---------------------------------------------------------------
+   Metà (meta.js)
+   --------------------------------------------------------------- */
+.half-stage { position: relative; height: 62vh; border-radius: 20px; background: rgba(0,0,0,0.2); overflow: hidden; touch-action: none; }
+.half-bar { position: absolute; height: 18px; border-radius: 9px; transform-origin: center; margin-top: -9px; }
+.half-mark, .half-truth { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; pointer-events: none; }
+.half-mark { border: 3px solid white; }
+.half-truth { background: var(--ok); }
+
+/* ---------------------------------------------------------------
+   Cronometro cieco (cinquesecondi.js)
+   --------------------------------------------------------------- */
+.clock-target { text-align: center; font-size: 22px; font-weight: 800; color: var(--muted); margin-bottom: 8px; }
+.clock-display { text-align: center; font-size: 84px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent); transition: opacity 0.2s; margin-bottom: 8px; }
+.clock-display.hidden { opacity: 0.06; }
+
+/* ---------------------------------------------------------------
+   Copia (copia.js)
+   --------------------------------------------------------------- */
+.copy-grid { display: grid; gap: 8px; width: 100%; max-width: 340px; margin: 0 auto 16px; }
+.copy-cell { aspect-ratio: 1; border-radius: 12px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.12); transition: background 0.1s; }
+.copy-cell.lit { background: var(--accent); border-color: var(--accent); }
+.copy-cell.on { background: #36cfc9; border-color: #36cfc9; }
+.copy-cell.ok { background: var(--ok); border-color: var(--ok); }
+.copy-cell.missed { background: rgba(255,255,255,0.1); border-color: var(--accent); border-style: dashed; }
+.copy-cell.wrong { background: var(--danger); border-color: var(--danger); }
+.copy-confirm { max-width: 340px; margin: 0 auto; width: 100%; }
+
+/* ---------------------------------------------------------------
+   Anagrammi (anagrammi.js)
+   --------------------------------------------------------------- */
+.ana-answer { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; min-height: 56px; margin-bottom: 20px; }
+.ana-slot {
+  width: 40px; height: 52px; border-radius: 10px;
+  background: rgba(255,255,255,0.08); border-bottom: 3px solid var(--accent);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 26px; font-weight: 700;
+}
+.ana-answer.ok .ana-slot { background: var(--ok); color: var(--ink); }
+.ana-answer.ko .ana-slot { background: var(--danger); animation: shake 0.25s; }
+.ana-tiles { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.ana-tile { width: 52px; height: 60px; padding: 0; font-size: 28px; background: #f6f3ff; color: var(--ink); border-radius: 12px; }
+.ana-tile.used { opacity: 0.15; }
+
+/* ---------------------------------------------------------------
+   Alto o basso (altobasso.js)
+   --------------------------------------------------------------- */
+.hl-prev { text-align: center; color: var(--muted); font-size: 14px; min-height: 18px; }
+.hl-card {
+  width: 170px; height: 220px; margin: 8px auto;
+  border-radius: 20px; background: #f6f3ff; color: var(--ink);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 84px; font-weight: 700; font-variant-numeric: tabular-nums;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  transition: background 0.15s;
+}
+.hl-card.ok { background: var(--ok); }
+.hl-card.ko { background: var(--danger); color: white; }
+.hl-streak { text-align: center; min-height: 24px; font-weight: 800; color: var(--accent); }
+.hl-buttons { display: flex; gap: 10px; margin-top: 8px; }
+.hl-btn { flex: 1; font-size: 20px; padding: 20px 0; }
+.hl-btn.high { background: var(--ok); color: var(--ink); }
+.hl-btn.low { background: #1982c4; color: white; }
+
+/* ---------------------------------------------------------------
+   Dieci (dieci.js)
+   --------------------------------------------------------------- */
+.ten-grid { display: grid; gap: 8px; width: 100%; }
+.ten-cell { aspect-ratio: 1; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 700; color: var(--ink); transition: transform 0.12s, opacity 0.2s; }
+.ten-cell.sel { transform: scale(0.9); outline: 4px solid white; }
+.ten-cell.gone { opacity: 0; transform: scale(0.5); }
+.ten-cell.wrong { animation: shake 0.25s; outline: 4px solid var(--danger); }

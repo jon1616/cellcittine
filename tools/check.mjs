@@ -98,6 +98,23 @@ const notListed = ids.filter((id) => !precache.includes(`./js/games/${id}.js`));
 if (notListed.length) warn(`minigiochi non elencati in PRECACHE (non funzionano offline): ${notListed.join(", ")}`);
 else ok("tutti i minigiochi sono in PRECACHE");
 
+// Ogni file dell'app (js, css, icone dei minigiochi) deve stare in PRECACHE,
+// altrimenti offline manca un pezzo. Il tester (tester.js) è escluso apposta.
+const appFiles = [
+  ...listJs("js").filter((p) => !p.endsWith("tester.js")),
+  ...readdirSync(join(root, "css")).filter((n) => n.endsWith(".css")).map((n) => `css/${n}`),
+  ...readdirSync(join(root, "assets/icons")).filter((n) => n.endsWith(".webp")).map((n) => `assets/icons/${n}`),
+].map((p) => `./${p.replace(/\\/g, "/")}`);
+const forgotten = appFiles.filter((p) => !precache.includes(p));
+if (forgotten.length) warn(`file dell'app non elencati in PRECACHE: ${forgotten.join(", ")}`);
+else ok(`tutti i file dell'app (${appFiles.length} tra js, css, icone) sono in PRECACHE`);
+
+// Ogni scheda con `image` deve avere il file
+const noImage = [...catalog.matchAll(/image:\s*"([^"]+)"/g)].map((m) => m[1]).filter((p) => !existsSync(join(root, p)));
+if (noImage.length) fail(`icone indicate nel catalogo ma assenti: ${noImage.join(", ")}`);
+const withoutImage = ids.filter((id) => !new RegExp(`id:\\s*"${id}"[\\s\\S]{0,200}image:`).test(catalog) && !new RegExp(`image:[^\\n]*\\n\\s*id:\\s*"${id}"`).test(catalog));
+if (withoutImage.length) warn(`minigiochi senza icona disegnata (usano l'emoji): ${withoutImage.join(", ")}`);
+
 // 4. Versione
 console.log("Versione");
 const v1 = read("js/version.js").match(/VERSION\s*=\s*"([^"]+)"/)?.[1];
