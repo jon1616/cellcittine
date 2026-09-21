@@ -9,12 +9,13 @@ import { state, setScreen } from "../state.js";
 import { show, statusLine, setStatus } from "../ui.js";
 import { CATALOG } from "../games/catalog.js";
 import { availableThemes, getChoice, setChoice, seasonalTheme } from "../theme.js";
-import { createRoom, playSolo } from "../room.js";
+import { createRoom, playSolo, joinRoom } from "../room.js";
 import { showJoin } from "./join.js";
 import { showRecords } from "./records.js";
 import { showCatalog } from "./catalog.js";
 
-export function showHome(message = "") {
+// message: riga di stato (per default in rosso: è quasi sempre un errore)
+export function showHome(message = "", isError = !!message) {
   setScreen("home");
   const nameInput = el("input", {
     type: "text",
@@ -37,13 +38,14 @@ export function showHome(message = "") {
     return true;
   };
 
-  const status = statusLine(message, !!message);
+  const status = statusLine(message, isError);
   const hero = el("div", { class: "hero" }, [el("img", { src: "assets/home-hero.jpg", alt: "", width: "1000", height: "521" })]);
 
   show(
     hero,
     el("h1", { class: "home-title", text: "CELLCITTINE" }),
     el("p", { text: "Sfide a minigiochi, da soli o in gruppo" }),
+    inviteCard(requireName),
     el("div", { class: "card" }, [
       nameInput,
       el("button", { text: "Crea una stanza", onclick: () => requireName() && createRoom() }),
@@ -67,6 +69,31 @@ export function showHome(message = "") {
     themeRow(),
     status
   );
+}
+
+// Invito arrivato da un link (?stanza=XXXX): riquadro in evidenza con "Entra".
+function inviteCard(requireName) {
+  const code = state.pendingCode;
+  if (!code) return el("span");
+  const enter = el("button", { text: `Entra nella stanza ${code}` });
+  enter.addEventListener("click", async () => {
+    if (!requireName()) return;
+    enter.disabled = true;
+    setStatus("Mi collego…");
+    try {
+      await joinRoom(code);
+      state.pendingCode = null;
+    } catch (err) {
+      enter.disabled = false;
+      setStatus(err.message, true);
+    }
+  });
+  return el("div", { class: "card invite" }, [
+    el("div", { class: "label", text: "Invito" }),
+    el("p", { text: state.name ? "Ti hanno invitato a giocare!" : "Ti hanno invitato a giocare! Scrivi il tuo nome qui sotto, poi entra." }),
+    enter,
+    el("button", { text: "Ignora l'invito", class: "link", onclick: () => { state.pendingCode = null; showHome(); } }),
+  ]);
 }
 
 // Scelta del tema: compare solo quando esiste più di un tema.

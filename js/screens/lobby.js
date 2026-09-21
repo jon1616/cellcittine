@@ -10,7 +10,7 @@ import { show, statusLine, segmented, difficultyLabel } from "../ui.js";
 import { CATALOG, CATEGORIES, getEntry } from "../games/catalog.js";
 import { BUILTIN_PACKS, getBuiltinPack, resolvePack, randomSelection, sameSelection } from "../packs.js";
 import { DIFFICULTIES, ROUND_OPTIONS, saveConfig, getUserPacks, saveUserPack, deleteUserPack } from "../storage.js";
-import { exitButton } from "../room.js";
+import { exitButton, shareInvite } from "../room.js";
 import { startChallenge } from "../challenge.js";
 import { showHome } from "./home.js";
 import { showPicker } from "./picker.js";
@@ -211,7 +211,8 @@ export function showLobby() {
     : [
         el("p", { text: "Codice della stanza" }),
         el("div", { class: "code-big", text: net.code }),
-        el("p", { text: "Chi vuole entrare tocca “Entra con un codice”" }),
+        el("p", { text: "Chi vuole entrare tocca “Entra con un codice”, oppure mandagli il link" }),
+        el("button", { text: "📨 Invita", class: "secondary small-btn invite-btn", onclick: () => shareInvite(net.code) }),
       ];
 
   const parts = [...header];

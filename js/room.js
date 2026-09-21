@@ -6,7 +6,7 @@
 import { Net } from "./net.js";
 import { el } from "./utils.js";
 import { state } from "./state.js";
-import { setStatus } from "./ui.js";
+import { setStatus, toast } from "./ui.js";
 import { showHome } from "./screens/home.js";
 import { showLobby, broadcastConfig } from "./screens/lobby.js";
 import { handleMessage, checkRoundComplete } from "./challenge.js";
@@ -72,6 +72,39 @@ export async function joinRoom(code) {
     leaveRoom();
     throw err;
   }
+}
+
+// ---------------------------------------------------------------
+// Invito con link: …/?stanza=XXXX
+// ---------------------------------------------------------------
+
+export function inviteLink(code) {
+  return `${location.origin}${location.pathname}?stanza=${code}`;
+}
+
+// Menu di condivisione del telefono se c'è, altrimenti copia negli appunti.
+export async function shareInvite(code) {
+  const url = inviteLink(code);
+  const text = `Entra nella mia stanza Cellcittine! Codice ${code}`;
+  if (navigator.share) {
+    try { await navigator.share({ title: "Cellcittine", text, url }); return; } catch (_) { /* annullato o non riuscito: copia */ }
+  }
+  try {
+    await navigator.clipboard.writeText(`${text} ${url}`);
+    toast("Link copiato: incollalo in chat");
+  } catch (_) {
+    toast(`Codice stanza: ${code}`);
+  }
+}
+
+// Legge ?stanza=XXXX dall'indirizzo (una volta sola) e lo toglie dalla barra,
+// così ricaricare la pagina non tenta di rientrare.
+export function readInviteFromUrl() {
+  const code = new URLSearchParams(location.search).get("stanza");
+  if (!code) return null;
+  history.replaceState(history.state, "", location.pathname);
+  const clean = code.trim().toUpperCase();
+  return /^[A-Z]{4}$/.test(clean) ? clean : null;
 }
 
 export function playSolo() {

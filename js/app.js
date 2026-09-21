@@ -14,6 +14,7 @@ import { applyTheme } from "./theme.js";
 import { state } from "./state.js";
 import { detectPack } from "./screens/lobby.js";
 import { showHome } from "./screens/home.js";
+import { readInviteFromUrl, joinRoom, leaveRoom } from "./room.js";
 
 document.getElementById("version").textContent = `v${VERSION}`;
 applyTheme();
@@ -41,4 +42,13 @@ document.addEventListener("pointerdown", (ev) => {
   if (btn && !btn.closest(".game-area")) sfx.play("click");
 }, { passive: true });
 
-showHome();
+// Arrivo da un link di invito (?stanza=XXXX)
+state.pendingCode = readInviteFromUrl();
+if (state.pendingCode && state.name) {
+  showHome(`Entro nella stanza ${state.pendingCode}…`, false);
+  joinRoom(state.pendingCode)
+    .then(() => { state.pendingCode = null; })
+    .catch((err) => { leaveRoom(); showHome(err.message); });
+} else {
+  showHome();
+}

@@ -105,3 +105,6 @@ GitHub Pages aggiorna il sito in circa un minuto. Sul telefono basta chiudere e 
 ## Sul telefono
 
 Apri il link in Chrome → menu ⋮ → "Aggiungi a schermata Home".
+
+Per far entrare qualcuno in stanza: pulsante "📨 Invita" sotto il codice, che manda il link
+`https://jon1616.github.io/cellcittine/?stanza=CODICE` (chi lo apre entra direttamente).

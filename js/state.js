@@ -19,6 +19,7 @@ export const state = {
   round: null,                      // { index, game, params, startAt, scores: Map, participants, deadline, my* }
   picker: null,                     // stato della schermata di scelta minigiochi
   infoBack: null,                   // dove torna la scheda di un minigioco
+  pendingCode: null,                // codice stanza arrivato da un link di invito (?stanza=XXXX)
 };
 
 export function setScreen(name) {
