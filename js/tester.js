@@ -516,7 +516,10 @@ async function testAllenamento(gameId, difficulty) {
       await waitFor("i risultati della manche", () => doc.querySelector("#app .ranking"), ((game.maxSeconds + 12) * 1000) / getFactor() + 3000);
     } finally { monkey.stop(); }
     steps.push(`risultati (${monkey.taps} tocchi)`);
-    if (!doc.getElementById("app").textContent.includes("Tester")) errors.push("nei risultati non compare il nome del giocatore");
+    if (!doc.getElementById("app").textContent.includes("Tester")) {
+      const seen = doc.getElementById("app").textContent.replace(/s+/g, " ").trim().slice(0, 160);
+      errors.push(`nei risultati non compare il nome del giocatore (a schermo: "${seen}" · nome salvato: "${win.localStorage.getItem("name")}" · config: ${win.localStorage.getItem("config")})`);
+    }
 
     const finalBtn = await waitFor("il pulsante del risultato finale", () => button("Vedi il risultato finale"), 3000);
     finalBtn.click();

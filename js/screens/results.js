@@ -8,7 +8,7 @@ import { sfx } from "../audio.js";
 import { state, setScreen, isSolo } from "../state.js";
 import { show, gameIcon, gameHeading, confetti, colorDot, playerColor } from "../ui.js";
 import { getEntry, loadGame, getLoaded } from "../games/catalog.js";
-import { getRecord } from "../storage.js";
+import { getRecord, addHistoryEntry } from "../storage.js";
 import { leaveRoom, exitButton } from "../room.js";
 import { nextRound, finishChallenge } from "../challenge.js";
 import { showHome } from "./home.js";
@@ -174,9 +174,34 @@ function awardsCard(awards, meId) {
 // Podio finale / riepilogo dell'allenamento
 // ---------------------------------------------------------------
 
+// Ricorda la sfida nello storico del telefono (ognuno salva la propria copia).
+function rememberChallenge(msg) {
+  const net = state.net;
+  const ch = state.challenge;
+  if (!net || !ch) return;
+  const solo = isSolo();
+  const meId = net.me.id;
+  const players = solo
+    ? [{ id: meId, name: net.me.name, color: 0, points: 0 }]
+    : msg.standings.map((s) => ({ id: s.id, name: s.name, color: s.color, points: s.points }));
+  addHistoryEntry({
+    at: Date.now(),
+    code: net.code,
+    solo,
+    rounds: ch.history.length,
+    difficulty: ch.difficulty,
+    games: ch.history.map((h) => h.gameId),
+    players,
+    winnerId: solo ? null : players[0]?.id || null,
+    awards: (msg.awards || []).map((a) => ({ icon: a.icon, title: a.title, name: a.name })),
+    meId,
+  });
+}
+
 export function showFinal(msg) {
   setScreen("final");
   sfx.play("fanfare");
+  rememberChallenge(msg);
   if (!isSolo() || (state.challenge?.history.length || 0) > 0) confetti();
   const net = state.net;
   const ch = state.challenge;

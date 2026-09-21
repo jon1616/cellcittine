@@ -43,6 +43,7 @@ js/screens/lobby.js  stanza + configurazione della sfida (pacchetti, manche, dif
 js/screens/picker.js scelta dei minigiochi (ricerca, filtri, categorie)
 js/screens/catalog.js  catalogo, scheda di un minigioco, elenco dei minigiochi della sfida
 js/screens/records.js  i miei record
+js/screens/history.js  storico delle sfide giocate (storage.getHistory)
 js/screens/results.js  risultati di manche e podio finale
 js/net.js            P2P (PeerJS): host(), join(), broadcast(), sendToHost(), now() sincronizzato; id stabile per telefono, ricollegamento automatico degli ospiti (30 s), ultimo messaggio di fase rimandato a chi rientra
 js/audio.js          effetti sintetizzati (sfx.play/pad/step/inflate*) + musica (sfx.setScene("menu"|"game"))

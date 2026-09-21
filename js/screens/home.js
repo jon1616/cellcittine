@@ -13,6 +13,7 @@ import { createRoom, playSolo, joinRoom } from "../room.js";
 import { showJoin } from "./join.js";
 import { showRecords } from "./records.js";
 import { showCatalog } from "./catalog.js";
+import { showHistory } from "./history.js";
 
 // message: riga di stato (per default in rosso: è quasi sempre un errore)
 export function showHome(message = "", isError = !!message) {
@@ -54,6 +55,7 @@ export function showHome(message = "", isError = !!message) {
     ]),
     el("div", { class: "links" }, [
       el("button", { text: "I miei record", class: "link", onclick: showRecords }),
+      el("button", { text: "Storico", class: "link", onclick: showHistory }),
       el("button", { text: `${CATALOG.length} minigiochi`, class: "link", onclick: () => showCatalog() }),
       el("button", {
         text: sfx.isEnabled() ? "🔊 Suoni" : "🔇 Suoni",

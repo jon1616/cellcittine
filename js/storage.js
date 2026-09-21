@@ -5,6 +5,8 @@ const KEY_CONFIG = "config";
 const KEY_RECORDS = "records";
 const KEY_PACKS = "packs";
 const KEY_CLIENT = "clientId";
+const KEY_HISTORY = "history";
+const HISTORY_MAX = 60; // sfide ricordate sul telefono
 
 export const DIFFICULTIES = [
   { id: "facile", label: "Facile" },
@@ -101,6 +103,26 @@ export function updateRecord(game, difficulty, score) {
     write(KEY_RECORDS, all);
   }
   return better;
+}
+
+// ---------------------------------------------------------------
+// Storico delle sfide giocate su questo telefono (le più recenti prima).
+// Voce: { at, code, solo, rounds, difficulty, games, players: [{id,name,color,points}],
+//         winnerId, awards: [{icon,title,name}], meId }
+// ---------------------------------------------------------------
+
+export function getHistory() {
+  const list = read(KEY_HISTORY, []);
+  return Array.isArray(list) ? list : [];
+}
+
+export function addHistoryEntry(entry) {
+  const list = [entry, ...getHistory()].slice(0, HISTORY_MAX);
+  write(KEY_HISTORY, list);
+}
+
+export function clearHistory() {
+  write(KEY_HISTORY, []);
 }
 
 // ---------------------------------------------------------------

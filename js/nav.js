@@ -53,6 +53,7 @@ function goBack() {
   const inRoom = state.net && !isSolo();
   switch (state.screen) {
     case "records":
+    case "history":
     case "catalog":
     case "join":
       showHome();
