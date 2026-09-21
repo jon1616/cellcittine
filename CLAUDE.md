@@ -16,7 +16,7 @@ Online: https://jon1616.github.io/cellcittine/ — Repo: jon1616/cellcittine (br
 2. **Ogni minigioco ha i suoni**: usa `sfx.play("good"|"bad"|"hit"|…)` di `js/audio.js`, mai suoni propri.
 3. **Ogni minigioco dice la prestazione**: `onFinish(score, detail)` con una frase breve, e `maxScore(params)` se esiste un massimo sensato.
 4. **Parametri identici per tutti**: tutto ciò che è casuale nasce in `createParams(rng, difficulty)` dal seme dell'host; `mount` non usa `Math.random()` per nulla che influenzi il punteggio.
-5. **Asset esterni solo con licenza libera e salvati nel progetto** (font in `fonts/`, immagini in `assets/`), sempre elencati in PRECACHE. Grafica dei minigiochi da codice; suoni sintetizzati. Stile immagini: flat cartoon, contorni scuri (#1B1A2E), tinte piene, palette del gioco.
+5. **Asset e librerie esterne solo con licenza libera e salvati nel progetto** (font in `fonts/`, immagini in `assets/`, librerie in `vendor/` con il testo della licenza; mai da CDN), sempre elencati in PRECACHE. Grafica dei minigiochi da codice; suoni sintetizzati. Stile immagini: flat cartoon, contorni scuri (#1B1A2E), tinte piene, palette del gioco.
 6. **Nessuna manche può restare bloccata**: un minigioco deve finire da solo entro `maxSeconds` anche senza tocchi (timer, limiti per tentativo).
 7. **Mai credenziali** in chat, file o commit.
 8. **Ogni file nuovo dell'app va in PRECACHE** (`sw.js`): `node tools/check.mjs` lo segnala se manca.
@@ -53,6 +53,7 @@ js/games/shell.js    cornice comune: createShell, runTimer, runStopwatch, shuffl
 js/games/<id>.js     logica di un minigioco (vedi contratto in semaforo.js)
 js/utils.js          el(), seededRandom(), sleep(), vibrate()
 js/version.js        VERSION mostrata nell'angolo
+vendor/peerjs.min.js PeerJS 1.5.4 (MIT): unica libreria esterna, copiata nel progetto (niente CDN)
 js/tester.js + test.html   tester nel browser (struttura, ogni minigioco, allenamento completo)
 tools/check.mjs      controllo da riga di comando (sintassi, catalogo ↔ file ↔ sw.js, PRECACHE completa, versione)
 .claude/serve.js + .claude/launch.json   server locale di sviluppo (porta 8765), fuori da Git

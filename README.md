@@ -36,6 +36,7 @@ icons/                  icone dell'app (any + maskable, generate da assets/icon-
 assets/music/           sottofondo.mp3 (CC0, vedi LICENSE.txt); l'originale resta fuori da Git
 assets/                 immagini: originali (PNG), versioni usate dall app (JPEG/WebP), icone dei minigiochi (assets/icons/<id>.webp)
 fonts/                  carattere Fredoka (SIL OFL, licenza in fonts/OFL.txt)
+vendor/                 PeerJS 1.5.4 (MIT, licenza in vendor/peerjs-LICENSE.txt): unica libreria esterna, copiata qui
 test.html + js/tester.js  tester nel browser: prova tutto il gioco in meno di un minuto
 tools/check.mjs         controllo rapido da riga di comando (sintassi, catalogo, PRECACHE completa, versione)
 CLAUDE.md · ROADMAP.md  guida per chi lavora sul codice · elenco di fatto / da fare

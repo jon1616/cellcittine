@@ -103,6 +103,7 @@ else ok("tutti i minigiochi sono in PRECACHE");
 const appFiles = [
   ...listJs("js").filter((p) => !p.endsWith("tester.js")),
   ...readdirSync(join(root, "css")).filter((n) => n.endsWith(".css")).map((n) => `css/${n}`),
+  ...readdirSync(join(root, "vendor")).filter((n) => n.endsWith(".js")).map((n) => `vendor/${n}`),
   ...readdirSync(join(root, "assets/icons")).filter((n) => n.endsWith(".webp")).map((n) => `assets/icons/${n}`),
 ].map((p) => `./${p.replace(/\\/g, "/")}`);
 const forgotten = appFiles.filter((p) => !precache.includes(p));

@@ -33,7 +33,7 @@ M = due-tre passi, L = più passi). L'ordine dentro ogni blocco è quello consig
 
 ## 1. Una serata senza intoppi (priorità alta)
 
-- [ ] **PeerJS copiato nel progetto** (licenza MIT) invece che da unpkg: apertura più veloce, niente dipendenza da un sito esterno, offline pulito. Come: `vendor/peerjs.min.js` + `LICENSE`, `<script>` in index.html, riga in PRECACHE. — S
+- [x] **PeerJS copiato nel progetto** (MIT, `vendor/`) invece che da unpkg; il service worker offline non risponde più con HTML al posto di uno script (v0.13.0)
 - [ ] **Invito con link**: pulsante "Invita" in stanza che condivide (navigator.share / copia) `…/cellcittine/?stanza=CODICE`; chi apre il link entra direttamente dopo aver scritto il nome. Come: `app.js` (lettura del parametro all'avvio), `screens/lobby.js` (pulsante), `screens/join.js` (codice precompilato). — S
 - [ ] **Schermo sempre acceso durante la sfida** (Wake Lock API) dalla stanza al podio, rilasciato in home. Come: `room.js`. — S
 - [ ] **Identità stabile per telefono** (id casuale salvato in localStorage, inviato nel `join`): chi perde la connessione e rientra ritrova i suoi punti; l'host riconosce il rientro e non lo conta come nuovo. Come: `net.js` (id nel join/welcome), `challenge.js` (standings per id stabile). — M

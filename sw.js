@@ -5,13 +5,14 @@
   salvata l'ultima volta.
 */
 
-const CACHE_VERSION = "0.12.1"; // tenere allineato a js/version.js
+const CACHE_VERSION = "0.13.0"; // tenere allineato a js/version.js
 const CACHE = `cellcittine-${CACHE_VERSION}`;
 
 const PRECACHE = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
+  "./vendor/peerjs.min.js",
   "./css/base.css",
   "./css/menu.css",
   "./css/games.css",
@@ -135,6 +136,14 @@ self.addEventListener("fetch", (event) => {
         }
         return response;
       })
-      .catch(() => caches.match(request).then((cached) => cached || caches.match("./index.html")))
+      .catch(() =>
+        caches.match(request).then((cached) => {
+          if (cached) return cached;
+          // Offline e non in cache: la pagina di partenza per le navigazioni,
+          // "non trovato" per tutto il resto (mai HTML al posto di uno script).
+          if (request.mode === "navigate") return caches.match("./index.html");
+          return new Response("", { status: 404, statusText: "Offline" });
+        })
+      )
   );
 });
