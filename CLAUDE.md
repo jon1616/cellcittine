@@ -115,3 +115,4 @@ condividono il localStorage) · Il multiplayer si prova con due schede (host + o
 - Non riproporre Roblox o Google Play: scartati per i tempi di attesa imposti agli account nuovi.
 - Avatar rimandati: per ora solo il nome.
 - Tutto sbloccato: niente monete/progressione finché non richiesto.
+- Niente ponte di rete (TURN) con account esterno: deciso il 21/09/2026 per non mettere una chiave nel codice pubblico. `js/relay.js` resta predisposto e spento; non riproporlo salvo richiesta.

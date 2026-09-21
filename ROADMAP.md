@@ -82,7 +82,7 @@ Idee già discusse, tutte con suoni, prestazione e icona nello stile delle altre
 
 ## 5. Rete e affidabilità (più avanti)
 
-- [ ] **Ponte di rete (TURN)** quando il collegamento diretto fallisce. Predisposto in v0.22.1 (`js/relay.js`: server STUN espliciti, richiesta delle credenziali temporanee a Open Relay/metered.ca, `?rete=ponte` per forzare il ponte in prova): per accenderlo servono un account gratuito su metered.ca (20 GB/mese) e i due valori `app` e `apiKey` in `relay.js`. Decisione del proprietario dell'account. — S
+- [ ] ~~Ponte di rete (TURN)~~ — **rinunciato il 21/09/2026**: servirebbe un account esterno con chiave nel codice pubblico. Il meccanismo resta predisposto e spento in `js/relay.js` (basterebbero `app` e `apiKey`), se un giorno si cambiasse idea. Il gioco a distanza funziona tra reti normali (casa ↔ casa); può fallire con alcune SIM, uffici e VPN: il messaggio d'errore lo spiega.
 - [ ] Server di presentazione (PeerJS) di riserva se quello pubblico non risponde. — M
 - [ ] Passaggio di host: se l'host esce, un altro telefono prende il comando (serve stato condiviso). — L
 - [ ] Modalità spettatore: chi entra a sfida iniziata vede le classifiche e gioca dalla manche successiva (oggi entra e aspetta). — S
