@@ -31,6 +31,7 @@ if ("serviceWorker" in navigator) {
   navigator.serviceWorker.addEventListener("controllerchange", () => {
     if (reloading || !hadController) return;
     if (state.screen !== "home") return; // mai a metà partita
+    if (new URLSearchParams(location.search).has("tester")) return; // sotto il tester la ricarica falserebbe la prova
     reloading = true;
     location.reload();
   });

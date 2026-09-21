@@ -46,7 +46,7 @@ M = due-tre passi, L = più passi). L'ordine dentro ogni blocco è quello consig
 
 ## 2. Più divertimento (priorità media)
 
-- [ ] **Premi di fine sfida**: "Fulmine" (reazione migliore), "Cecchino" (più bersagli/precisione), "Costante" (mai ultimo), "Rimonta" (dall'ultimo posto al podio), "Record" (più record personali). Calcolati dall'host dallo storico delle manche e mostrati sul podio. Come: `challenge.js` (awards), `screens/results.js`, `menu.css`. — M
+- [x] **Premi di fine sfida** sul podio: uno per categoria (Fulmine ⚡, Cecchino 🎯, Elefante 🐘, Occhio di lince 🔍, Calcolatrice 🧮, Fortuna 🍀, Dizionario 📖) a chi vince più manche di quel tipo, più Dominio 👑, Costante 🧱, Rimonta 🚀 e Da record ★ (js/awards.js) (v0.18.0)
 - [ ] **Storico delle sfide** sul telefono: data, partecipanti, vincitore, punteggi; conteggio vittorie; schermata "Storico" dalla home. Come: `storage.js`, `screens/history.js`, `nav.js`. — M
 - [ ] **Presentazione più lunga la prima volta**: per un minigioco mai giocato su quel telefono il conto alla rovescia dura 6 s e mostra la spiegazione completa (`howTo`); poi 3,5 s come oggi. L'host decide la durata e la manda nello `start`. Come: `challenge.js`, `storage.js` (visti). — S
 - [ ] **Massimo o riferimento per gli 11 minigiochi che non lo mostrano**: Memory/Numeri → "tempo ideale" per difficoltà; Calcoli/Colori/Frecce/Di più/Alto o basso/Dieci → "domande viste"; Tocchi → "record del telefono"; Intruso/Anagrammi → totale disponibile. Come: `maxScore` o `detail` in ogni file. — M

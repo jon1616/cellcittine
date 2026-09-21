@@ -153,6 +153,23 @@ export async function showResults(msg) {
   );
 }
 
+// Premi di fine sfida (calcolati dall'host, vedi awards.js)
+function awardsCard(awards, meId) {
+  return el("div", { class: "card" }, [
+    el("h2", { text: "Premi" }),
+    el("div", { class: "awards" }, awards.map((a, i) =>
+      el("div", { class: `award${a.id === meId ? " me" : ""}`, style: `--i: ${i}` }, [
+        el("span", { class: "award-icon", text: a.icon }),
+        el("span", { class: "award-text" }, [
+          el("span", { class: "award-title", text: a.title }),
+          el("span", { class: "award-who" }, [colorDot(a.color), el("span", { text: a.name })]),
+          el("span", { class: "award-why", text: a.text }),
+        ]),
+      ])
+    )),
+  ]);
+}
+
 // ---------------------------------------------------------------
 // Podio finale / riepilogo dell'allenamento
 // ---------------------------------------------------------------
@@ -196,6 +213,7 @@ export function showFinal(msg) {
       ])
     );
     parts.push(el("div", { class: "card" }, [standingsList(msg.standings, meId)]));
+    if (msg.awards?.length) parts.push(awardsCard(msg.awards, meId));
   }
 
   const actions = net.isHost

@@ -21,6 +21,7 @@ import { shuffle } from "./games/shell.js";
 import { updateRecord } from "./storage.js";
 import { showLobby } from "./screens/lobby.js";
 import { showResults, showFinal } from "./screens/results.js";
+import { computeAwards } from "./awards.js";
 
 const COUNTDOWN_MS = 3500; // dal messaggio "start" al via
 const GRACE_SECONDS = 8;   // margine oltre maxSeconds prima di chiudere la manche
@@ -93,7 +94,8 @@ export function nextRound() {
 }
 
 export function finishChallenge() {
-  const msg = { type: "final", standings: standingsArray() };
+  const standings = standingsArray();
+  const msg = { type: "final", standings, awards: computeAwards(state.challenge.history, standings) };
   state.net.broadcast(msg);
   showFinal(msg);
 }
@@ -113,7 +115,7 @@ async function beginRound(msg) {
   state.challenge.index = msg.index;
 
   // Segnaposto subito (così i messaggi di questa manche non vengono scartati)…
-  state.round = { index: msg.index, game: null, params: null, startAt: msg.startAt, scores: new Map(), participants: net.players.map((p) => p.id), deadline: null };
+  state.round = { index: msg.index, game: null, params: null, startAt: msg.startAt, scores: new Map(), records: new Set(), participants: net.players.map((p) => p.id), deadline: null };
   showCountdown(getEntry(msg.gameId), msg);
 
   // …poi il codice del minigioco, caricato a richiesta.
@@ -200,9 +202,9 @@ function submitScore(score, detail = null) {
   round.isRecord = updateRecord(round.game, state.challenge.difficulty, score);
 
   if (net.isHost) {
-    recordScore(net.me.id, score);
+    recordScore(net.me.id, score, round.isRecord);
   } else {
-    net.sendToHost({ type: "result", index: round.index, score });
+    net.sendToHost({ type: "result", index: round.index, score, record: round.isRecord });
   }
 }
 
@@ -210,10 +212,11 @@ function submitScore(score, detail = null) {
 // Raccolta punteggi e classifiche (host)
 // ---------------------------------------------------------------
 
-function recordScore(playerId, score) {
+function recordScore(playerId, score, record = false) {
   const round = state.round;
   if (!round || round.scores.has(playerId)) return;
   round.scores.set(playerId, score);
+  if (record) round.records.add(playerId);
   checkRoundComplete();
 }
 
@@ -236,7 +239,7 @@ function publishResults() {
   const order = round.game.order;
 
   const ranking = round.participants
-    .map((id) => ({ id, name: infoOf(id).name, color: infoOf(id).color, score: round.scores.has(id) ? round.scores.get(id) : null }))
+    .map((id) => ({ id, name: infoOf(id).name, color: infoOf(id).color, score: round.scores.has(id) ? round.scores.get(id) : null, record: round.records.has(id) }))
     .sort((a, b) => {
       if (a.score === null) return 1;
       if (b.score === null) return -1;
@@ -289,7 +292,7 @@ export function handleMessage(msg, fromId) {
   if (!net) return;
 
   if (net.isHost) {
-    if (msg.type === "result" && msg.index === state.round?.index) recordScore(fromId, msg.score);
+    if (msg.type === "result" && msg.index === state.round?.index) recordScore(fromId, msg.score, msg.record === true);
     return;
   }
 

@@ -36,6 +36,7 @@ js/ui.js             mattoni: show(), statusLine/setStatus, toast, confetti, gam
 js/nav.js            tasto indietro (guardia nella cronologia, doppia pressione per uscire)
 js/room.js           stanza: createRoom, joinRoom, playSolo, leaveRoom, exitButton; collega Net alle schermate
 js/challenge.js      sfida e manche: startChallenge, nextRound, conto alla rovescia, mount, punteggi, classifiche, handleMessage
+js/awards.js         premi di fine sfida (computeAwards dallo storico delle manche; inviati nel messaggio "final")
 js/screens/home.js   home (nome, pulsanti, collegamenti, temi)
 js/screens/join.js   entra con un codice
 js/screens/lobby.js  stanza + configurazione della sfida (pacchetti, manche, difficoltà, updateConfig/broadcastConfig)

@@ -224,6 +224,6 @@ h2.with-icon { width: 100%; }
 
 /* Meno movimento per chi lo chiede nelle impostazioni del telefono */
 @media (prefers-reduced-motion: reduce) {
-  .screen, .code-big, .podium-trophy, .confetti i { animation: none !important; }
+  .screen, .code-big, .podium-trophy, .confetti i, .award { animation: none !important; }
   button, .chip { transition: none; }
 }
