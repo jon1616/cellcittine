@@ -11,6 +11,32 @@ import { showHome } from "./screens/home.js";
 import { showLobby, broadcastConfig } from "./screens/lobby.js";
 import { handleMessage, checkRoundComplete } from "./challenge.js";
 
+// ---------------------------------------------------------------
+// Schermo sempre acceso dalla stanza al podio (Wake Lock API).
+// Il blocco cade da solo quando l'app va in secondo piano: al ritorno lo
+// richiediamo se siamo ancora in stanza. Se il telefono non lo supporta,
+// non succede nulla.
+// ---------------------------------------------------------------
+
+let wakeLock = null;
+
+async function keepScreenOn() {
+  if (!("wakeLock" in navigator) || wakeLock) return;
+  try {
+    wakeLock = await navigator.wakeLock.request("screen");
+    wakeLock.addEventListener("release", () => { wakeLock = null; });
+  } catch (_) { /* negato (batteria bassa, permessi): pazienza */ }
+}
+
+function letScreenSleep() {
+  wakeLock?.release().catch(() => {});
+  wakeLock = null;
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && state.net) keepScreenOn();
+});
+
 function makeNet() {
   return new Net({
     onPlayers: () => {
@@ -31,6 +57,7 @@ function makeNet() {
 
 // Chiude tutto: rete, manche in corso, sfida. Non cambia schermata.
 export function leaveRoom() {
+  letScreenSleep();
   state.round?.game?.unmount();
   clearTimeout(state.round?.deadline);
   state.net?.leave();
@@ -56,6 +83,7 @@ export async function createRoom() {
   state.net = makeNet();
   try {
     await state.net.host(state.name);
+    keepScreenOn();
     showLobby();
   } catch (err) {
     leaveRoom();
@@ -67,6 +95,7 @@ export async function joinRoom(code) {
   state.net = makeNet();
   try {
     await state.net.join(code, state.name);
+    keepScreenOn();
     showLobby();
   } catch (err) {
     leaveRoom();
@@ -110,5 +139,6 @@ export function readInviteFromUrl() {
 export function playSolo() {
   state.net = makeNet();
   state.net.solo(state.name);
+  keepScreenOn();
   showLobby();
 }
