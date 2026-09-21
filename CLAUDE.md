@@ -115,4 +115,5 @@ condividono il localStorage) · Il multiplayer si prova con due schede (host + o
 - Non riproporre Roblox o Google Play: scartati per i tempi di attesa imposti agli account nuovi.
 - Avatar rimandati: per ora solo il nome.
 - Tutto sbloccato: niente monete/progressione finché non richiesto.
+- Niente minigiochi di fortuna: la categoria Azzardo è stata eliminata (21/09/2026); in ogni minigioco deve contare un'abilità (riflessi, controllo, memoria…), mai il caso.
 - Niente ponte di rete (TURN) con account esterno: deciso il 21/09/2026 per non mettere una chiave nel codice pubblico. `js/relay.js` resta predisposto e spento; non riproporlo salvo richiesta.

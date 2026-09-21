@@ -1,6 +1,6 @@
 # Cellcittine
 
-Party game di 33 minigiochi per telefono, giocabile da soli o in gruppo (2-6 persone)
+Party game di 32 minigiochi per telefono, giocabile da soli o in gruppo (2-6 persone)
 tramite codice stanza. È una pagina web installabile (PWA): niente store, aggiornamenti istantanei.
 
 **Gioco online:** https://jon1616.github.io/cellcittine/
@@ -57,7 +57,7 @@ CLAUDE.md · ROADMAP.md  guida per chi lavora sul codice · elenco di fatto / da
 | 🦘 Salta | destrezza | ostacoli superati in 30 s |
 | 🔍 Intruso | occhio | trovati in 20 s |
 | 🧭 Frecce | riflessi + logica | giuste − sbagliate in 20 s |
-| 🎈 Palloncini | azzardo | 5 palloncini, max 100 l'uno |
+| 🎈 Palloncini | controllo | gonfia fino alla riga: 5 palloncini, max 100 l'uno |
 | ⚖️ Di più | stima | giuste − sbagliate in 20 s |
 | 👆 Tocchi | velocità | tocchi in 10 s |
 | 🥁 Ritmo | ritmo | precisione su 16 battiti (max 1600) |
@@ -69,7 +69,6 @@ CLAUDE.md · ROADMAP.md  guida per chi lavora sul codice · elenco di fatto / da
 | ⏱️ Cronometro cieco | senso del tempo | 3 tentativi, max 100 l'uno |
 | 🪞 Copia | memoria visiva | schemi esatti su 6 |
 | 🔤 Anagrammi | parole | parole ricomposte in 30 s |
-| 🎴 Alto o basso | azzardo | giuste − sbagliate in 20 s |
 | 🔟 Dieci | calcolo | coppie che fanno 10 in 25 s |
 | 🌀 Labirinto | destrezza | tempo per uscire (+1 s per tocco al muro) |
 | 🎹 Melodia | memoria uditiva | note giuste (max 52) |

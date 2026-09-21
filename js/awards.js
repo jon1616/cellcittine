@@ -18,7 +18,6 @@ const CATEGORY_AWARDS = {
   memoria: { icon: "🐘", title: "Elefante", what: "memoria" },
   attenzione: { icon: "🔍", title: "Occhio di lince", what: "attenzione" },
   calcolo: { icon: "🧮", title: "Calcolatrice", what: "calcolo" },
-  azzardo: { icon: "🍀", title: "Fortuna", what: "azzardo" },
   parole: { icon: "📖", title: "Dizionario", what: "parole" },
 };
 

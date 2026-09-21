@@ -71,6 +71,7 @@ Idee già discusse, tutte con suoni, prestazione e icona nello stile delle altre
 - [x] Traiettoria (destrezza): lancio con scorrimento verso un bersaglio in movimento (v0.23.0)
 - [x] Capitali (memoria): quiz a quattro risposte con bandiere, tre livelli di notorietà (v0.23.0)
 - [x] Icone disegnate degli 8 nuovi minigiochi (foglio assets/game-icons-2.png ritagliato in assets/icons/<id>.webp) (v0.23.1)
+- [x] Via la categoria Azzardo: "Alto o basso" eliminato, "Palloncini" rifatto come gioco di controllo (riga da raggiungere, punti per precisione) e spostato in Destrezza → 32 minigiochi (v0.24.0)
 
 ## 4. Grafica, audio, temi
 
