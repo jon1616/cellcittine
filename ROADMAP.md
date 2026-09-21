@@ -41,7 +41,7 @@ M = due-tre passi, L = più passi). L'ordine dentro ogni blocco è quello consig
 - [ ] **Manche automatiche** (opzione dell'host): dopo i risultati si passa da soli alla manche successiva con un conto alla rovescia di 8 s e un pulsante "Avanti subito". Come: `storage.js` (config.auto), `screens/lobby.js` (interruttore), `screens/results.js`. — S
 - [ ] **Nomi doppi**: se in stanza c'è già "Giulia", chi entra diventa "Giulia 2". Come: `net.js` (_hostAccept). — S
 - [ ] **Colore per persona**: ogni partecipante ha un colore (in ordine di ingresso) usato nella lista, nelle classifiche e nel podio. Come: `net.js` (indice), `menu.css`, `screens/lobby.js`/`results.js`. — S
-- [ ] **Messaggio chiaro quando il P2P non si collega** su reti mobili diverse ("Prova sullo stesso Wi‑Fi o con l'hotspot di un telefono"), al posto del solo "Nessuna risposta". Come: `net.js` (_describe, timeout). — S
+- [x] **Messaggi chiari quando il collegamento non riesce**: distinguono server non raggiunto, stanza non trovata (con promemoria su I/O) e telefoni che non si collegano tra loro (stesso Wi‑Fi, VPN, hotspot) (v0.14.2)
 - [ ] **Pulsante "Installa"** in home quando il browser lo permette (beforeinstallprompt), con una riga di istruzioni per iPhone. Come: `screens/home.js`, `app.js`. — S
 
 ## 2. Più divertimento (priorità media)

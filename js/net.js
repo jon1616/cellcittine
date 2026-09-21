@@ -148,18 +148,23 @@ export class Net {
     return new Promise((resolve, reject) => {
       const peer = new Peer(undefined, { debug: 1 });
       let settled = false;
+      // Fase del collegamento, per dire con precisione dove si è fermato:
+      //   "server"  = non abbiamo ancora raggiunto il server di presentazione
+      //   "connect" = server raggiunto, stiamo cercando il telefono dell'host
+      let phase = "server";
 
       const fail = (err) => {
         if (settled) return;
         settled = true;
         try { peer.destroy(); } catch (_) { /* ignora */ }
-        reject(this._describe(err));
+        reject(this._describe(err, phase, code));
       };
 
       const timeout = setTimeout(() => fail({ type: "timeout" }), 15000);
 
       peer.on("open", () => {
         this.peer = peer;
+        phase = "connect";
         this._status("Cerco la stanza…");
         const conn = peer.connect(PREFIX + code, { reliable: true });
 
@@ -251,15 +256,22 @@ export class Net {
     this.handlers.onStatus?.(text);
   }
 
-  _describe(err) {
+  // Messaggi per chi gioca: dicono dove si è fermato il collegamento e cosa provare.
+  //   phase "server"  = il telefono non raggiunge il server di presentazione
+  //   phase "connect" = la stanza c'è, ma i due telefoni non si collegano tra loro
+  _describe(err, phase = null, code = "") {
     const type = err?.type || "";
+    const SAME_NET = "Prova sulla stessa rete Wi‑Fi di chi ha creato la stanza, spegni la VPN, oppure usate l'hotspot di un telefono.";
     const map = {
-      "peer-unavailable": "Stanza non trovata. Controlla il codice.",
-      "timeout": "Nessuna risposta dalla stanza. Controlla il codice e la connessione.",
-      "network": "Problema di rete. C'è connessione a internet?",
-      "browser-incompatible": "Questo browser non supporta il gioco in gruppo.",
+      "peer-unavailable": `Stanza ${code || ""} non trovata. Controlla le 4 lettere (non ci sono mai I e O) e che chi l'ha creata sia ancora dentro.`.replace("  ", " "),
+      "timeout": phase === "connect"
+        ? `La stanza c'è, ma i due telefoni non riescono a collegarsi tra loro. ${SAME_NET}`
+        : "Non riesco a raggiungere il server di collegamento. C'è connessione? Se sei sotto VPN o su un Wi‑Fi aziendale, prova con i dati del telefono.",
+      "network": "Problema di rete: non raggiungo il server di collegamento. Controlla la connessione (o spegni la VPN) e riprova.",
+      "browser-incompatible": "Questo browser non supporta il gioco in gruppo. Prova con Chrome o Safari.",
       "server-error": "Il server di collegamento non risponde. Riprova fra poco.",
       "unavailable-id": "Codice già in uso, riprova.",
+      "webrtc": `Il collegamento diretto tra i telefoni non è riuscito. ${SAME_NET}`,
     };
     return new Error(map[type] || `Errore di collegamento (${type || err?.message || "sconosciuto"})`);
   }
