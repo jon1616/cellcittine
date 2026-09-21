@@ -19,6 +19,7 @@
 */
 
 import { getClientId, getSeenGames } from "./storage.js";
+import { iceServers } from "./relay.js";
 
 const PREFIX = "cellcittine-";
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ"; // senza I e O: si confondono con 1 e 0
@@ -27,6 +28,14 @@ const JOIN_TIMEOUT = 15000;       // primo ingresso: tempo massimo totale
 const RECONNECT_WINDOW = 30000;   // quanto a lungo un ospite riprova dopo aver perso la linea
 const RECONNECT_EVERY = 2000;
 const PHASE_MESSAGES = new Set(["start", "results", "final", "lobby"]); // l'ultimo viene rimandato a chi rientra
+
+// Server per il collegamento fra telefoni (vedi relay.js): STUN per il collegamento
+// diretto, più il ponte TURN se configurato. Con ?rete=ponte nell'indirizzo si usa
+// SOLO il ponte (per provare che funzioni davvero).
+async function peerOptions() {
+  const forceRelay = new URLSearchParams(location.search).get("rete") === "ponte";
+  return { debug: 1, config: { iceServers: await iceServers(), iceTransportPolicy: forceRelay ? "relay" : "all" } };
+}
 
 export function randomCode() {
   let code = "";
@@ -73,10 +82,11 @@ export class Net {
   // ---------------------------------------------------------------
   // HOST
   // ---------------------------------------------------------------
-  host(name, attempt = 0) {
+  async host(name, attempt = 0) {
+    const options = await peerOptions();
     return new Promise((resolve, reject) => {
       const code = randomCode();
-      const peer = new Peer(PREFIX + code, { debug: 1 });
+      const peer = new Peer(PREFIX + code, options);
 
       peer.on("open", () => {
         this.peer = peer;
@@ -234,7 +244,8 @@ export class Net {
   }
 
   // Un Peer pronto (creato ora, o ricollegato al server se serve).
-  _ensurePeer() {
+  async _ensurePeer() {
+    const options = await peerOptions();
     return new Promise((resolve, reject) => {
       if (this.peer && !this.peer.destroyed && !this.peer.disconnected) return resolve();
       if (this.peer && !this.peer.destroyed) {
@@ -247,7 +258,7 @@ export class Net {
         try { peer.reconnect(); } catch (err) { onErr(err); }
         return;
       }
-      const peer = new Peer(undefined, { debug: 1 });
+      const peer = new Peer(undefined, options);
       peer.on("open", () => { this.peer = peer; resolve(); });
       peer.on("error", (err) => {
         if (this.peer !== peer) { try { peer.destroy(); } catch (_) { /* ignora */ } reject(err); }

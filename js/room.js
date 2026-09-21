@@ -146,7 +146,9 @@ export async function shareInvite(code) {
 export function readInviteFromUrl() {
   const code = new URLSearchParams(location.search).get("stanza");
   if (!code) return null;
-  history.replaceState(history.state, "", location.pathname);
+  const keep = new URLSearchParams(location.search);
+  keep.delete("stanza");
+  history.replaceState(history.state, "", location.pathname + (keep.toString() ? `?${keep}` : ""));
   const clean = code.trim().toUpperCase();
   return /^[A-Z]{4}$/.test(clean) ? clean : null;
 }
