@@ -73,6 +73,9 @@ Idee già discusse, tutte con suoni, prestazione e icona nello stile delle altre
 - [x] Icone disegnate degli 8 nuovi minigiochi (foglio assets/game-icons-2.png ritagliato in assets/icons/<id>.webp) (v0.23.1)
 - [x] Via la categoria Azzardo: "Alto o basso" eliminato, "Palloncini" rifatto come gioco di controllo (riga da raggiungere, punti per precisione) e spostato in Destrezza → 32 minigiochi (v0.24.0)
 
+- [x] 18 minigiochi nuovi → 50 totali: Talpe, Lampadine, Sfuggente (riflessi); Suoni, Cosa manca, Cifre (memoria); Quanti, Gemelli, Bussolotti (attenzione); Equilibrio, Serpente, Strada (destrezza); Bilancia, Prossimo, Orologio (calcolo); Ortografia, Rime, Contrari (parole) (v0.25.0)
+- [ ] Icone disegnate dei 18 nuovi minigiochi (foglio 6×3 dal prompt fornito, poi ritaglio in `assets/icons/<id>.webp`); intanto usano l'emoji. — S
+
 ## 4. Grafica, audio, temi
 
 - [ ] Origine e autore della musica in `assets/music/LICENSE.txt` (oggi "da indicare"). — S

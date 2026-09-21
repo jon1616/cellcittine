@@ -1,6 +1,6 @@
 # Cellcittine
 
-Party game di 32 minigiochi per telefono, giocabile da soli o in gruppo (2-6 persone)
+Party game di 50 minigiochi per telefono, giocabile da soli o in gruppo (2-6 persone)
 tramite codice stanza. È una pagina web installabile (PWA): niente store, aggiornamenti istantanei.
 
 **Gioco online:** https://jon1616.github.io/cellcittine/
@@ -78,6 +78,24 @@ CLAUDE.md · ROADMAP.md  guida per chi lavora sul codice · elenco di fatto / da
 | 🎣 Pesca | riflessi | 5 pesci, max 100 l'uno |
 | 🎯 Traiettoria | mira | 8 lanci, max 100 l'uno |
 | 🌍 Capitali | cultura | giuste − sbagliate in 25 s |
+| 🐹 Talpe | riflessi | talpe colpite − bombe in 20 s |
+| 💡 Lampadine | riflessi | lampadine spente − errori in 20 s |
+| 🏓 Sfuggente | riflessi | prese in 20 s |
+| 🔔 Suoni | memoria uditiva | coppie di note trovate |
+| 🔎 Cosa manca | memoria visiva | giuste su 8 |
+| 🔢 Cifre | memoria | cifre ricordate |
+| 🔺 Quanti | conteggio | giusti su 6 |
+| 🪞 Gemelli | confronto | giuste − sbagliate in 20 s |
+| 🥤 Bussolotti | attenzione | palline trovate su 6 |
+| ⚖️ Equilibrio | controllo | secondi in equilibrio (max 30) |
+| 🐍 Serpente | destrezza | frutti mangiati in 30 s |
+| 🚙 Strada | controllo | metri percorsi (max 300) |
+| 🧮 Bilancia | calcolo | giuste − sbagliate in 25 s |
+| ➡️ Prossimo | logica | giuste − sbagliate in 25 s |
+| 🕒 Orologio | lettura dell'ora | giuste − sbagliate in 25 s |
+| ✏️ Ortografia | parole | giuste − sbagliate in 25 s |
+| 🎤 Rime | parole | giuste − sbagliate in 25 s |
+| ↔️ Contrari | parole | giuste − sbagliate in 25 s |
 
 ## Aggiungere un minigioco
 

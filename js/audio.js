@@ -176,6 +176,12 @@ export const sfx = {
     tone({ freq: f, dur: 0.06, type: "sine", gain: 0.1 });
   },
 
+  // Nota "lunga" su una scala di `total` gradini (memory dei suoni)
+  note(i, total, dur = 0.4) {
+    const f = 330 * Math.pow(2, i / Math.max(1, total) * 1.2);
+    tone({ freq: f, dur, type: "triangle", gain: 0.16 });
+  },
+
   // Tono continuo che sale mentre si tiene premuto (palloncini)
   inflateStart() {
     const c = ensure();

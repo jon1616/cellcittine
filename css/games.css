@@ -416,3 +416,115 @@
 .quiz-question.flash-wrong { color: var(--danger); }
 .quiz-answers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .quiz-answer { font-size: 20px; padding: 18px 8px; background: rgba(255,255,255,0.12); border: 2px solid rgba(255,255,255,0.15); color: var(--text); border-radius: 14px; }
+
+/* ---------------------------------------------------------------
+   Talpe (talpe.js)
+   --------------------------------------------------------------- */
+.mole-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; max-width: 360px; margin: 0 auto; }
+.mole-hole { aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 50% 60%, #1b1a2e 55%, #3a3960 56%); position: relative; overflow: hidden; }
+.mole-thing { position: absolute; left: 18%; right: 18%; bottom: -70%; height: 70%; border-radius: 45% 45% 20% 20%; transition: bottom 0.12s; }
+.mole-thing.up { bottom: 8%; }
+.mole-thing.mole { background: #a9743a; box-shadow: inset 0 -10px 0 rgba(0,0,0,0.2); }
+.mole-thing.mole::before { content: ""; position: absolute; top: 28%; left: 22%; width: 12%; aspect-ratio: 1; border-radius: 50%; background: #1b1a2e; box-shadow: 260% 0 0 #1b1a2e; }
+.mole-thing.mole::after { content: ""; position: absolute; top: 50%; left: 40%; width: 20%; height: 12%; border-radius: 50%; background: #ff8fa3; }
+.mole-thing.bomb { background: #2b2b3a; border-radius: 50%; box-shadow: inset -6px -8px 0 rgba(0,0,0,0.35); }
+.mole-thing.bomb::before { content: ""; position: absolute; top: -14%; left: 46%; width: 8%; height: 22%; background: #ffb703; border-radius: 2px; }
+.mole-thing.hit { bottom: -70%; transition: bottom 0.1s; }
+.mole-thing.boom { background: #ff4d6d; transform: scale(1.4); opacity: 0; transition: transform 0.2s, opacity 0.2s; }
+
+/* ---------------------------------------------------------------
+   Lampadine (lampadine.js)
+   --------------------------------------------------------------- */
+.bulb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; max-width: 340px; margin: 0 auto; }
+.bulb { aspect-ratio: 1; border-radius: 50% 50% 40% 40%; background: rgba(255,255,255,0.08); border: 3px solid rgba(255,255,255,0.12); transition: background 0.08s, box-shadow 0.08s; }
+.bulb.on { background: var(--c); border-color: var(--c); box-shadow: 0 0 30px var(--c), 0 0 60px color-mix(in srgb, var(--c) 50%, transparent); }
+.bulb.flash { background: #f6f3ff; }
+.bulb.shake { animation: shake 0.25s; }
+
+/* ---------------------------------------------------------------
+   Sfuggente (sfuggente.js) — canvas · Bussolotti (bussolotti.js) — canvas
+   Equilibrio (equilibrio.js) — canvas · Serpente (serpente.js) — canvas · Strada (strada.js) — canvas
+   --------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------
+   Suoni (suoni.js)
+   --------------------------------------------------------------- */
+.snd-grid { display: grid; gap: 10px; width: 100%; max-width: 360px; margin: 0 auto; }
+.snd-tile { aspect-ratio: 1; border-radius: 14px; background: linear-gradient(135deg, #3f3d8a, #2a2860); border: 2px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; transition: transform 0.1s, background 0.15s; }
+.snd-tile .snd-icon { font-size: 28px; opacity: 0.35; }
+.snd-tile.open { transform: scale(0.94); background: #4cc9f0; }
+.snd-tile.open .snd-icon { opacity: 1; color: #1b1a2e; }
+.snd-tile.found { border-color: rgba(255,255,255,0.4); }
+.snd-tile.found .snd-icon { opacity: 1; color: #1b1a2e; }
+
+/* ---------------------------------------------------------------
+   Cosa manca (cosamanca.js) — usa le forme .shape-* di Memory
+   --------------------------------------------------------------- */
+.cm-field { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 18px; min-height: 200px; padding: 12px; border-radius: 20px; background: rgba(0,0,0,0.2); margin-bottom: 16px; }
+.cm-item { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; }
+.cm-item::before { content: ""; width: 80%; aspect-ratio: 1; background: var(--shape-color); }
+.cm-item.small { width: 48px; height: 48px; }
+.cm-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.cm-option { padding: 10px 0; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.15); border-radius: 14px; display: flex; justify-content: center; }
+.cm-option.ok { background: rgba(67,209,122,0.4); border-color: var(--ok); }
+.cm-option.ko { background: rgba(255,77,109,0.4); border-color: var(--danger); }
+
+/* ---------------------------------------------------------------
+   Cifre (cifre.js)
+   --------------------------------------------------------------- */
+.cif-display { text-align: center; font-size: 44px; font-weight: 800; letter-spacing: 6px; font-variant-numeric: tabular-nums; color: var(--accent); min-height: 56px; transition: opacity 0.2s; }
+.cif-display.hidden { color: rgba(255,255,255,0.25); }
+.cif-typed { text-align: center; font-size: 30px; font-weight: 700; letter-spacing: 5px; min-height: 40px; font-variant-numeric: tabular-nums; margin-bottom: 10px; }
+.cif-typed.ok { color: var(--ok); }
+.cif-typed.ko { color: var(--danger); }
+.cif-pad { grid-template-columns: repeat(3, 1fr); max-width: 300px; margin: 0 auto; }
+
+/* ---------------------------------------------------------------
+   Quanti (quanti.js) — usa le forme .shape-*
+   --------------------------------------------------------------- */
+.qn-question { text-align: center; font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+.qn-field { position: relative; height: 46vh; border-radius: 20px; background: rgba(0,0,0,0.2); overflow: hidden; margin-bottom: 12px; }
+.qn-shape { position: absolute; display: flex; align-items: center; justify-content: center; }
+.qn-shape::before { content: ""; width: 100%; aspect-ratio: 1; background: var(--shape-color); }
+.qn-shape.mark::before { outline: 3px solid #fff; outline-offset: 2px; }
+
+/* ---------------------------------------------------------------
+   Gemelli (gemelli.js)
+   --------------------------------------------------------------- */
+.gem-pair { display: flex; gap: 14px; justify-content: center; margin-bottom: 16px; }
+.gem-pair.shake { animation: shake 0.25s; }
+.gem-grid { display: grid; gap: 4px; width: 46%; max-width: 170px; padding: 6px; border-radius: 12px; background: rgba(0,0,0,0.25); }
+.gem-cell { aspect-ratio: 1; border-radius: 4px; }
+.gem-buttons { display: flex; gap: 10px; }
+.gem-btn { flex: 1; font-size: 22px; padding: 18px 0; }
+.gem-btn.same { background: var(--ok); color: var(--ink); }
+.gem-btn.diff { background: var(--danger); color: white; }
+
+/* ---------------------------------------------------------------
+   Bilancia (bilancia.js)
+   --------------------------------------------------------------- */
+.bil-beam { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; transition: transform 0.25s; transform-origin: center; }
+.bil-beam.tilt-l { transform: rotate(-4deg); }
+.bil-beam.tilt-r { transform: rotate(4deg); }
+.bil-pan { flex: 1; font-size: 28px; padding: 26px 6px; background: rgba(255,255,255,0.12); border: 2px solid rgba(255,255,255,0.15); color: var(--text); font-variant-numeric: tabular-nums; }
+.bil-pivot { width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent; border-bottom: 26px solid #a9743a; }
+.bil-equal { width: 100%; font-size: 22px; padding: 16px; background: var(--accent); color: var(--ink); }
+
+/* ---------------------------------------------------------------
+   Prossimo (prossimo.js)
+   --------------------------------------------------------------- */
+.seq-line { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; }
+.seq-num { min-width: 52px; padding: 10px 8px; border-radius: 12px; background: rgba(255,255,255,0.1); text-align: center; font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.seq-num.q { background: var(--accent); color: var(--ink); }
+
+/* ---------------------------------------------------------------
+   Orologio (orologio.js)
+   --------------------------------------------------------------- */
+.clock-face { display: block; margin: 0 auto 16px; }
+
+/* ---------------------------------------------------------------
+   Ortografia (ortografia.js) · Rime (rime.js) · Contrari (contrari.js)
+   --------------------------------------------------------------- */
+.ort-answers { display: flex; flex-direction: column; gap: 10px; }
+.ort-answer { font-size: 24px; padding: 16px; background: rgba(255,255,255,0.12); border: 2px solid rgba(255,255,255,0.15); color: var(--text); letter-spacing: 0.5px; }
+.rime-label { text-align: center; color: var(--muted); font-size: 15px; margin-bottom: 4px; }
