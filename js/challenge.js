@@ -18,12 +18,13 @@ import { setStatus, gameIcon, difficultyLabel, appRoot } from "./ui.js";
 import { syncBackGuard } from "./nav.js";
 import { getEntry, loadGame, preloadGames } from "./games/catalog.js";
 import { shuffle } from "./games/shell.js";
-import { updateRecord } from "./storage.js";
+import { updateRecord, markSeen } from "./storage.js";
 import { showLobby } from "./screens/lobby.js";
 import { showResults, showFinal } from "./screens/results.js";
 import { computeAwards } from "./awards.js";
 
 const COUNTDOWN_MS = 3500; // dal messaggio "start" al via
+const INTRO_MS = 7000;     // …quando per qualcuno è la prima volta: si legge come si gioca
 const GRACE_SECONDS = 8;   // margine oltre maxSeconds prima di chiudere la manche
 
 // ---------------------------------------------------------------
@@ -80,6 +81,8 @@ export function nextRound() {
   const net = state.net;
   ch.index++;
   const r = ch.rounds[ch.index];
+  // Se per qualcuno in stanza è la prima volta, presentazione più lunga per tutti
+  const intro = net.players.some((p) => !net.hasSeen(p.id, r.gameId));
   const msg = {
     type: "start",
     index: ch.index,
@@ -87,7 +90,8 @@ export function nextRound() {
     gameId: r.gameId,
     seed: r.seed,
     difficulty: ch.difficulty,
-    startAt: net.now() + COUNTDOWN_MS,
+    intro,
+    startAt: net.now() + (intro ? INTRO_MS : COUNTDOWN_MS),
   };
   net.broadcast(msg);
   beginRound(msg);
@@ -141,11 +145,13 @@ function showCountdown(entry, msg) {
   sfx.setScene("game");
   const net = state.net;
   const number = el("div", { class: "big", text: "" });
-  const area = el("div", { class: "game-area" }, [
+  const area = el("div", { class: `game-area${msg.intro ? " intro" : ""}` }, [
     el("div", { class: "hint", text: `Manche ${msg.index + 1} di ${msg.total} · ${difficultyLabel(msg.difficulty)}` }),
     gameIcon(entry, "countdown-icon"),
     el("div", { text: entry?.title || msg.gameId }),
-    el("div", { class: "hint", text: entry?.description || "" }),
+    msg.intro
+      ? el("div", { class: "howto-intro" }, [el("div", { class: "howto-label", text: "Come si gioca" }), el("div", { text: entry?.howTo || entry?.description || "" })])
+      : el("div", { class: "hint", text: entry?.description || "" }),
     number,
   ]);
   appRoot().replaceChildren(area);
@@ -177,6 +183,7 @@ function mountGame() {
   setScreen("game");
   const round = state.round;
   const net = state.net;
+  markSeen(round.game.id);
 
   if (net.isHost) {
     // Scadenza di sicurezza: se qualcuno non risponde, si chiude comunque.

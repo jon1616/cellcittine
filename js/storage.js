@@ -6,6 +6,7 @@ const KEY_RECORDS = "records";
 const KEY_PACKS = "packs";
 const KEY_CLIENT = "clientId";
 const KEY_HISTORY = "history";
+const KEY_SEEN = "seen"; // minigiochi già giocati su questo telefono (per la presentazione lunga la prima volta)
 const HISTORY_MAX = 60; // sfide ricordate sul telefono
 
 export const DIFFICULTIES = [
@@ -103,6 +104,21 @@ export function updateRecord(game, difficulty, score) {
     write(KEY_RECORDS, all);
   }
   return better;
+}
+
+// ---------------------------------------------------------------
+// Minigiochi già visti su questo telefono
+// ---------------------------------------------------------------
+
+export function getSeenGames() {
+  const list = read(KEY_SEEN, []);
+  return Array.isArray(list) ? list : [];
+}
+
+export function markSeen(gameId) {
+  const list = getSeenGames();
+  if (list.includes(gameId)) return;
+  write(KEY_SEEN, [...list, gameId]);
 }
 
 // ---------------------------------------------------------------

@@ -47,7 +47,7 @@ js/screens/history.js  storico delle sfide giocate (storage.getHistory)
 js/screens/results.js  risultati di manche e podio finale
 js/net.js            P2P (PeerJS): host(), join(), broadcast(), sendToHost(), now() sincronizzato; id stabile per telefono, ricollegamento automatico degli ospiti (30 s), ultimo messaggio di fase rimandato a chi rientra
 js/audio.js          effetti sintetizzati (sfx.play/pad/step/inflate*) + musica (sfx.setScene("menu"|"game"))
-js/storage.js        localStorage: config sfida, record {score,text}, pacchetti personali, getClientId() (id stabile del telefono)
+js/storage.js        localStorage: config sfida, record {score,text}, pacchetti personali, getClientId() (id stabile), storico, minigiochi già visti
 js/packs.js          pacchetti integrati (alcuni calcolati dal catalogo) + utilità
 js/theme.js          temi: sfondo dei menu (assets/bg-<id>.webp), stagionali per data, scelta manuale
 js/games/catalog.js  CATALOGO: scheda di ogni minigioco + loadGame(id) con import() a richiesta

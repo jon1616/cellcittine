@@ -18,7 +18,7 @@
   chiama handlers.onDisconnected.
 */
 
-import { getClientId } from "./storage.js";
+import { getClientId, getSeenGames } from "./storage.js";
 
 const PREFIX = "cellcittine-";
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ"; // senza I e O: si confondono con 1 e 0
@@ -49,6 +49,7 @@ export class Net {
     this.timeOffset = 0;     // guest: hostTime - localTime
     this.lastBroadcast = null; // host: ultimo messaggio "di fase", rimandato a chi rientra
     this.queue = [];         // guest: messaggi da mandare quando torna la linea
+    this.seenBy = new Map(); // host: id -> minigiochi già giocati da quella persona (per la presentazione lunga)
     this.reconnecting = false;
     this._leaving = false;
     this._name = "";
@@ -128,6 +129,7 @@ export class Net {
             player = { id, name, isHost: false, color: this._freeColor() };
             this.players.push(player);
           }
+          if (Array.isArray(msg.seen)) this.seenBy.set(id, new Set(msg.seen.map(String)));
           conn.send({ type: "welcome", you: player, players: this.players, hostTime: Date.now() });
           // Chi rientra riceve il punto in cui siamo; chi è nuovo a sfida iniziata vede
           // i risultati correnti (giocherà dalla prossima manche), ma non una manche già partita.
@@ -179,6 +181,12 @@ export class Net {
     for (const conn of this.conns.values()) {
       if (conn.open) conn.send(msg);
     }
+  }
+
+  // Host: questa persona ha già giocato quel minigioco? (per sé stesso guarda il telefono)
+  hasSeen(id, gameId) {
+    if (this.me && id === this.me.id) return getSeenGames().includes(gameId);
+    return this.seenBy.get(id)?.has(gameId) ?? true; // sconosciuto = non allungare
   }
 
   // Host → una sola persona (id stabile)
@@ -248,7 +256,7 @@ export class Net {
 
       conn.on("open", () => {
         this._status(again ? "Rientro nella stanza…" : "Entro nella stanza…");
-        conn.send({ type: "join", name: this._name, cid: getClientId(), again });
+        conn.send({ type: "join", name: this._name, cid: getClientId(), again, seen: getSeenGames() });
       });
 
       conn.on("data", async (msg) => {
@@ -371,6 +379,7 @@ export class Net {
     this.isHost = false;
     this.queue = [];
     this.lastBroadcast = null;
+    this.seenBy.clear();
   }
 
   _status(text) {

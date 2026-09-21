@@ -48,7 +48,7 @@ M = due-tre passi, L = più passi). L'ordine dentro ogni blocco è quello consig
 
 - [x] **Premi di fine sfida** sul podio: uno per categoria (Fulmine ⚡, Cecchino 🎯, Elefante 🐘, Occhio di lince 🔍, Calcolatrice 🧮, Fortuna 🍀, Dizionario 📖) a chi vince più manche di quel tipo, più Dominio 👑, Costante 🧱, Rimonta 🚀 e Da record ★ (js/awards.js) (v0.18.0)
 - [x] **Storico delle sfide** sul telefono ("Storico" in home): data, stanza, partecipanti con punti, chi ha vinto, premi; conteggio di sfide, vittorie e allenamenti; ultime 60 (v0.19.0)
-- [ ] **Presentazione più lunga la prima volta**: per un minigioco mai giocato su quel telefono il conto alla rovescia dura 6 s e mostra la spiegazione completa (`howTo`); poi 3,5 s come oggi. L'host decide la durata e la manda nello `start`. Come: `challenge.js`, `storage.js` (visti). — S
+- [x] **Presentazione più lunga la prima volta**: se per qualcuno in stanza il minigioco è nuovo (ognuno manda all'host i minigiochi già giocati), il conto alla rovescia dura 7 s per tutti e mostra "Come si gioca" completo; altrimenti 3,5 s come prima (v0.20.0)
 - [ ] **Massimo o riferimento per gli 11 minigiochi che non lo mostrano**: Memory/Numeri → "tempo ideale" per difficoltà; Calcoli/Colori/Frecce/Di più/Alto o basso/Dieci → "domande viste"; Tocchi → "record del telefono"; Intruso/Anagrammi → totale disponibile. Come: `maxScore` o `detail` in ogni file. — M
 - [ ] **Interruttore vibrazione** in home accanto a Suoni e Musica. Come: `utils.js` (vibrate legge l'impostazione), `screens/home.js`. — S
 - [ ] **Sfide salvate con nome** che ricordano anche manche e difficoltà (oggi i pacchetti salvano solo i minigiochi). Come: `storage.js`, `screens/lobby.js`. — S
