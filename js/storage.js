@@ -23,7 +23,8 @@ export const ROUND_OPTIONS = [3, 5, 7, 10, "tutti"];
 // dopo autoDelay secondi (tra AUTO_MIN e AUTO_MAX).
 export const AUTO_MIN = 5;
 export const AUTO_MAX = 20;
-const DEFAULT_CONFIG = { games: [], rounds: 5, difficulty: "normale", pack: null, auto: false, autoDelay: 8 };
+// teams: 0 = nessuna squadra, 2 o 3 = numero di squadre (l'host assegna le persone in stanza)
+const DEFAULT_CONFIG = { games: [], rounds: 5, difficulty: "normale", pack: null, auto: false, autoDelay: 8, teams: 0 };
 
 function read(key, fallback) {
   try {
@@ -67,6 +68,7 @@ export function loadConfig(allGameIds) {
   if (!DIFFICULTIES.some((d) => d.id === cfg.difficulty)) cfg.difficulty = DEFAULT_CONFIG.difficulty;
   cfg.auto = cfg.auto === true;
   cfg.autoDelay = Number.isInteger(cfg.autoDelay) ? Math.min(AUTO_MAX, Math.max(AUTO_MIN, cfg.autoDelay)) : DEFAULT_CONFIG.autoDelay;
+  cfg.teams = [0, 2, 3].includes(cfg.teams) ? cfg.teams : 0;
   return cfg;
 }
 

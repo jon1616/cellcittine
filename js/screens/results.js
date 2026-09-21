@@ -13,6 +13,7 @@ import { leaveRoom, exitButton } from "../room.js";
 import { nextRound, finishChallenge, replayChallenge } from "../challenge.js";
 import { showHome } from "./home.js";
 import { showLobby } from "./lobby.js";
+import { teamInfo, formatAvg } from "../teams.js";
 
 // ---------------------------------------------------------------
 // "La tua prestazione": dettaglio del minigioco e confronto col massimo, dove esiste.
@@ -33,6 +34,34 @@ function performanceLine(game, round) {
   const text = performanceText(game, round.myScore, round.myMax, round.myDetail);
   if (!text) return el("span");
   return el("div", { class: "perf" }, [el("span", { class: "perf-label", text: "La tua prestazione" }), el("span", { text })]);
+}
+
+// Squadre: pillola colorata col nome
+function teamLabel(team, full = false) {
+  const t = teamInfo(team);
+  return el("span", { class: "team-pill", text: full ? t?.name || "?" : t?.short || "?", style: `--t: ${t?.color || "#888"}` });
+}
+
+// Classifica delle squadre nella manche (media dei membri) e generale
+function teamsCard(teamRanking, teamStandings, myTeam) {
+  const n = (teamRanking || []).length;
+  const roundList = el("ol", { class: "ranking teams" }, (teamRanking || []).map((t) => {
+    const pos = n - t.points + 1; // a pari media, pari posizione
+    return el("li", { class: t.team === myTeam ? "me" : "" }, [
+      el("span", { class: "pos", text: pos === 1 ? "🏆" : String(pos) }),
+      el("span", { class: "who" }, [teamLabel(t.team, true)]),
+      el("span", { class: "score", text: `media ${formatAvg(t.avg)}` }),
+      el("span", { class: "pts", text: `+${t.points}` }),
+    ]);
+  }));
+  const general = el("ol", { class: "ranking teams" }, (teamStandings || []).map((t, i) =>
+    el("li", { class: t.team === myTeam ? "me" : "" }, [
+      el("span", { class: "pos", text: String(i + 1) }),
+      el("span", { class: "who" }, [teamLabel(t.team, true)]),
+      el("span", { class: "score", text: `${t.points} pt` }),
+    ])
+  ));
+  return el("div", { class: "card" }, [el("h2", { text: "Squadre" }), roundList, el("div", { class: "label", text: "Classifica squadre" }), general]);
 }
 
 function standingsList(standings, meId) {
@@ -121,7 +150,11 @@ export async function showResults(msg) {
     const rec = getRecord(game.id, state.challenge.difficulty);
     cards.push(el("p", { text: rec ? `Il tuo record: ${rec.text}` : "" }));
   } else {
-    cards.push(el("div", { class: "card" }, [el("h2", { text: "Classifica generale" }), standingsList(msg.standings, meId)]));
+    if (msg.teamRanking) {
+      const myTeam = net.players.find((p) => p.id === meId)?.team;
+      cards.push(teamsCard(msg.teamRanking, msg.teamStandings, myTeam));
+    }
+    cards.push(el("div", { class: "card" }, [el("h2", { text: msg.teamRanking ? "Classifica individuale" : "Classifica generale" }), standingsList(msg.standings, meId)]));
   }
 
   const actions = [];
@@ -194,6 +227,7 @@ function rememberChallenge(msg) {
     players,
     winnerId: solo ? null : players[0]?.id || null,
     awards: (msg.awards || []).map((a) => ({ icon: a.icon, title: a.title, name: a.name })),
+    teams: msg.teamStandings?.length ? msg.teamStandings.map((t) => ({ team: t.team, points: t.points })) : null,
     meId,
   });
 }
@@ -227,6 +261,35 @@ export function showFinal(msg) {
         })),
       ])
     );
+  } else if (msg.teamStandings?.length) {
+    // Podio di squadra
+    const win = msg.teamStandings[0];
+    const t = teamInfo(win.team);
+    const myTeam = net.players.find((p) => p.id === meId)?.team;
+    const tied = msg.teamStandings.filter((s) => s.points === win.points);
+    parts.push(el("h2", { text: "Fine della sfida!" }));
+    parts.push(
+      el("div", { class: "podium" }, [
+        el("div", { class: "podium-trophy", text: tied.length > 1 ? "🤝" : "🏆" }),
+        tied.length > 1
+          ? el("div", { class: "podium-name", text: "Pareggio!", style: "--c: var(--accent)" })
+          : el("div", { class: "podium-name", text: t?.name || "", style: `--c: ${t?.color || "#888"}` }),
+        el("div", { class: "hint", text: tied.length > 1
+          ? `${tied.map((s) => teamInfo(s.team)?.name || "?").join(" e ")} a ${win.points} punti`
+          : `${win.points} punti${myTeam === win.team ? " · la tua squadra!" : ""}` }),
+      ])
+    );
+    parts.push(el("div", { class: "card" }, [
+      el("ol", { class: "ranking teams" }, msg.teamStandings.map((s, i) =>
+        el("li", { class: s.team === myTeam ? "me" : "" }, [
+          el("span", { class: "pos", text: String(i + 1) }),
+          el("span", { class: "who" }, [teamLabel(s.team, true)]),
+          el("span", { class: "score", text: `${s.points} pt` }),
+        ])
+      )),
+    ]));
+    parts.push(el("div", { class: "card" }, [el("h2", { text: "Classifica individuale" }), standingsList(msg.standings, meId)]));
+    if (msg.awards?.length) parts.push(awardsCard(msg.awards, meId));
   } else {
     const winner = msg.standings[0];
     parts.push(el("h2", { text: "Fine della sfida!" }));

@@ -8,6 +8,7 @@ import { setScreen } from "../state.js";
 import { show, colorDot, difficultyLabel } from "../ui.js";
 import { getHistory, clearHistory } from "../storage.js";
 import { getEntry } from "../games/catalog.js";
+import { teamInfo } from "../teams.js";
 import { showHome } from "./home.js";
 
 function formatDate(ts) {
@@ -34,6 +35,9 @@ function entryCard(e) {
         el("span", { text: `${p.name} ${p.points} pt` }),
       ])
     )));
+  }
+  if (e.teams?.length) {
+    parts.push(el("div", { class: "hist-teams", text: e.teams.map((t, i) => `${i === 0 ? "🏆 " : ""}${teamInfo(t.team)?.name || "?"} ${t.points} pt`).join(" · ") }));
   }
   if (e.awards?.length) {
     parts.push(el("div", { class: "hist-awards", text: e.awards.map((a) => `${a.icon} ${a.title}: ${a.name}`).join(" · ") }));

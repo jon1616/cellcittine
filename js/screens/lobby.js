@@ -15,6 +15,7 @@ import { startChallenge } from "../challenge.js";
 import { showHome } from "./home.js";
 import { showPicker } from "./picker.js";
 import { showSelectionList } from "./catalog.js";
+import { TEAM_OPTIONS, teamInfo, balancedAssignment } from "../teams.js";
 
 // ---------------------------------------------------------------
 // Configurazione della sfida (host)
@@ -24,7 +25,7 @@ export function broadcastConfig() {
   const cfg = state.config;
   state.net?.broadcast({
     type: "config",
-    config: { games: cfg.games, rounds: cfg.rounds, difficulty: cfg.difficulty, packName: packName(cfg), auto: cfg.auto, autoDelay: cfg.autoDelay },
+    config: { games: cfg.games, rounds: cfg.rounds, difficulty: cfg.difficulty, packName: packName(cfg), auto: cfg.auto, autoDelay: cfg.autoDelay, teams: cfg.teams },
   });
 }
 
@@ -181,6 +182,11 @@ function configPanel() {
       (auto) => updateConfig({ auto })
     ),
     cfg.auto ? autoDelayRow() : el("p", { class: "small", text: "Chi ha creato la stanza tocca “Prossima manche”" }),
+    ...(isSolo() ? [] : [
+      el("div", { class: "label", text: "Squadre" }),
+      segmented(TEAM_OPTIONS, cfg.teams, (teams) => setTeams(teams)),
+      cfg.teams ? el("p", { class: "small", text: "Tocca la squadra accanto a un nome per cambiarla. Conta la media dei punti dei membri." }) : el("span"),
+    ]),
   ]);
 
   return [selectionCard, rulesCard];
@@ -196,12 +202,51 @@ function autoDelayRow() {
   return el("div", { class: "range-row" }, [el("span", { class: "small", text: "Attesa" }), slider, value]);
 }
 
+// Squadre: numero e assegnazione (host)
+function setTeams(count) {
+  const net = state.net;
+  if (count) {
+    for (const a of balancedAssignment(net.players, count)) net.setTeam(a.id, a.team);
+  } else {
+    for (const p of net.players) net.setTeam(p.id, null);
+  }
+  net.broadcastPlayers();
+  updateConfig({ teams: count });
+}
+
+function shuffleTeams() {
+  const net = state.net;
+  const count = state.config.teams;
+  const order = [...net.players].sort(() => Math.random() - 0.5);
+  for (const a of balancedAssignment(order, count)) net.setTeam(a.id, a.team);
+  net.broadcastPlayers();
+  showLobby();
+}
+
+function cycleTeam(id) {
+  const net = state.net;
+  const count = state.config.teams;
+  const p = net.players.find((x) => x.id === id);
+  net.setTeam(id, ((Number.isInteger(p?.team) ? p.team : -1) + 1) % count);
+  net.broadcastPlayers();
+  showLobby();
+}
+
+// Pillola con il nome della squadra (per l'host è un pulsante che la cambia)
+function teamPill(p, canEdit) {
+  const t = teamInfo(p.team);
+  if (!t) return el("span");
+  const attrs = { class: "team-pill", text: t.short, style: `--t: ${t.color}` };
+  if (!canEdit) return el("span", attrs);
+  return el("button", { ...attrs, title: "Cambia squadra", onclick: () => cycleTeam(p.id) });
+}
+
 // Riassunto per gli ospiti (dalla configurazione ricevuta dall'host).
 function configSummary(cfg) {
   const n = cfg.games.length;
   return el("div", { class: "card" }, [
     el("h2", { text: "La sfida" }),
-    el("p", { text: `${cfg.packName ? `Pacchetto ${cfg.packName} · ` : ""}${roundsLabel(cfg)} · ${difficultyLabel(cfg.difficulty)}${cfg.auto ? ` · manche automatiche (${cfg.autoDelay} s)` : ""}` }),
+    el("p", { text: `${cfg.packName ? `Pacchetto ${cfg.packName} · ` : ""}${roundsLabel(cfg)} · ${difficultyLabel(cfg.difficulty)}${cfg.auto ? ` · manche automatiche (${cfg.autoDelay} s)` : ""}${cfg.teams ? ` · ${cfg.teams} squadre` : ""}` }),
     el("p", { class: "small", text: n ? `${n} ${n === 1 ? "minigioco" : "minigiochi"}: ${categoryBreakdown(cfg.games)}` : "" }),
     el("button", { text: "Vedi i minigiochi", class: "link", onclick: () => showSelectionList(cfg.games) }),
   ]);
@@ -211,14 +256,17 @@ function configSummary(cfg) {
 // Schermata
 // ---------------------------------------------------------------
 
-function playersList(players, meId) {
+function playersList(players, meId, { teams = 0, canEdit = false } = {}) {
   return el(
     "ul",
     { class: "players" },
     players.map((p) =>
       el("li", { class: p.id === meId ? "me" : "" }, [
         el("span", { class: "who" }, [colorDot(p.color), el("span", { text: p.name })]),
-        el("span", { class: "tag", text: p.isHost ? "host" : "" }),
+        el("span", { class: "player-right" }, [
+          teams ? teamPill(p, canEdit) : el("span"),
+          el("span", { class: "tag", text: p.isHost ? "host" : "" }),
+        ]),
       ])
     )
   );
@@ -243,10 +291,12 @@ export function showLobby() {
   const parts = [...header];
 
   if (!solo) {
+    const teams = net.isHost ? state.config.teams : state.hostConfig?.teams || 0;
     parts.push(
       el("div", { class: "card" }, [
         el("h2", { text: `In stanza (${net.players.length})` }),
-        playersList(net.players, net.me.id),
+        playersList(net.players, net.me.id, { teams, canEdit: net.isHost }),
+        net.isHost && teams ? el("button", { text: "🎲 Mescola le squadre", class: "secondary small-btn", onclick: shuffleTeams }) : el("span"),
       ])
     );
   }

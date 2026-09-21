@@ -189,6 +189,16 @@ export class Net {
     return this.seenBy.get(id)?.has(gameId) ?? true; // sconosciuto = non allungare
   }
 
+  // Host: cambia la squadra di una persona e aggiorna tutti (senza richiamare onPlayers)
+  setTeam(id, team) {
+    const p = this.players.find((x) => x.id === id);
+    if (!p) return;
+    if (team === null) delete p.team; else p.team = team;
+  }
+  broadcastPlayers() {
+    this.broadcast({ type: "players", players: this.players });
+  }
+
   // Host → una sola persona (id stabile)
   sendTo(id, msg) {
     const conn = this.conns.get(id);

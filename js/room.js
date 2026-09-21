@@ -10,6 +10,7 @@ import { setStatus, toast } from "./ui.js";
 import { showHome } from "./screens/home.js";
 import { showLobby, broadcastConfig } from "./screens/lobby.js";
 import { handleMessage, checkRoundComplete } from "./challenge.js";
+import { smallestTeam } from "./teams.js";
 
 // ---------------------------------------------------------------
 // Schermo sempre acceso dalla stanza al podio (Wake Lock API).
@@ -40,7 +41,15 @@ document.addEventListener("visibilitychange", () => {
 function makeNet() {
   return new Net({
     onPlayers: () => {
-      if (state.net?.isHost) {
+      const net = state.net;
+      if (net?.isHost) {
+        // Con le squadre attive, chi entra senza squadra va nella più piccola
+        const count = state.config.teams;
+        let changed = false;
+        for (const p of net.players) {
+          if (count && !(Number.isInteger(p.team) && p.team < count)) { net.setTeam(p.id, smallestTeam(net.players, count)); changed = true; }
+        }
+        if (changed) net.broadcastPlayers();
         broadcastConfig();
         checkRoundComplete();
       }

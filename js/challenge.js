@@ -13,7 +13,7 @@
 
 import { el, seededRandom } from "./utils.js";
 import { sfx } from "./audio.js";
-import { state, setScreen } from "./state.js";
+import { state, setScreen, isSolo } from "./state.js";
 import { setStatus, gameIcon, difficultyLabel, appRoot } from "./ui.js";
 import { syncBackGuard } from "./nav.js";
 import { getEntry, loadGame, preloadGames } from "./games/catalog.js";
@@ -22,6 +22,7 @@ import { updateRecord, markSeen } from "./storage.js";
 import { showLobby } from "./screens/lobby.js";
 import { showResults, showFinal } from "./screens/results.js";
 import { computeAwards } from "./awards.js";
+import { teamRound } from "./teams.js";
 
 const COUNTDOWN_MS = 3500; // dal messaggio "start" al via
 const INTRO_MS = 7000;     // …quando per qualcuno è la prima volta: si legge come si gioca
@@ -62,6 +63,8 @@ export async function startChallenge(sameGames = null) {
     difficulty: cfg.difficulty,
     index: -1,
     standings: new Map(),
+    teamStandings: new Map(), // squadra -> punti (solo con le squadre attive)
+    teams: isSolo() ? 0 : cfg.teams,
     history: [],
   };
 
@@ -113,7 +116,7 @@ export function replayChallenge() {
 
 export function finishChallenge() {
   const standings = standingsArray();
-  const msg = { type: "final", standings, awards: computeAwards(state.challenge.history, standings) };
+  const msg = { type: "final", standings, awards: computeAwards(state.challenge.history, standings), teamStandings: teamStandingsArray() };
   state.net.broadcast(msg);
   showFinal(msg);
 }
@@ -280,9 +283,18 @@ function publishResults() {
     entry.name = r.name;
     entry.color = r.color;
     entry.points += r.points;
+    const team = net.players.find((p) => p.id === r.id)?.team;
+    if (Number.isInteger(team)) entry.team = team;
     ch.standings.set(r.id, entry);
   }
   ch.history.push({ gameId: round.game.id, ranking });
+
+  // Squadre: media dei punti dei membri, poi punti per posizione tra squadre
+  let teamRanking = null;
+  if (ch.teams) {
+    teamRanking = teamRound(ranking, (id) => ch.standings.get(id)?.team);
+    for (const t of teamRanking) ch.teamStandings.set(t.team, (ch.teamStandings.get(t.team) || 0) + t.points);
+  }
 
   const msg = {
     type: "results",
@@ -292,10 +304,18 @@ function publishResults() {
     gameId: round.game.id,
     ranking,
     standings: standingsArray(),
+    teamRanking,
+    teamStandings: teamStandingsArray(),
     last: round.index === ch.total - 1,
   };
   net.broadcast(msg);
   showResults(msg);
+}
+
+export function teamStandingsArray() {
+  const ch = state.challenge;
+  if (!ch?.teams) return null;
+  return [...ch.teamStandings.entries()].map(([team, points]) => ({ team, points })).sort((a, b) => b.points - a.points);
 }
 
 export function standingsArray() {

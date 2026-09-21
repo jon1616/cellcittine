@@ -54,7 +54,7 @@ M = due-tre passi, L = più passi). L'ordine dentro ogni blocco è quello consig
 - [x] **Sfide salvate**: salvando un pacchetto si può includere anche manche, difficoltà e manche automatiche (chip "⚙ Anche manche e difficoltà"); il pacchetto le riapplica (v0.21.0)
 - [x] **Preferiti**: stellina su ogni riga della scelta, filtro "★ Preferiti", pacchetto automatico "Preferiti" (compare quando c'è almeno una stellina) (v0.21.0)
 - [x] **Rivincita**: dal podio, "🔁 Rivincita (stessa sfida)" ripete gli stessi minigiochi nello stesso ordine con nuovi semi, punti da zero (v0.21.0)
-- [ ] **Squadre** (2 contro 2, 3 contro 3): l'host assegna le squadre in stanza; punti sommati per squadra, podio di squadra. Come: `net.js` (team nel join/players), `challenge.js`, `screens/lobby.js`/`results.js`. — L
+- [x] **Squadre** (2 o 3): l'host le attiva in stanza, assegna le persone toccando la pillola accanto al nome (o "Mescola"), chi entra dopo va nella squadra più piccola; in ogni manche la squadra vale la media dei punti dei membri e le squadre prendono punti per posizione; card "Squadre" nei risultati, podio di squadra, storico (js/teams.js) (v0.22.0)
 - [ ] **Campionato**: più sfide in serie con classifica cumulativa e "giornate". Come: `challenge.js`, `storage.js`. — M
 - [ ] **Difficoltà per persona** (handicap): l'host può dare "facile" a chi è più piccolo; i parametri restano equi per chi ha la stessa difficoltà. Come: `net.js`, `challenge.js` (difficoltà nel `start` per id). — M
 
