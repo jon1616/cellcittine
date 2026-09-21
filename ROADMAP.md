@@ -62,14 +62,15 @@ M = due-tre passi, L = più passi). L'ordine dentro ogni blocco è quello consig
 
 Idee già discusse, tutte con suoni, prestazione e icona nello stile delle altre:
 
-- [ ] Labirinto a dito (destrezza): traccia il percorso senza toccare i muri, tempo. — M
-- [ ] Melodia (memoria): ripeti una sequenza di note che si allunga, con i pad sonori. — S
-- [ ] Ordina per grandezza (attenzione): tocca le forme dalla più piccola alla più grande. — S
-- [ ] Parola nascosta (parole): trova la parola in una griglia di lettere. — M
-- [ ] Tris veloce (calcolo/attenzione): contro un avversario automatico, partite lampo. — M
-- [ ] Pesca (azzardo/riflessi): tocca al momento giusto quando il pesce abbocca. — S
-- [ ] Traiettoria (destrezza): lancia con uno scorrimento verso un bersaglio che si sposta. — M
-- [ ] Bandiere / capitali (memoria): quiz a quattro risposte, con set di domande dal seme. — S
+- [x] Labirinto (destrezza): dito dall'ingresso all'uscita senza toccare i muri, labirinto dal seme (v0.23.0)
+- [x] Melodia (memoria): melodie nuove e sempre più lunghe su quattro tasti-pianoforte (v0.23.0)
+- [x] Ordina (attenzione): cerchi dal più piccolo al più grande, serie dopo serie (v0.23.0)
+- [x] Parola nascosta (parole): griglia di lettere, tocca la parola in ordine (v0.23.0)
+- [x] Tris veloce (attenzione): partite lampo contro il telefono, distrazioni dal seme (v0.23.0)
+- [x] Pesca (riflessi): tocca quando il pesce abbocca, finti morsi nei livelli alti (v0.23.0)
+- [x] Traiettoria (destrezza): lancio con scorrimento verso un bersaglio in movimento (v0.23.0)
+- [x] Capitali (memoria): quiz a quattro risposte con bandiere, tre livelli di notorietà (v0.23.0)
+- [ ] Icone disegnate degli 8 nuovi minigiochi (foglio 4×2 da generare con il prompt fornito, poi ritaglio in `assets/icons/<id>.webp`); intanto usano l'emoji. — S
 
 ## 4. Grafica, audio, temi
 

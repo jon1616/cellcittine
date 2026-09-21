@@ -348,3 +348,84 @@
 .ten-cell.sel { transform: scale(0.9); outline: 4px solid white; }
 .ten-cell.gone { opacity: 0; transform: scale(0.5); }
 .ten-cell.wrong { animation: shake 0.25s; outline: 4px solid var(--danger); }
+
+/* ---------------------------------------------------------------
+   Melodia (melodia.js)
+   --------------------------------------------------------------- */
+.mel-keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; max-width: 380px; margin: 0 auto 16px; }
+.mel-key {
+  height: 200px; border-radius: 14px 14px 22px 22px;
+  background: var(--pad); opacity: 0.6;
+  display: flex; align-items: flex-end; justify-content: center; padding-bottom: 14px;
+  font-size: 18px; font-weight: 800; color: rgba(0,0,0,0.55);
+  transition: opacity 0.08s, transform 0.08s, background 0.08s;
+  box-shadow: inset 0 -6px 0 rgba(0,0,0,0.18);
+}
+.mel-key.lit { opacity: 1; background: var(--pad-bright); transform: translateY(3px); box-shadow: none; }
+.mel-progress { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; min-height: 14px; }
+.mel-dot { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.18); }
+.mel-dot.ok { background: var(--ok); }
+
+/* ---------------------------------------------------------------
+   Ordina (ordina.js)
+   --------------------------------------------------------------- */
+.ord-field { position: relative; width: 100%; height: 62vh; border-radius: 20px; background: rgba(0,0,0,0.2); overflow: hidden; }
+.ord-circle {
+  position: absolute; transform: translate(-50%, -50%); border-radius: 50%;
+  box-shadow: inset 0 0 0 4px rgba(255,255,255,0.3), 0 4px 12px rgba(0,0,0,0.3);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.ord-circle.gone { opacity: 0; transform: translate(-50%, -50%) scale(0.3); pointer-events: none; }
+.ord-circle.shake { animation: shake 0.25s; }
+
+/* ---------------------------------------------------------------
+   Parola nascosta (parola.js)
+   --------------------------------------------------------------- */
+.word-target { text-align: center; font-size: 30px; font-weight: 800; letter-spacing: 4px; color: var(--accent); margin-bottom: 12px; }
+.word-grid { display: grid; gap: 6px; width: 100%; max-width: 360px; margin: 0 auto; }
+.word-cell {
+  aspect-ratio: 1; border-radius: 10px;
+  background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.12);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; font-weight: 700;
+  transition: background 0.1s;
+}
+.word-cell.on { background: var(--accent); border-color: var(--accent); color: var(--ink); }
+.word-cell.ok { background: var(--ok); border-color: var(--ok); color: var(--ink); }
+.word-cell.wrong { background: var(--danger); border-color: var(--danger); animation: shake 0.25s; }
+
+/* ---------------------------------------------------------------
+   Tris veloce (tris.js)
+   --------------------------------------------------------------- */
+.tris-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; max-width: 300px; margin: 0 auto 14px; }
+.tris-cell {
+  aspect-ratio: 1; border-radius: 14px;
+  background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.14);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 48px; font-weight: 800;
+}
+.tris-cell.x { color: var(--accent); }
+.tris-cell.o { color: #4cc9f0; }
+.tris-cell.win { background: rgba(67,209,122,0.3); border-color: var(--ok); }
+.tris-tally { text-align: center; color: var(--muted); font-size: 15px; font-weight: 600; }
+
+/* ---------------------------------------------------------------
+   Pesca (pesca.js) — canvas
+   --------------------------------------------------------------- */
+.pesca-feedback { text-align: center; font-size: 22px; font-weight: 700; min-height: 30px; color: var(--accent); margin-top: 8px; }
+.pesca-feedback.bad { color: var(--danger); }
+.pesca-feedback.great { color: var(--ok); }
+
+/* ---------------------------------------------------------------
+   Traiettoria (traiettoria.js) — canvas (usa .run-canvas)
+   Labirinto (labirinto.js) — canvas (usa .run-canvas)
+   --------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------
+   Capitali (capitali.js)
+   --------------------------------------------------------------- */
+.quiz-flag { text-align: center; font-size: 72px; line-height: 1; margin-bottom: 6px; }
+.quiz-question { text-align: center; font-size: 26px; font-weight: 700; margin-bottom: 18px; }
+.quiz-question.flash-wrong { color: var(--danger); }
+.quiz-answers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.quiz-answer { font-size: 20px; padding: 18px 8px; background: rgba(255,255,255,0.12); border: 2px solid rgba(255,255,255,0.15); color: var(--text); border-radius: 14px; }
