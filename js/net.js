@@ -1,18 +1,32 @@
 /*
   Net: collegamento fra telefoni (P2P via PeerJS / WebRTC).
 
-  Modello "host-arbitro": chi crea la stanza è l'host, tutte le altre
-  giocatrici si collegano a lei. L'host decide cosa succede (minigioco,
-  tempi, punteggi) e lo comunica a tutte; le altre mandano all'host solo
-  i propri input/risultati.
+  Modello "host-arbitro": chi crea la stanza è l'host, tutti gli altri si
+  collegano a lui. L'host decide cosa succede (minigioco, tempi, punteggi)
+  e lo comunica a tutti; gli altri mandano all'host solo i propri risultati.
 
   Il codice stanza (4 lettere) è parte dell'ID PeerJS dell'host:
   chi conosce il codice sa a chi collegarsi.
+
+  Identità stabile: ogni telefono ha un id fisso (storage.getClientId) che
+  manda nel "join". I partecipanti sono riconosciuti da quello, non dalla
+  connessione: chi perde la linea e rientra ritrova nome, colore e punti.
+
+  Ricollegamento: se un ospite perde la connessione con l'host, riprova da
+  solo per RECONNECT_WINDOW ms (handlers.onLink: "lost" / "back" / "failed");
+  i messaggi da mandare nel frattempo restano in coda. Solo se non ci riesce
+  chiama handlers.onDisconnected.
 */
 
+import { getClientId } from "./storage.js";
+
 const PREFIX = "cellcittine-";
-const COLORS = 8; // quante tinte diverse esistono (la palette sta in ui.js)
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ"; // senza I e O: si confondono con 1 e 0
+const COLORS = 8;                 // quante tinte diverse esistono (la palette sta in ui.js)
+const JOIN_TIMEOUT = 15000;       // primo ingresso: tempo massimo totale
+const RECONNECT_WINDOW = 30000;   // quanto a lungo un ospite riprova dopo aver perso la linea
+const RECONNECT_EVERY = 2000;
+const PHASE_MESSAGES = new Set(["start", "results", "final", "lobby"]); // l'ultimo viene rimandato a chi rientra
 
 export function randomCode() {
   let code = "";
@@ -28,14 +42,19 @@ export class Net {
     this.isHost = false;
     this.peer = null;
     this.code = null;
-    this.me = null;          // { id, name, isHost }
-    this.players = [];       // lista condivisa, nell'ordine di ingresso
-    this.conns = new Map();  // host: peerId -> DataConnection
+    this.me = null;          // { id, name, isHost, color }
+    this.players = [];       // lista condivisa, nell'ordine di ingresso (id = id stabile del telefono)
+    this.conns = new Map();  // host: id stabile -> DataConnection
     this.hostConn = null;    // guest: connessione verso l'host
     this.timeOffset = 0;     // guest: hostTime - localTime
+    this.lastBroadcast = null; // host: ultimo messaggio "di fase", rimandato a chi rientra
+    this.queue = [];         // guest: messaggi da mandare quando torna la linea
+    this.reconnecting = false;
+    this._leaving = false;
+    this._name = "";
   }
 
-  // Orologio comune: il tempo dell'host. Serve per far partire tutte insieme.
+  // Orologio comune: il tempo dell'host. Serve per far partire tutti insieme.
   now() {
     return Date.now() + this.timeOffset;
   }
@@ -45,7 +64,7 @@ export class Net {
   // ---------------------------------------------------------------
   solo(name) {
     this.isHost = true;
-    this.me = { id: "me", name, isHost: true, color: 0 };
+    this.me = { id: getClientId(), name, isHost: true, color: 0 };
     this.players = [this.me];
     return Promise.resolve(null);
   }
@@ -58,11 +77,11 @@ export class Net {
       const code = randomCode();
       const peer = new Peer(PREFIX + code, { debug: 1 });
 
-      peer.on("open", (id) => {
+      peer.on("open", () => {
         this.peer = peer;
         this.isHost = true;
         this.code = code;
-        this.me = { id, name, isHost: true, color: 0 };
+        this.me = { id: getClientId(), name, isHost: true, color: 0 };
         this.players = [this.me];
         this._status(`Stanza ${code} aperta`);
         resolve(code);
@@ -81,7 +100,7 @@ export class Net {
 
       peer.on("disconnected", () => {
         // Persa la connessione al server di "presentazione": le partite in corso
-        // continuano (sono dirette), ma nessuna nuova giocatrice può entrare.
+        // continuano (sono dirette), ma nessuno di nuovo può entrare.
         this._status("Collegamento al server perso, provo a ricollegarmi…");
         try { peer.reconnect(); } catch (_) { /* ignora */ }
       });
@@ -89,21 +108,31 @@ export class Net {
   }
 
   _hostAccept(conn) {
-    conn.on("open", () => {
-      this.conns.set(conn.peer, conn);
-    });
-
     conn.on("data", (msg) => {
       if (!msg || typeof msg !== "object") return;
 
       switch (msg.type) {
         case "join": {
-          this.players = this.players.filter((p) => p.id !== conn.peer);
-          // Nome unico in stanza ("Giulia", "Giulia 2"…) e prima tinta libera
-          const name = this._uniqueName(String(msg.name || "Ospite").trim().slice(0, 16) || "Ospite");
-          const player = { id: conn.peer, name, isHost: false, color: this._freeColor() };
-          this.players.push(player);
+          const id = String(msg.cid || conn.peer).slice(0, 40);
+          const old = this.conns.get(id);
+          if (old && old !== conn) { try { old.close(); } catch (_) { /* ignora */ } }
+          this.conns.set(id, conn);
+          conn.cid = id;
+
+          // Rientro: stesso telefono, tiene nome, colore e (in challenge) punti.
+          let player = this.players.find((p) => p.id === id);
+          const rejoin = !!player;
+          if (!player) {
+            // Nome unico in stanza ("Giulia", "Giulia 2"…) e prima tinta libera
+            const name = this._uniqueName(String(msg.name || "Ospite").trim().slice(0, 16) || "Ospite");
+            player = { id, name, isHost: false, color: this._freeColor() };
+            this.players.push(player);
+          }
           conn.send({ type: "welcome", you: player, players: this.players, hostTime: Date.now() });
+          // Chi rientra riceve il punto in cui siamo; chi è nuovo a sfida iniziata vede
+          // i risultati correnti (giocherà dalla prossima manche), ma non una manche già partita.
+          const last = this.lastBroadcast;
+          if (last && (rejoin || last.type === "results" || last.type === "final")) conn.send(last);
           this.broadcast({ type: "players", players: this.players });
           this.handlers.onPlayers?.(this.players);
           break;
@@ -112,14 +141,16 @@ export class Net {
           conn.send({ type: "pong", t0: msg.t0, t1: Date.now() });
           break;
         default:
-          this.handlers.onMessage?.(msg, conn.peer);
+          if (conn.cid) this.handlers.onMessage?.(msg, conn.cid);
       }
     });
 
     const drop = () => {
-      this.conns.delete(conn.peer);
+      // Una connessione già sostituita da un rientro non conta più
+      if (!conn.cid || this.conns.get(conn.cid) !== conn) return;
+      this.conns.delete(conn.cid);
       const before = this.players.length;
-      this.players = this.players.filter((p) => p.id !== conn.peer);
+      this.players = this.players.filter((p) => p.id !== conn.cid);
       if (this.players.length !== before) {
         this.broadcast({ type: "players", players: this.players });
         this.handlers.onPlayers?.(this.players);
@@ -132,7 +163,7 @@ export class Net {
   _uniqueName(base) {
     const taken = (n) => this.players.some((p) => p.name.toLowerCase() === n.toLowerCase());
     let name = base;
-    for (let i = 2; taken(name); i++) name = `${base} ${i}`.slice(0, 16 + 3);
+    for (let i = 2; taken(name); i++) name = `${base} ${i}`;
     return name;
   }
 
@@ -144,88 +175,158 @@ export class Net {
 
   // Host → tutti
   broadcast(msg) {
+    if (PHASE_MESSAGES.has(msg.type)) this.lastBroadcast = msg;
     for (const conn of this.conns.values()) {
       if (conn.open) conn.send(msg);
     }
   }
 
-  // Host → una sola giocatrice
-  sendTo(peerId, msg) {
-    const conn = this.conns.get(peerId);
+  // Host → una sola persona (id stabile)
+  sendTo(id, msg) {
+    const conn = this.conns.get(id);
     if (conn?.open) conn.send(msg);
   }
 
   // ---------------------------------------------------------------
   // GUEST
   // ---------------------------------------------------------------
-  join(code, name) {
+  async join(code, name) {
     code = code.toUpperCase().trim();
+    this._name = name;
+    this._leaving = false;
+    let phase = "server"; // dove siamo arrivati, per un messaggio d'errore preciso
+    let giveUpTimer = null;
+    const giveUp = new Promise((_, rej) => { giveUpTimer = setTimeout(() => rej({ type: "timeout" }), JOIN_TIMEOUT); });
+    giveUp.catch(() => {}); // se entriamo in tempo, il rifiuto tardivo non deve fare rumore
+    try {
+      await Promise.race([this._ensurePeer(), giveUp]);
+      phase = "connect";
+      this._status("Cerco la stanza…");
+      await Promise.race([this._connectToHost(code, false), giveUp]);
+      this.isHost = false;
+      this.code = code;
+      this.handlers.onPlayers?.(this.players);
+      return code;
+    } catch (err) {
+      this.leave();
+      throw this._describe(err, phase, code);
+    } finally {
+      clearTimeout(giveUpTimer);
+    }
+  }
+
+  // Un Peer pronto (creato ora, o ricollegato al server se serve).
+  _ensurePeer() {
     return new Promise((resolve, reject) => {
+      if (this.peer && !this.peer.destroyed && !this.peer.disconnected) return resolve();
+      if (this.peer && !this.peer.destroyed) {
+        // Server di presentazione perso: riaggancia lo stesso Peer
+        const peer = this.peer;
+        const onOpen = () => { peer.off("open", onOpen); peer.off("error", onErr); resolve(); };
+        const onErr = (err) => { peer.off("open", onOpen); peer.off("error", onErr); reject(err); };
+        peer.on("open", onOpen);
+        peer.on("error", onErr);
+        try { peer.reconnect(); } catch (err) { onErr(err); }
+        return;
+      }
       const peer = new Peer(undefined, { debug: 1 });
-      let settled = false;
-      // Fase del collegamento, per dire con precisione dove si è fermato:
-      //   "server"  = non abbiamo ancora raggiunto il server di presentazione
-      //   "connect" = server raggiunto, stiamo cercando il telefono dell'host
-      let phase = "server";
+      peer.on("open", () => { this.peer = peer; resolve(); });
+      peer.on("error", (err) => {
+        if (this.peer !== peer) { try { peer.destroy(); } catch (_) { /* ignora */ } reject(err); }
+        else if (err.type !== "peer-unavailable") this._status(this._describe(err).message);
+      });
+    });
+  }
 
-      const fail = (err) => {
-        if (settled) return;
-        settled = true;
-        try { peer.destroy(); } catch (_) { /* ignora */ }
-        reject(this._describe(err, phase, code));
-      };
+  // Apre la connessione dati verso l'host e aspetta il "welcome".
+  _connectToHost(code, again) {
+    return new Promise((resolve, reject) => {
+      const conn = this.peer.connect(PREFIX + code, { reliable: true });
+      let done = false;
+      const settle = (fn, v) => { if (!done) { done = true; fn(v); } };
+      const failTimer = setTimeout(() => settle(reject, { type: "timeout" }), 10000);
 
-      const timeout = setTimeout(() => fail({ type: "timeout" }), 15000);
-
-      peer.on("open", () => {
-        this.peer = peer;
-        phase = "connect";
-        this._status("Cerco la stanza…");
-        const conn = peer.connect(PREFIX + code, { reliable: true });
-
-        conn.on("open", () => {
-          this.hostConn = conn;
-          this._status("Entro nella stanza…");
-          conn.send({ type: "join", name });
-        });
-
-        conn.on("data", async (msg) => {
-          if (!msg || typeof msg !== "object") return;
-
-          switch (msg.type) {
-            case "welcome":
-              this.isHost = false;
-              this.code = code;
-              this.me = msg.you;
-              this.players = msg.players;
-              await this._syncClock(conn);
-              clearTimeout(timeout);
-              settled = true;
-              this.handlers.onPlayers?.(this.players);
-              resolve(code);
-              break;
-            case "players":
-              this.players = msg.players;
-              this.handlers.onPlayers?.(this.players);
-              break;
-            case "pong":
-              this._pongResolve?.(msg);
-              break;
-            default:
-              this.handlers.onMessage?.(msg, "host");
-          }
-        });
-
-        conn.on("close", () => {
-          clearTimeout(timeout);
-          if (!settled) fail({ type: "peer-unavailable" });
-          else this.handlers.onDisconnected?.();
-        });
-        conn.on("error", fail);
+      conn.on("open", () => {
+        this._status(again ? "Rientro nella stanza…" : "Entro nella stanza…");
+        conn.send({ type: "join", name: this._name, cid: getClientId(), again });
       });
 
-      peer.on("error", fail);
+      conn.on("data", async (msg) => {
+        if (!msg || typeof msg !== "object") return;
+        switch (msg.type) {
+          case "welcome":
+            this.hostConn = conn;
+            this.me = msg.you;
+            this.players = msg.players;
+            await this._syncClock(conn);
+            clearTimeout(failTimer);
+            settle(resolve);
+            break;
+          case "players":
+            this.players = msg.players;
+            this.handlers.onPlayers?.(this.players);
+            break;
+          case "pong":
+            this._pongResolve?.(msg);
+            break;
+          default:
+            this.handlers.onMessage?.(msg, "host");
+        }
+      });
+
+      conn.on("close", () => {
+        clearTimeout(failTimer);
+        if (!done) settle(reject, { type: "peer-unavailable" });
+        else if (this.hostConn === conn) this._lost();
+      });
+      conn.on("error", (err) => {
+        clearTimeout(failTimer);
+        if (!done) settle(reject, err);
+        else if (this.hostConn === conn) this._lost();
+      });
+
+      // PeerJS segnala "stanza inesistente" come errore del Peer, non della connessione
+      const onPeerErr = (err) => {
+        if (err.type === "peer-unavailable") { clearTimeout(failTimer); settle(reject, err); }
+        this.peer?.off("error", onPeerErr);
+      };
+      this.peer.on("error", onPeerErr);
     });
+  }
+
+  // Linea con l'host persa: riprova per un po', poi si arrende.
+  _lost() {
+    if (this._leaving || this.reconnecting) return;
+    this.reconnecting = true;
+    this.hostConn = null;
+    this.handlers.onLink?.("lost");
+    const deadline = Date.now() + RECONNECT_WINDOW;
+    const attempt = async () => {
+      if (this._leaving) return;
+      if (Date.now() > deadline) {
+        this.reconnecting = false;
+        this.handlers.onLink?.("failed");
+        this.handlers.onDisconnected?.();
+        return;
+      }
+      try {
+        await this._ensurePeer();
+        await this._connectToHost(this.code, true);
+        this.reconnecting = false;
+        this.handlers.onLink?.("back");
+        this.handlers.onPlayers?.(this.players);
+        this._flush();
+      } catch (_) {
+        setTimeout(attempt, RECONNECT_EVERY);
+      }
+    };
+    setTimeout(attempt, 500);
+  }
+
+  _flush() {
+    const pending = this.queue;
+    this.queue = [];
+    for (const msg of pending) this.sendToHost(msg);
   }
 
   // Misura lo scarto fra l'orologio locale e quello dell'host.
@@ -248,15 +349,18 @@ export class Net {
     this.timeOffset = best ? best.offset : 0;
   }
 
-  // Guest → host
+  // Guest → host (in coda se la linea è momentaneamente persa)
   sendToHost(msg) {
     if (this.hostConn?.open) this.hostConn.send(msg);
+    else if (this.reconnecting) this.queue.push(msg);
   }
 
   // ---------------------------------------------------------------
   // Comune
   // ---------------------------------------------------------------
   leave() {
+    this._leaving = true;
+    this.reconnecting = false;
     try { this.peer?.destroy(); } catch (_) { /* ignora */ }
     this.peer = null;
     this.conns.clear();
@@ -265,6 +369,8 @@ export class Net {
     this.me = null;
     this.code = null;
     this.isHost = false;
+    this.queue = [];
+    this.lastBroadcast = null;
   }
 
   _status(text) {

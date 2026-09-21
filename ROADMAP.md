@@ -36,8 +36,8 @@ M = due-tre passi, L = più passi). L'ordine dentro ogni blocco è quello consig
 - [x] **PeerJS copiato nel progetto** (MIT, `vendor/`) invece che da unpkg; il service worker offline non risponde più con HTML al posto di uno script (v0.13.0)
 - [x] **Invito con link**: pulsante "📨 Invita" in stanza (menu di condivisione del telefono o copia); chi apre `…/?stanza=CODICE` entra subito se ha già il nome, altrimenti trova in home il riquadro "Invito" (v0.14.0)
 - [x] **Schermo sempre acceso** dalla stanza al podio (Wake Lock API), anche in allenamento; rilasciato uscendo in home (v0.14.1)
-- [ ] **Identità stabile per telefono** (id casuale salvato in localStorage, inviato nel `join`): chi perde la connessione e rientra ritrova i suoi punti; l'host riconosce il rientro e non lo conta come nuovo. Come: `net.js` (id nel join/welcome), `challenge.js` (standings per id stabile). — M
-- [ ] **Ricollegamento automatico** del guest per 30 s se cade la connessione (avviso "Mi ricollego…") prima di tornare in home. Come: `net.js`, `room.js`. — M
+- [x] **Identità stabile per telefono**: i partecipanti sono riconosciuti da un id fisso del telefono, non dalla connessione; chi rientra ritrova nome, colore e punti (v0.17.0)
+- [x] **Ricollegamento automatico**: se un ospite perde la linea con l'host riprova da solo per 30 s ("Collegamento perso, mi ricollego…" / "Ricollegato!"), i risultati in sospeso vengono inviati al rientro, l'host gli rimanda l'ultimo messaggio di fase (v0.17.0)
 - [x] **Manche automatiche**: opzione "A mano / Automatico" in stanza con attesa regolabile da 5 a 20 s; conto alla rovescia sul pulsante, "Aspetta, non ancora" per fermarlo; gli ospiti vedono il conto (v0.15.0)
 - [x] **Nomi doppi**: se in stanza c'è già "Giulia", chi entra diventa "Giulia 2" (v0.16.0)
 - [x] **Colore per persona** (8 tinte, in ordine di ingresso): pallino accanto al nome in stanza e nelle classifiche, alone del vincitore sul podio (v0.16.0)

@@ -42,6 +42,9 @@ document.addEventListener("pointerdown", (ev) => {
   if (btn && !btn.closest(".game-area")) sfx.play("click");
 }, { passive: true });
 
+// In locale, lo stato è raggiungibile dalla console per prove e diagnosi
+if (location.hostname === "localhost") window.cellcittine = { state };
+
 // Arrivo da un link di invito (?stanza=XXXX)
 state.pendingCode = readInviteFromUrl();
 if (state.pendingCode && state.name) {

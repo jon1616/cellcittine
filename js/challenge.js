@@ -263,6 +263,8 @@ function publishResults() {
   const msg = {
     type: "results",
     index: round.index,
+    total: ch.total,
+    difficulty: ch.difficulty,
     gameId: round.game.id,
     ranking,
     standings: standingsArray(),
@@ -291,22 +293,30 @@ export function handleMessage(msg, fromId) {
     return;
   }
 
+  // Dopo un rientro l'host rimanda l'ultimo messaggio di fase: se lo abbiamo già, niente doppioni.
   switch (msg.type) {
     case "config":
       state.hostConfig = msg.config;
       if (state.screen === "lobby") showLobby();
       break;
     case "start":
+      if (state.round?.index === msg.index && state.round.startAt === msg.startAt) return;
       state.round?.game?.unmount();
       beginRound(msg);
       break;
     case "results":
+      if (state.screen === "results" && state.round?.index === msg.index) return;
+      // Arrivati (o rientrati) a pagina nuova: la vista della sfida si ricostruisce da qui
+      if (!state.challenge) state.challenge = { total: msg.total || msg.index + 1, difficulty: msg.difficulty || null, index: msg.index, standings: new Map(), history: [] };
       showResults(msg);
       break;
     case "final":
+      if (state.screen === "final") return;
+      if (!state.challenge) state.challenge = { total: 0, difficulty: null, index: 0, standings: new Map(), history: [] };
       showFinal(msg);
       break;
     case "lobby":
+      if (state.screen === "lobby" && !state.challenge) return;
       state.challenge = null;
       state.round = null;
       showLobby();

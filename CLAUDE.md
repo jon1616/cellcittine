@@ -43,9 +43,9 @@ js/screens/picker.js scelta dei minigiochi (ricerca, filtri, categorie)
 js/screens/catalog.js  catalogo, scheda di un minigioco, elenco dei minigiochi della sfida
 js/screens/records.js  i miei record
 js/screens/results.js  risultati di manche e podio finale
-js/net.js            P2P (PeerJS): host(), join(), broadcast(), sendToHost(), now() sincronizzato
+js/net.js            P2P (PeerJS): host(), join(), broadcast(), sendToHost(), now() sincronizzato; id stabile per telefono, ricollegamento automatico degli ospiti (30 s), ultimo messaggio di fase rimandato a chi rientra
 js/audio.js          effetti sintetizzati (sfx.play/pad/step/inflate*) + musica (sfx.setScene("menu"|"game"))
-js/storage.js        localStorage: config sfida, record {score,text}, pacchetti personali
+js/storage.js        localStorage: config sfida, record {score,text}, pacchetti personali, getClientId() (id stabile del telefono)
 js/packs.js          pacchetti integrati (alcuni calcolati dal catalogo) + utilità
 js/theme.js          temi: sfondo dei menu (assets/bg-<id>.webp), stagionali per data, scelta manuale
 js/games/catalog.js  CATALOGO: scheda di ogni minigioco + loadGame(id) con import() a richiesta
@@ -58,6 +58,8 @@ js/tester.js + test.html   tester nel browser (struttura, ogni minigioco, allena
 tools/check.mjs      controllo da riga di comando (sintassi, catalogo ↔ file ↔ sw.js, PRECACHE completa, versione)
 .claude/serve.js + .claude/launch.json   server locale di sviluppo (porta 8765), fuori da Git
 ```
+
+Rete: i partecipanti sono identificati dall'id stabile del telefono (`getClientId`), mai dall'id PeerJS; i messaggi di fase (start/results/final/lobby) devono poter arrivare due volte senza effetti (guardie in `handleMessage`). In locale `window.cellcittine.state` espone lo stato per le prove.
 
 Regole di dipendenza tra i moduli: le schermate importano `state`, `ui`, i dati (catalog, storage,
 packs) e le altre schermate a cui portano; nessun modulo esegue codice al caricamento che usi

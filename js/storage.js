@@ -4,6 +4,7 @@
 const KEY_CONFIG = "config";
 const KEY_RECORDS = "records";
 const KEY_PACKS = "packs";
+const KEY_CLIENT = "clientId";
 
 export const DIFFICULTIES = [
   { id: "facile", label: "Facile" },
@@ -31,6 +32,21 @@ function read(key, fallback) {
 
 function write(key, value) {
   try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) { /* spazio pieno o privato */ }
+}
+
+// ---------------------------------------------------------------
+// Identità stabile del telefono: un id casuale creato una volta sola.
+// Serve in stanza per riconoscere chi rientra dopo aver perso la linea.
+// ---------------------------------------------------------------
+
+export function getClientId() {
+  let id = null;
+  try { id = localStorage.getItem(KEY_CLIENT); } catch (_) { /* privato */ }
+  if (!id) {
+    id = "c" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+    try { localStorage.setItem(KEY_CLIENT, id); } catch (_) { /* pazienza: vale per questa sessione */ }
+  }
+  return id;
 }
 
 // ---------------------------------------------------------------

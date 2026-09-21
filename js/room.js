@@ -48,9 +48,14 @@ function makeNet() {
     },
     onMessage: handleMessage,
     onStatus: (text) => setStatus(text),
+    // Linea con l'host persa e ritrovata (solo ospiti)
+    onLink: (what) => {
+      if (what === "lost") toast("Collegamento perso, mi ricollego…");
+      else if (what === "back") toast("Ricollegato!");
+    },
     onDisconnected: () => {
       leaveRoom();
-      showHome("La stanza è stata chiusa.");
+      showHome("La stanza è stata chiusa o non risponde più.");
     },
   });
 }
@@ -96,7 +101,8 @@ export async function joinRoom(code) {
   try {
     await state.net.join(code, state.name);
     keepScreenOn();
-    showLobby();
+    // Se rientrando abbiamo già ricevuto una manche o dei risultati, la schermata è già quella giusta
+    if (!state.challenge) showLobby();
   } catch (err) {
     leaveRoom();
     throw err;
