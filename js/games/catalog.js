@@ -546,6 +546,7 @@ export const CATALOG = [
   },
   {
     id: "labirinto",
+    image: "assets/icons/labirinto.webp",
     title: "Labirinto",
     icon: "🌀",
     description: "Trascina il dito dall'ingresso all'uscita senza toccare i muri.",
@@ -565,6 +566,7 @@ export const CATALOG = [
   },
   {
     id: "melodia",
+    image: "assets/icons/melodia.webp",
     title: "Melodia",
     icon: "🎹",
     description: "Ascolta una melodia sui quattro tasti e ripetila. Ogni giro è nuova e più lunga.",
@@ -584,6 +586,7 @@ export const CATALOG = [
   },
   {
     id: "ordina",
+    image: "assets/icons/ordina.webp",
     title: "Ordina",
     icon: "🫧",
     description: "Tocca i cerchi dal più piccolo al più grande, serie dopo serie.",
@@ -603,6 +606,7 @@ export const CATALOG = [
   },
   {
     id: "parola",
+    image: "assets/icons/parola.webp",
     title: "Parola nascosta",
     icon: "🔠",
     description: "Trova la parola nascosta nella griglia di lettere e tocca le sue lettere in ordine.",
@@ -622,6 +626,7 @@ export const CATALOG = [
   },
   {
     id: "tris",
+    image: "assets/icons/tris.webp",
     title: "Tris veloce",
     icon: "❌",
     description: "Partite lampo di tris contro il telefono: vinci 3 punti, pareggi 1.",
@@ -641,6 +646,7 @@ export const CATALOG = [
   },
   {
     id: "pesca",
+    image: "assets/icons/pesca.webp",
     title: "Pesca",
     icon: "🎣",
     description: "Quando il galleggiante affonda, tocca subito: cinque pesci, più sei rapido più punti.",
@@ -660,6 +666,7 @@ export const CATALOG = [
   },
   {
     id: "traiettoria",
+    image: "assets/icons/traiettoria.webp",
     title: "Traiettoria",
     icon: "🎯",
     description: "Scorri dalla palla verso il bersaglio in movimento: otto lanci, centra più che puoi.",
@@ -679,6 +686,7 @@ export const CATALOG = [
   },
   {
     id: "capitali",
+    image: "assets/icons/capitali.webp",
     title: "Capitali",
     icon: "🌍",
     description: "Qual è la capitale di…? Quattro risposte, 25 secondi a raffica.",

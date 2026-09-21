@@ -70,7 +70,7 @@ Idee già discusse, tutte con suoni, prestazione e icona nello stile delle altre
 - [x] Pesca (riflessi): tocca quando il pesce abbocca, finti morsi nei livelli alti (v0.23.0)
 - [x] Traiettoria (destrezza): lancio con scorrimento verso un bersaglio in movimento (v0.23.0)
 - [x] Capitali (memoria): quiz a quattro risposte con bandiere, tre livelli di notorietà (v0.23.0)
-- [ ] Icone disegnate degli 8 nuovi minigiochi (foglio 4×2 da generare con il prompt fornito, poi ritaglio in `assets/icons/<id>.webp`); intanto usano l'emoji. — S
+- [x] Icone disegnate degli 8 nuovi minigiochi (foglio assets/game-icons-2.png ritagliato in assets/icons/<id>.webp) (v0.23.1)
 
 ## 4. Grafica, audio, temi
 

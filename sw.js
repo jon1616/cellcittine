@@ -5,7 +5,7 @@
   salvata l'ultima volta.
 */
 
-const CACHE_VERSION = "0.23.0"; // tenere allineato a js/version.js
+const CACHE_VERSION = "0.23.1"; // tenere allineato a js/version.js
 const CACHE = `cellcittine-${CACHE_VERSION}`;
 
 const PRECACHE = [
@@ -112,6 +112,14 @@ const PRECACHE = [
   "./assets/icons/anagrammi.webp",
   "./assets/icons/altobasso.webp",
   "./assets/icons/dieci.webp",
+  "./assets/icons/labirinto.webp",
+  "./assets/icons/melodia.webp",
+  "./assets/icons/ordina.webp",
+  "./assets/icons/parola.webp",
+  "./assets/icons/tris.webp",
+  "./assets/icons/pesca.webp",
+  "./assets/icons/traiettoria.webp",
+  "./assets/icons/capitali.webp",
 ];
 
 self.addEventListener("install", (event) => {
