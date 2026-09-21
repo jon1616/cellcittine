@@ -31,16 +31,22 @@ const GRACE_SECONDS = 8;   // margine oltre maxSeconds prima di chiudere la manc
 // Avvio (host)
 // ---------------------------------------------------------------
 
-export async function startChallenge() {
+// sameGames: (rivincita) stessa sequenza di minigiochi della sfida appena finita, semi nuovi
+export async function startChallenge(sameGames = null) {
+  if (!Array.isArray(sameGames)) sameGames = null; // (un evento del click non è una lista)
   const cfg = state.config;
   const rng = seededRandom(Math.floor(Math.random() * 2 ** 31));
 
   // "Tutti": ogni minigioco scelto una volta, in ordine casuale.
   // Altrimenti: cicla su quelli scelti, mescolati, evitando ripetizioni vicine.
-  const total = cfg.rounds === "tutti" ? cfg.games.length : cfg.rounds;
+  const total = sameGames ? sameGames.length : cfg.rounds === "tutti" ? cfg.games.length : cfg.rounds;
   const rounds = [];
   let pool = [];
   while (rounds.length < total) {
+    if (sameGames) {
+      rounds.push({ gameId: sameGames[rounds.length], seed: Math.floor(rng() * 2 ** 31) });
+      continue;
+    }
     if (pool.length === 0) {
       pool = shuffle(cfg.games, rng);
       if (rounds.length > 0 && pool.length > 1 && pool[0] === rounds[rounds.length - 1].gameId) {
@@ -95,6 +101,14 @@ export function nextRound() {
   };
   net.broadcast(msg);
   beginRound(msg);
+}
+
+// Rivincita: stessa sfida (stessi minigiochi, stesso ordine), nuovi semi, punti da zero
+export function replayChallenge() {
+  const games = state.challenge?.rounds?.map((r) => r.gameId);
+  if (!games?.length) return;
+  state.round = null;
+  startChallenge(games);
 }
 
 export function finishChallenge() {

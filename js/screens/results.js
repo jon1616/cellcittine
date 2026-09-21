@@ -10,7 +10,7 @@ import { show, gameIcon, gameHeading, confetti, colorDot, playerColor } from "..
 import { getEntry, loadGame, getLoaded } from "../games/catalog.js";
 import { getRecord, addHistoryEntry } from "../storage.js";
 import { leaveRoom, exitButton } from "../room.js";
-import { nextRound, finishChallenge } from "../challenge.js";
+import { nextRound, finishChallenge, replayChallenge } from "../challenge.js";
 import { showHome } from "./home.js";
 import { showLobby } from "./lobby.js";
 
@@ -243,8 +243,10 @@ export function showFinal(msg) {
 
   const actions = net.isHost
     ? [
+        el("button", { text: "🔁 Rivincita (stessa sfida)", onclick: () => replayChallenge() }),
         el("button", {
-          text: solo ? "Ricomincia" : "Nuova sfida",
+          text: solo ? "Cambia impostazioni" : "Nuova sfida",
+          class: "secondary",
           onclick: () => {
             state.challenge = null;
             state.round = null;

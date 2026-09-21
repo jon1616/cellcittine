@@ -136,10 +136,10 @@ export function gameHeading(g, tag = "h2") {
 
 // Riga compatta di un minigioco, usata in catalogo e nella scelta.
 //   selected: null (nessuna spunta) | true | false
-//   onClick: tocco sulla riga · onInfo: pulsante "i"
-export function gameRow(g, { selected = null, onClick, onInfo } = {}) {
+//   onClick: tocco sulla riga · onInfo: pulsante "i" · onFav: stellina (fav = stato attuale)
+export function gameRow(g, { selected = null, onClick, onInfo, onFav = null, fav = false } = {}) {
   const rec = getRecord(g.id, state.config.difficulty);
-  const row = el("div", { class: `game-row${selected === true ? " on" : ""}${selected === false ? " off" : ""}` }, [
+  const row = el("div", { class: `game-row${selected === true ? " on" : ""}${selected === false ? " off" : ""}${onFav ? " with-fav" : ""}` }, [
     selected === null ? el("span") : el("span", { class: "check", text: selected ? "✓" : "" }),
     gameIcon(g),
     el("div", { class: "game-text" }, [
@@ -150,6 +150,7 @@ export function gameRow(g, { selected = null, onClick, onInfo } = {}) {
       el("div", { class: "game-desc", text: g.description }),
       el("div", { class: "game-meta", text: metaLine(g) + (rec ? ` · ★ ${rec.text}` : "") }),
     ]),
+    onFav ? el("button", { class: `fav${fav ? " on" : ""}`, text: fav ? "★" : "☆", title: "Preferito", onclick: (ev) => { ev.stopPropagation(); onFav(); } }) : el("span"),
     onInfo ? el("button", { class: "info", text: "i", onclick: (ev) => { ev.stopPropagation(); onInfo(); } }) : el("span"),
   ]);
   if (onClick) row.addEventListener("click", onClick);

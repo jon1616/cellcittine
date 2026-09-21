@@ -9,6 +9,7 @@ import { sfx } from "../audio.js";
 import { state, setScreen } from "../state.js";
 import { showRaw, gameRow } from "../ui.js";
 import { CATALOG, CATEGORIES, isNew, matches } from "../games/catalog.js";
+import { getFavorites, toggleFavorite } from "../storage.js";
 import { updateConfig, showLobby } from "./lobby.js";
 import { showGameInfo } from "./catalog.js";
 
@@ -41,9 +42,11 @@ export function showPicker() {
     const mk = (id, label) =>
       el("button", { class: `chip small${p.filter === id ? " on" : ""}`, text: label, onclick: () => { p.filter = id; renderFilters(); renderList(); } });
     const newCount = CATALOG.filter(isNew).length;
+    const favCount = getFavorites().length;
     filters.replaceChildren(
       mk("tutti", "Tutti"),
       mk("scelti", `Scelti (${p.selected.size})`),
+      mk("preferiti", `★ Preferiti (${favCount})`),
       ...(newCount ? [mk("nuovi", `✨ Nuovi (${newCount})`)] : []),
       ...CATEGORIES.map((c) => mk(c.id, `${c.icon} ${c.label}`))
     );
@@ -54,6 +57,7 @@ export function showPicker() {
     return CATALOG.filter((g) => {
       if (p.filter === "nuovi" && !isNew(g)) return false;
       if (p.filter === "scelti" && !p.selected.has(g.id)) return false;
+      if (p.filter === "preferiti" && !getFavorites().includes(g.id)) return false;
       if (CATEGORIES.some((c) => c.id === p.filter) && g.category !== p.filter) return false;
       return matches(g, p.query);
     });
@@ -96,9 +100,12 @@ export function showPicker() {
         }),
       ]);
       head.style.setProperty("--cat", cat.color);
+      const favs = getFavorites();
       const rows = collapsed ? [] : games.map((g) =>
         gameRow(g, {
           selected: p.selected.has(g.id),
+          fav: favs.includes(g.id),
+          onFav: () => { toggleFavorite(g.id); renderList(); },
           onClick: () => { p.selected.has(g.id) ? p.selected.delete(g.id) : p.selected.add(g.id); renderList(); },
           onInfo: () => showGameInfo(g, () => { showPickerAgain(); }),
         })

@@ -220,7 +220,7 @@ async function testStruttura() {
     const raw = typeof p.games === "function" ? p.games() : p.games;
     const unknown = raw.filter((id) => !ALL_GAME_IDS.includes(id));
     if (unknown.length) packProblems.push(`${p.name}: ${unknown.join(", ")}`);
-    if (resolvePack(p).length === 0) packProblems.push(`${p.name}: vuoto`);
+    if (resolvePack(p).length === 0 && !p.optional) packProblems.push(`${p.name}: vuoto`); // "optional": può essere vuoto (es. Preferiti)
   }
   if (packProblems.length) row("fail", "Pacchetti integrati con id sconosciuti o vuoti", packProblems.join(" · "));
   else row("ok", `${BUILTIN_PACKS.length} pacchetti integrati coerenti`);

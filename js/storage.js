@@ -6,6 +6,7 @@ const KEY_RECORDS = "records";
 const KEY_PACKS = "packs";
 const KEY_CLIENT = "clientId";
 const KEY_HISTORY = "history";
+const KEY_FAVORITES = "favorites"; // minigiochi preferiti (stellina nella scelta)
 const KEY_SEEN = "seen"; // minigiochi già giocati su questo telefono (per la presentazione lunga la prima volta)
 const HISTORY_MAX = 60; // sfide ricordate sul telefono
 
@@ -107,6 +108,22 @@ export function updateRecord(game, difficulty, score) {
 }
 
 // ---------------------------------------------------------------
+// Preferiti
+// ---------------------------------------------------------------
+
+export function getFavorites() {
+  const list = read(KEY_FAVORITES, []);
+  return Array.isArray(list) ? list : [];
+}
+
+export function toggleFavorite(gameId) {
+  const list = getFavorites();
+  const next = list.includes(gameId) ? list.filter((id) => id !== gameId) : [...list, gameId];
+  write(KEY_FAVORITES, next);
+  return next.includes(gameId);
+}
+
+// ---------------------------------------------------------------
 // Minigiochi già visti su questo telefono
 // ---------------------------------------------------------------
 
@@ -150,16 +167,18 @@ export function getUserPacks() {
   return Array.isArray(packs) ? packs : [];
 }
 
-export function saveUserPack(name, games) {
+// rules (facoltativo): { rounds, difficulty, auto, autoDelay } salvate insieme ai minigiochi
+export function saveUserPack(name, games, rules = null) {
   const packs = getUserPacks();
   const clean = name.trim().slice(0, 24) || "Il mio pacchetto";
   const existing = packs.find((p) => p.name.toLowerCase() === clean.toLowerCase());
   if (existing) {
     existing.games = [...games];
+    if (rules) existing.rules = { ...rules }; else delete existing.rules;
     write(KEY_PACKS, packs);
     return existing;
   }
-  const pack = { id: `u${Date.now().toString(36)}`, name: clean, games: [...games] };
+  const pack = { id: `u${Date.now().toString(36)}`, name: clean, games: [...games], ...(rules ? { rules: { ...rules } } : {}) };
   packs.push(pack);
   write(KEY_PACKS, packs);
   return pack;

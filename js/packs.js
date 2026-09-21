@@ -5,6 +5,7 @@
 */
 
 import { CATALOG, ALL_GAME_IDS, isNew } from "./games/catalog.js";
+import { getFavorites } from "./storage.js";
 
 const ids = (filter) => CATALOG.filter(filter).map((g) => g.id);
 
@@ -15,6 +16,14 @@ export const BUILTIN_PACKS = [
     icon: "🌈",
     description: "Ogni minigioco disponibile.",
     games: () => [...ALL_GAME_IDS],
+  },
+  {
+    id: "preferiti",
+    name: "Preferiti",
+    icon: "★",
+    description: "I minigiochi con la stellina nella scelta.",
+    optional: true, // vuoto finché non c'è nessuna stellina: non compare tra i pacchetti
+    games: () => getFavorites(),
   },
   {
     id: "classici",

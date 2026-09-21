@@ -54,7 +54,9 @@ function packName(cfg) {
 }
 
 function applyPack(pack, type) {
-  updateConfig({ games: resolvePack(pack), pack: { type, id: pack.id } });
+  // Un pacchetto personale può portare con sé anche manche, difficoltà e manche automatiche
+  const rules = type === "user" && pack.rules ? pack.rules : {};
+  updateConfig({ games: resolvePack(pack), pack: { type, id: pack.id }, ...rules });
 }
 
 function roundsLabel(cfg) {
@@ -73,7 +75,7 @@ function packsRow() {
   const cfg = state.config;
   const isActive = (type, id) => cfg.pack?.type === type && cfg.pack?.id === id;
 
-  const builtin = BUILTIN_PACKS.map((p) => {
+  const builtin = BUILTIN_PACKS.filter((p) => resolvePack(p).length > 0).map((p) => {
     const n = resolvePack(p).length;
     return el("button", {
       class: `chip pack${isActive("builtin", p.id) ? " on" : ""}`,
@@ -86,7 +88,8 @@ function packsRow() {
   const user = getUserPacks().map((p) => {
     const chip = el("button", {
       class: `chip pack user${isActive("user", p.id) ? " on" : ""}`,
-      text: `💾 ${p.name} (${p.games.length})`,
+      text: `💾 ${p.name} (${p.games.length})${p.rules ? " ⚙" : ""}`,
+      title: p.rules ? `${p.rules.rounds === "tutti" ? "Tutte le manche" : `${p.rules.rounds} manche`} · ${difficultyLabel(p.rules.difficulty)}${p.rules.auto ? " · automatiche" : ""}` : "",
       onclick: () => applyPack(p, "user"),
     });
     const del = el("button", {
@@ -118,12 +121,17 @@ function savePackForm() {
   open.addEventListener("click", () => {
     const input = el("input", { type: "text", maxlength: "24", placeholder: "Nome del pacchetto", autocomplete: "off" });
     const save = el("button", { text: "Salva", class: "small-btn" });
+    let withRules = true;
+    const rulesChip = el("button", { class: "chip small on", text: "⚙ Anche manche e difficoltà" });
+    rulesChip.addEventListener("click", () => { withRules = !withRules; rulesChip.classList.toggle("on", withRules); });
     save.addEventListener("click", () => {
-      const pack = saveUserPack(input.value, state.config.games);
+      const cfg = state.config;
+      const rules = withRules ? { rounds: cfg.rounds, difficulty: cfg.difficulty, auto: cfg.auto, autoDelay: cfg.autoDelay } : null;
+      const pack = saveUserPack(input.value, cfg.games, rules);
       updateConfig({ pack: { type: "user", id: pack.id } });
     });
     input.addEventListener("keydown", (ev) => { if (ev.key === "Enter") save.click(); });
-    wrap.replaceChildren(el("div", { class: "save-row" }, [input, save]));
+    wrap.replaceChildren(el("div", { class: "save-row" }, [input, save]), el("div", { class: "chips" }, [rulesChip]));
     input.focus();
   });
   wrap.append(open);
@@ -245,7 +253,7 @@ export function showLobby() {
 
   if (net.isHost) {
     parts.push(...configPanel());
-    const startBtn = el("button", { text: solo ? "Inizia!" : "Inizia la sfida!", onclick: startChallenge });
+    const startBtn = el("button", { text: solo ? "Inizia!" : "Inizia la sfida!", onclick: () => startChallenge() });
     startBtn.disabled = state.config.games.length === 0;
     parts.push(startBtn);
     if (state.config.games.length === 0) parts.push(el("p", { class: "small", text: "Scegli almeno un minigioco" }));

@@ -250,6 +250,13 @@ input.code { letter-spacing: 8px; text-transform: uppercase; font-weight: 700; f
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
 }
+.game-row.with-fav { grid-template-columns: 24px 44px 1fr 30px 30px; }
+.screen .game-row button.fav {
+  width: 28px; height: 28px; padding: 0; border-radius: 50%;
+  background: rgba(255,255,255,0.08); border: 1px solid var(--line);
+  box-shadow: none; text-shadow: none; color: var(--muted); font-size: 16px;
+}
+.screen .game-row button.fav.on { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 60%, transparent); background: color-mix(in srgb, var(--accent) 18%, transparent); }
 .game-row + .game-row { margin-top: 6px; }
 .game-row.on {
   border-color: var(--accent);

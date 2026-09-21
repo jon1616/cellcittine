@@ -28,6 +28,14 @@ export function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+// Vibrazione (interruttore in home: localStorage "vibration" = "off" per spegnerla)
+export function isVibrationEnabled() {
+  try { return localStorage.getItem("vibration") !== "off"; } catch (_) { return true; }
+}
+export function setVibrationEnabled(on) {
+  try { localStorage.setItem("vibration", on ? "on" : "off"); } catch (_) { /* privato */ }
+}
 export function vibrate(pattern) {
+  if (!isVibrationEnabled()) return;
   try { navigator.vibrate?.(pattern); } catch (_) { /* non supportato */ }
 }

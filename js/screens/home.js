@@ -3,7 +3,7 @@
   (record, catalogo, suoni, musica) e scelta del tema.
 */
 
-import { el } from "../utils.js";
+import { el, isVibrationEnabled, setVibrationEnabled, vibrate } from "../utils.js";
 import { sfx } from "../audio.js";
 import { state, setScreen } from "../state.js";
 import { show, statusLine, setStatus, toast } from "../ui.js";
@@ -66,6 +66,11 @@ export function showHome(message = "", isError = !!message) {
         text: sfx.isMusicEnabled() ? "🎵 Musica" : "🎵 Musica (off)",
         class: "link",
         onclick: () => { sfx.setMusicEnabled(!sfx.isMusicEnabled()); showHome(); },
+      }),
+      el("button", {
+        text: isVibrationEnabled() ? "📳 Vibrazione" : "📳 Vibrazione (off)",
+        class: "link",
+        onclick: () => { setVibrationEnabled(!isVibrationEnabled()); vibrate(30); showHome(); },
       }),
     ]),
     themeRow(),
