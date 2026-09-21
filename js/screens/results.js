@@ -50,6 +50,31 @@ function standingsList(standings, meId) {
 }
 
 // ---------------------------------------------------------------
+// Manche automatiche: conto alla rovescia dopo i risultati
+// ---------------------------------------------------------------
+
+let autoTimer = null;
+
+function stopAuto() {
+  clearInterval(autoTimer);
+  autoTimer = null;
+}
+
+// Aggiorna `onTick(rimanenti)` ogni secondo e chiama `onDone` a zero.
+// Si ferma da solo se nel frattempo si è cambiata schermata o manche.
+function startAuto(seconds, roundIndex, onTick, onDone) {
+  stopAuto();
+  let left = seconds;
+  onTick(left);
+  autoTimer = setInterval(() => {
+    if (state.screen !== "results" || state.round?.index !== roundIndex || !state.net) { stopAuto(); return; }
+    left--;
+    if (left <= 0) { stopAuto(); onDone(); return; }
+    onTick(left);
+  }, 1000);
+}
+
+// ---------------------------------------------------------------
 // Fine manche
 // ---------------------------------------------------------------
 
@@ -98,9 +123,25 @@ export async function showResults(msg) {
     cards.push(el("div", { class: "card" }, [el("h2", { text: "Classifica generale" }), standingsList(msg.standings, meId)]));
   }
 
-  const actions = net.isHost
-    ? [el("button", { text: msg.last ? "Vedi il risultato finale" : "Prossima manche", onclick: () => (msg.last ? finishChallenge() : nextRound()) })]
-    : [el("p", { text: "Aspetta l'host…" })];
+  const actions = [];
+  const cfg = net.isHost ? state.config : state.hostConfig;
+  if (net.isHost) {
+    const label = msg.last ? "Vedi il risultato finale" : "Prossima manche";
+    const advance = () => { stopAuto(); msg.last ? finishChallenge() : nextRound(); };
+    const btn = el("button", { text: label, onclick: advance });
+    actions.push(btn);
+    if (cfg?.auto) {
+      const hold = el("button", { text: "Aspetta, non ancora", class: "link", onclick: () => { stopAuto(); btn.textContent = label; hold.remove(); } });
+      actions.push(hold);
+      startAuto(cfg.autoDelay, msg.index, (n) => { btn.textContent = `${label} · ${n} s`; }, advance);
+    }
+  } else if (cfg?.auto) {
+    const p = el("p", { text: "" });
+    actions.push(p);
+    startAuto(cfg.autoDelay, msg.index, (n) => { p.textContent = `${msg.last ? "Risultato finale" : "Prossima manche"} fra ${n} s…`; }, () => { p.textContent = "Aspetta l'host…"; });
+  } else {
+    actions.push(el("p", { text: "Aspetta l'host…" }));
+  }
 
   show(
     el("p", { text: `Manche ${msg.index + 1} di ${state.challenge.total}` }),

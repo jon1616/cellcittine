@@ -9,7 +9,7 @@ import { state, setScreen, isSolo } from "../state.js";
 import { show, statusLine, segmented, difficultyLabel } from "../ui.js";
 import { CATALOG, CATEGORIES, getEntry } from "../games/catalog.js";
 import { BUILTIN_PACKS, getBuiltinPack, resolvePack, randomSelection, sameSelection } from "../packs.js";
-import { DIFFICULTIES, ROUND_OPTIONS, saveConfig, getUserPacks, saveUserPack, deleteUserPack } from "../storage.js";
+import { DIFFICULTIES, ROUND_OPTIONS, AUTO_MIN, AUTO_MAX, saveConfig, getUserPacks, saveUserPack, deleteUserPack } from "../storage.js";
 import { exitButton, shareInvite } from "../room.js";
 import { startChallenge } from "../challenge.js";
 import { showHome } from "./home.js";
@@ -24,7 +24,7 @@ export function broadcastConfig() {
   const cfg = state.config;
   state.net?.broadcast({
     type: "config",
-    config: { games: cfg.games, rounds: cfg.rounds, difficulty: cfg.difficulty, packName: packName(cfg) },
+    config: { games: cfg.games, rounds: cfg.rounds, difficulty: cfg.difficulty, packName: packName(cfg), auto: cfg.auto, autoDelay: cfg.autoDelay },
   });
 }
 
@@ -166,9 +166,26 @@ function configPanel() {
     ),
     el("div", { class: "label", text: "Difficoltà" }),
     segmented(DIFFICULTIES, cfg.difficulty, (difficulty) => updateConfig({ difficulty })),
+    el("div", { class: "label", text: "Tra una manche e l'altra" }),
+    segmented(
+      [{ id: false, label: "A mano" }, { id: true, label: "Automatico" }],
+      cfg.auto,
+      (auto) => updateConfig({ auto })
+    ),
+    cfg.auto ? autoDelayRow() : el("p", { class: "small", text: "Chi ha creato la stanza tocca “Prossima manche”" }),
   ]);
 
   return [selectionCard, rulesCard];
+}
+
+// Attesa tra le manche (manche automatiche): cursore da AUTO_MIN a AUTO_MAX secondi.
+function autoDelayRow() {
+  const cfg = state.config;
+  const value = el("span", { class: "range-val", text: `${cfg.autoDelay} s` });
+  const slider = el("input", { type: "range", min: String(AUTO_MIN), max: String(AUTO_MAX), step: "1", value: String(cfg.autoDelay) });
+  slider.addEventListener("input", () => { value.textContent = `${slider.value} s`; });
+  slider.addEventListener("change", () => updateConfig({ autoDelay: Number(slider.value) }, { rerender: false }));
+  return el("div", { class: "range-row" }, [el("span", { class: "small", text: "Attesa" }), slider, value]);
 }
 
 // Riassunto per gli ospiti (dalla configurazione ricevuta dall'host).
@@ -176,7 +193,7 @@ function configSummary(cfg) {
   const n = cfg.games.length;
   return el("div", { class: "card" }, [
     el("h2", { text: "La sfida" }),
-    el("p", { text: `${cfg.packName ? `Pacchetto ${cfg.packName} · ` : ""}${roundsLabel(cfg)} · ${difficultyLabel(cfg.difficulty)}` }),
+    el("p", { text: `${cfg.packName ? `Pacchetto ${cfg.packName} · ` : ""}${roundsLabel(cfg)} · ${difficultyLabel(cfg.difficulty)}${cfg.auto ? ` · manche automatiche (${cfg.autoDelay} s)` : ""}` }),
     el("p", { class: "small", text: n ? `${n} ${n === 1 ? "minigioco" : "minigiochi"}: ${categoryBreakdown(cfg.games)}` : "" }),
     el("button", { text: "Vedi i minigiochi", class: "link", onclick: () => showSelectionList(cfg.games) }),
   ]);

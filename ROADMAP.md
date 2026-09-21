@@ -38,7 +38,7 @@ M = due-tre passi, L = più passi). L'ordine dentro ogni blocco è quello consig
 - [x] **Schermo sempre acceso** dalla stanza al podio (Wake Lock API), anche in allenamento; rilasciato uscendo in home (v0.14.1)
 - [ ] **Identità stabile per telefono** (id casuale salvato in localStorage, inviato nel `join`): chi perde la connessione e rientra ritrova i suoi punti; l'host riconosce il rientro e non lo conta come nuovo. Come: `net.js` (id nel join/welcome), `challenge.js` (standings per id stabile). — M
 - [ ] **Ricollegamento automatico** del guest per 30 s se cade la connessione (avviso "Mi ricollego…") prima di tornare in home. Come: `net.js`, `room.js`. — M
-- [ ] **Manche automatiche** (opzione dell'host): dopo i risultati si passa da soli alla manche successiva con un conto alla rovescia di 8 s e un pulsante "Avanti subito". Come: `storage.js` (config.auto), `screens/lobby.js` (interruttore), `screens/results.js`. — S
+- [x] **Manche automatiche**: opzione "A mano / Automatico" in stanza con attesa regolabile da 5 a 20 s; conto alla rovescia sul pulsante, "Aspetta, non ancora" per fermarlo; gli ospiti vedono il conto (v0.15.0)
 - [ ] **Nomi doppi**: se in stanza c'è già "Giulia", chi entra diventa "Giulia 2". Come: `net.js` (_hostAccept). — S
 - [ ] **Colore per persona**: ogni partecipante ha un colore (in ordine di ingresso) usato nella lista, nelle classifiche e nel podio. Come: `net.js` (indice), `menu.css`, `screens/lobby.js`/`results.js`. — S
 - [x] **Messaggi chiari quando il collegamento non riesce**: distinguono server non raggiunto, stanza non trovata (con promemoria su I/O) e telefoni che non si collegano tra loro (stesso Wi‑Fi, VPN, hotspot) (v0.14.2)
