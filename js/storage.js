@@ -122,7 +122,8 @@ export function loadConfig(allGameIds) {
   if (!DIFFICULTY_OPTIONS.some((d) => d.id === cfg.difficulty)) cfg.difficulty = DEFAULT_CONFIG.difficulty;
   cfg.auto = cfg.auto === true;
   cfg.autoDelay = Number.isInteger(cfg.autoDelay) ? Math.min(AUTO_MAX, Math.max(AUTO_MIN, cfg.autoDelay)) : DEFAULT_CONFIG.autoDelay;
-  cfg.teams = [0, 2, 3].includes(cfg.teams) ? cfg.teams : 0;
+  cfg.teams = [0, 2, 3, "coppie"].includes(cfg.teams) ? cfg.teams : 0;
+  cfg.presenter = cfg.presenter === true; // l'host presenta e non gioca
   cfg.special = cfg.special === true;
   cfg.championship = cfg.championship === true;
   cfg.mode = MODE_OPTIONS.some((m) => m.id === cfg.mode) ? cfg.mode : "punti";

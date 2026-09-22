@@ -83,6 +83,18 @@ export const BUILTIN_PACKS = [
   },
 ];
 
+// Sfide a tema (scelte in stanza in un tocco): liste calcolate dal catalogo
+export const THEMES = [
+  { id: "parolenumeri", name: "Parole e numeri", icon: "🔤", description: "Solo minigiochi di parole e di calcolo.", fixed: true, games: () => ids((g) => ["parole", "calcolo"].includes(g.category)) },
+  { id: "canvas", name: "Solo azione", icon: "🕹️", description: "Destrezza e riflessi: si muove tutto.", fixed: true, games: () => ids((g) => ["destrezza", "riflessi"].includes(g.category) && g.pace !== "tranquillo") },
+  { id: "riflessi", name: "Riflessi puri", icon: "⚡", description: "Solo reazione.", fixed: true, games: () => ids((g) => g.category === "riflessi") },
+  { id: "memoria", name: "Memoria di ferro", icon: "🧠", description: "Solo memoria.", fixed: true, games: () => ids((g) => g.category === "memoria") },
+  { id: "mix", name: "Mix equilibrato", icon: "🎨", description: "Due minigiochi a caso per ogni categoria.", fixed: false, games: () => ["riflessi", "memoria", "attenzione", "destrezza", "calcolo", "parole"].flatMap((c) => randomSelection(2, ids((g) => g.category === c))) },
+];
+export function themeGames(theme) {
+  return theme.games().filter((id) => ALL_GAME_IDS.includes(id));
+}
+
 export function getBuiltinPack(id) {
   return BUILTIN_PACKS.find((p) => p.id === id);
 }

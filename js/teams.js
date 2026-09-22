@@ -14,13 +14,42 @@ export const TEAMS = [
   { id: 0, name: "Squadra Rossa", short: "Rossa", color: "#ff4d6d" },
   { id: 1, name: "Squadra Blu", short: "Blu", color: "#4cc9f0" },
   { id: 2, name: "Squadra Verde", short: "Verde", color: "#43d17a" },
+  { id: 3, name: "Squadra Gialla", short: "Gialla", color: "#ffca3a" },
+  { id: 4, name: "Squadra Viola", short: "Viola", color: "#c77dff" },
+  { id: 5, name: "Squadra Arancio", short: "Arancio", color: "#ff924c" },
 ];
 
+// config.teams: 0 | 2 | 3 | "coppie" (squadre da due, a turni alterni: uno gioca le manche dispari, l'altro le pari)
 export const TEAM_OPTIONS = [
   { id: 0, label: "Nessuna" },
   { id: 2, label: "2 squadre" },
   { id: 3, label: "3 squadre" },
+  { id: "coppie", label: "Coppie" },
 ];
+
+// Quante squadre ci sono davvero (le coppie dipendono da quante persone ci sono)
+export function teamCount(teams, nPlayers) {
+  if (teams === "coppie") return Math.max(1, Math.min(TEAMS.length, Math.ceil(nPlayers / 2)));
+  return Number(teams) || 0;
+}
+
+// Coppie: le persone due a due nell'ordine dato
+export function pairAssignment(players) {
+  return players.map((p, i) => ({ id: p.id, team: Math.min(TEAMS.length - 1, Math.floor(i / 2)) }));
+}
+
+// Coppie: chi gioca questa manche (uno per coppia, a turno) e chi sta fuori
+export function pairTurn(players, roundIndex) {
+  const byTeam = new Map();
+  for (const p of players) { if (Number.isInteger(p.team)) { if (!byTeam.has(p.team)) byTeam.set(p.team, []); byTeam.get(p.team).push(p.id); } }
+  const sitOut = [];
+  for (const members of byTeam.values()) {
+    members.sort();
+    const active = members[roundIndex % members.length];
+    for (const id of members) if (id !== active) sitOut.push(id);
+  }
+  return sitOut;
+}
 
 export function teamInfo(index) {
   return TEAMS[index] ?? null;

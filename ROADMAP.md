@@ -25,9 +25,9 @@ QR code, inglese.
 
 ## 3. Modi di giocare nuovi
 
-- [ ] **Sfida a tema**: in stanza, temi pronti in tre tocchi con anteprima delle icone ("Parole e numeri", "Solo canvas", "Riflessi puri", "Memoria di ferro", "Mix equilibrato"). — S
-- [ ] **Coppie**: squadre da due con turni alterni (uno gioca le manche pari, l'altro le dispari) e conteggio unico; per quando i telefoni sono pochi. — M
-- [ ] **Presentatore ("Tutti contro l'host")**: l'host non gioca, vede tutti i risultati in diretta, può dare un punto bonus "simpatia" a fine manche. — M
+- [x] **Sfida a tema**: in stanza, temi pronti in tre tocchi con anteprima delle icone ("Parole e numeri", "Solo canvas", "Riflessi puri", "Memoria di ferro", "Mix equilibrato"). (v0.47.0)
+- [x] **Coppie**: squadre da due con turni alterni (uno gioca le manche pari, l'altro le dispari) e conteggio unico; per quando i telefoni sono pochi. (v0.47.0)
+- [x] **Presentatore ("Tutti contro l'host")**: l'host non gioca, vede tutti i risultati in diretta, può dare un punto bonus "simpatia" a fine manche. (v0.47.0)
 
 ## 4. Minigiochi
 

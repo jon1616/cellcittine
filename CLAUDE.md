@@ -45,7 +45,7 @@ js/missions.js       missioni della settimana (3 dal seme della settimana), cont
 js/story.js          la storia della sfida (frasi, posizioni manche per manche per il grafico, testo da condividere), rivali e rivincite dallo storico
 js/awards.js         premi di fine sfida (computeAwards dallo storico delle manche; inviati nel messaggio "final")
 js/championship.js   campionato: giornate (addDay dalla classifica finale), tabella (snapshot), chiusura (endChampionship); messaggi "final.championship" e "champion"
-js/teams.js          squadre: TEAMS, assegnazione bilanciata, classifica di squadra per manche (media dei membri)
+js/teams.js          squadre: TEAMS (6), assegnazione bilanciata, coppie a turni (pairAssignment/pairTurn), classifica di squadra per manche (media o somma)
 js/screens/home.js   home (nome, pulsanti, collegamenti, temi)
 js/screens/join.js   entra con un codice
 js/screens/lobby.js  stanza + configurazione della sfida (pacchetti, manche, difficoltà; riquadro "In più": squadre, modalità, manche speciali, campionato; updateConfig/broadcastConfig)
@@ -75,6 +75,7 @@ tools/tester.mjs     esegue test.html in Chrome headless e stampa il rapporto (n
 
 Difficoltà: `config.difficulty` può essere anche "crescente"; la difficoltà VERA di una manche per chi guarda è `state.round.difficulty` = `msg.difficulties[me]` (handicap personale, campo `handicap` nei partecipanti, impostato dall'host in stanza) oppure `msg.difficulty` del messaggio "start", da usare per mount, record e "Il tuo record". Le manche speciali viaggiano come `msg.special` (id in SPECIALS) e l'host applica `applySpecial` ai punti in `publishResults`.
 
+Chi non gioca una manche (host presentatore con `config.presenter`, chi non è di turno nelle coppie) è in `msg.sitOut`: vede la schermata "spectate" e non è tra i partecipanti; il presentatore può mandare un `bonus` (+1 punto) dai risultati.
 Modalità: `config.mode` = "punti" | "eliminazione" (challenge.mode; `ch.eliminated` Map id → manche di uscita; nei messaggi "start" viaggiano `mode` e `out`, in "results" `eliminated`/`alive`; `standingsArray` mette in fondo chi è fuori con il campo `out`).
 
 Simbolo personale: `storage.getAvatar()` (emoji tra AVATARS), inviato nel `join`, campo `avatar` nei partecipanti; `colorDot(color, id)` di ui.js lo mostra al posto del pallino quando c'è.

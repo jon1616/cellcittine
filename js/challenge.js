@@ -14,7 +14,7 @@
 import { el, seededRandom } from "./utils.js";
 import { sfx } from "./audio.js";
 import { state, setScreen, isSolo } from "./state.js";
-import { setStatus, gameIcon, difficultyLabel, appRoot, colorDot } from "./ui.js";
+import { setStatus, gameIcon, difficultyLabel, appRoot, colorDot, toast } from "./ui.js";
 import { syncBackGuard } from "./nav.js";
 import { getEntry, getCategory, loadGame, preloadGames } from "./games/catalog.js";
 import { shuffle } from "./games/shell.js";
@@ -24,7 +24,7 @@ import { bumpWeekly } from "./missions.js";
 import { showLobby } from "./screens/lobby.js";
 import { showResults, showFinal } from "./screens/results.js";
 import { computeAwards } from "./awards.js";
-import { teamRound } from "./teams.js";
+import { teamRound, pairTurn } from "./teams.js";
 import { SPECIALS, roundDifficulty, assignSpecials, applySpecial, pickDuel } from "./specials.js";
 import { addDay, endChampionship, isChampionship, startChampionship } from "./championship.js";
 import { showChampion, showReaction } from "./screens/results.js";
@@ -83,6 +83,7 @@ export async function startChallenge(opts = {}) {
     standings: new Map(),
     teamStandings: new Map(), // squadra -> punti (solo con le squadre attive)
     teams: isSolo() ? 0 : cfg.teams,
+    presenter: !isSolo() && cfg.presenter === true, // l'host presenta e non gioca
     history: [],
     daily: opts.daily || null, // { key } nella Sfida del giorno
     quick: opts.quick === true,
@@ -121,6 +122,11 @@ export function nextRound() {
     if (!r.duel) r.special = null;
   }
   if (r.special === "staffetta" && !ch.teams) r.special = null;
+  // Chi sta fuori in questa manche: l'host presentatore, e nelle coppie chi non è di turno
+  const sitOut = [];
+  if (ch.presenter) sitOut.push(net.me.id);
+  if (ch.teams === "coppie") sitOut.push(...pairTurn(net.players.filter((p) => !sitOut.includes(p.id)), ch.index));
+  if (r.special === "duello" && r.duel && r.duel.some((id) => sitOut.includes(id))) { r.special = null; r.duel = null; }
   const special = r.special ? SPECIALS[r.special] : null;
   // Handicap: chi ha una difficoltà personale la usa (salvo le manche speciali Difficile/Facile, uguali per tutti)
   const difficulties = {};
@@ -136,6 +142,7 @@ export function nextRound() {
     challengeDifficulty: ch.difficulty,
     special: special ? special.id : null,
     duel: r.duel || null,
+    sitOut,
     mode: ch.mode,
     daily: ch.daily?.key || null,
     out: [...ch.eliminated.keys()],
@@ -194,17 +201,21 @@ async function beginRound(msg) {
   if (!net.isHost) state.challenge.daily = msg.daily ? { key: msg.daily, group: true } : null;
   if (Array.isArray(msg.out)) { state.challenge.eliminated = new Map(msg.out.map((id) => [id, true])); }
 
-  // Entrati a manche iniziata: si guarda (risultati in diretta), si gioca dalla prossima
-  if (msg.spectate && !net.isHost) {
-    state.round = { index: msg.index, game: null, params: null, startAt: msg.startAt, difficulty: msg.difficulty, special: msg.special || null, scores: new Map(), records: new Set(), participants: [], deadline: null, ready: new Set(), spectator: true, live: [] };
-    showSpectator(getEntry(msg.gameId), msg);
+  // Entrati a manche iniziata, presentatore, o non di turno nella coppia: si guarda (risultati in diretta)
+  const sitOut = Array.isArray(msg.sitOut) ? msg.sitOut : [];
+  if ((msg.spectate && !net.isHost) || sitOut.includes(net.me.id)) {
+    const participants = net.players.map((p) => p.id).filter((id) => !sitOut.includes(id));
+    state.round = { index: msg.index, game: null, params: null, startAt: msg.startAt, difficulty: msg.difficulty, special: msg.special || null, scores: new Map(), records: new Set(), participants, deadline: null, ready: new Set(), spectator: true, live: [] };
+    const why = state.challenge?.presenter && net.isHost ? "🎤 Sei il presentatore: guardi, e a fine manche puoi dare un punto simpatia." : sitOut.includes(net.me.id) ? `🤝 Tocca al tuo compagno di coppia: ${net.players.find((p) => p.team === net.players.find((x) => x.id === net.me.id)?.team && p.id !== net.me.id && !sitOut.includes(p.id))?.name || "l'altra persona"}. Tu guardi questa manche.` : "👀 Manche già iniziata: la guardi da qui e giochi dalla prossima.";
+    if (net.isHost) { state.round.deadline = setTimeout(publishResults, ((getEntry(msg.gameId)?.duration || 30) + 15) * 1000); }
+    showSpectator(getEntry(msg.gameId), msg, why);
     try { const g = await loadGame(msg.gameId); if (state.round?.index === msg.index) state.round.game = g; renderLive(); } catch (_) { /* si vedrà ai risultati */ }
     return;
   }
 
   // Segnaposto subito (così i messaggi di questa manche non vengono scartati)…
   const myDifficulty = msg.difficulties?.[net.me.id] || msg.difficulty; // handicap personale
-  state.round = { index: msg.index, game: null, params: null, startAt: msg.startAt, difficulty: myDifficulty, special: msg.special || null, duel: msg.duel || null, scores: new Map(), records: new Set(), participants: net.players.map((p) => p.id), deadline: null, ready: new Set() };
+  state.round = { index: msg.index, game: null, params: null, startAt: msg.startAt, difficulty: myDifficulty, special: msg.special || null, duel: msg.duel || null, scores: new Map(), records: new Set(), participants: net.players.map((p) => p.id).filter((id) => !sitOut.includes(id)), deadline: null, ready: new Set() };
   showCountdown(getEntry(msg.gameId), msg);
   // "Sono pronto": l'host raccoglie e rimanda a tutti la lista di chi ha il conto alla rovescia a schermo
   if (net.isHost) markReady(net.me.id, msg.index);
@@ -229,14 +240,14 @@ async function beginRound(msg) {
 }
 
 // Spettatore: nome del minigioco in corso e lista di chi ha già finito (riempita da renderLive)
-function showSpectator(entry, msg) {
+function showSpectator(entry, msg, why = "👀 Manche già iniziata: la guardi da qui e giochi dalla prossima.") {
   setScreen("spectate");
   sfx.setScene("game");
   const area = el("div", { class: "game-area spectate" }, [
     el("div", { class: "hint", text: `Manche ${msg.index + 1} di ${msg.total} in corso` }),
     gameIcon(entry, "countdown-icon"),
     el("div", { text: entry?.title || msg.gameId }),
-    el("div", { class: "spectate-note", text: "👀 Manche già iniziata: la guardi da qui e giochi dalla prossima." }),
+    el("div", { class: "spectate-note", text: why }),
     el("div", { class: "game-done" }, [el("div", { class: "hint", text: "In attesa dei risultati…" })]),
   ]);
   appRoot().replaceChildren(area);
@@ -415,6 +426,26 @@ export function checkRoundComplete() {
   if (waiting.length === 0 && round.scores.size > 0) publishResults();
 }
 
+// Presentatore: un punto "simpatia" a una persona, una volta per manche (host → tutti)
+export function giveBonus(id) {
+  const ch = state.challenge;
+  const net = state.net;
+  if (!net?.isHost || !ch?.presenter || !ch.standings.has(id) || ch.bonusGiven === state.round?.index) return;
+  ch.bonusGiven = state.round?.index;
+  ch.standings.get(id).points += 1;
+  const msg = { type: "bonus", id, name: ch.standings.get(id).name, standings: standingsArray() };
+  net.broadcast(msg);
+  applyBonus(msg);
+}
+function applyBonus(msg) {
+  const ch = state.challenge;
+  if (ch && !state.net.isHost) for (const s of msg.standings) { const e = ch.standings.get(s.id); if (e) e.points = s.points; }
+  for (const li of document.querySelectorAll(`.ranking li[data-id="${CSS.escape(String(msg.id))}"] .score`)) { const s = msg.standings.find((x) => x.id === msg.id); if (s && /pt$/.test(li.textContent)) { li.textContent = `${s.points} pt`; li.classList.add("bumped"); } }
+  document.querySelectorAll(".bonus-btn").forEach((b) => { b.disabled = true; });
+  toastBonus(msg.name);
+}
+function toastBonus(name) { toast(`🎁 Punto simpatia a ${name} dal presentatore!`); sfx.play("coin"); }
+
 function publishResults() {
   const round = state.round;
   const ch = state.challenge;
@@ -582,6 +613,7 @@ export function handleMessage(msg, fromId) {
   if (msg.type === "ready") { if (state.round?.index === msg.index && state.screen === "countdown") renderReady(msg.ids || []); return; }
   if (msg.type === "progress") { if (state.round?.index === msg.index) { state.round.live = msg.done || []; renderLive(); } return; }
   if (msg.type === "react") { showReaction(msg.id, msg.emoji); return; }
+  if (msg.type === "bonus") { applyBonus(msg); return; }
 
   // Dopo un rientro l'host rimanda l'ultimo messaggio di fase: se lo abbiamo già, niente doppioni.
   switch (msg.type) {

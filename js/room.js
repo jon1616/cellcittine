@@ -12,7 +12,7 @@ import { showLobby, broadcastConfig } from "./screens/lobby.js";
 import { handleMessage, checkRoundComplete, startChallenge } from "./challenge.js";
 import { dailyPlan } from "./daily.js";
 import { saveLastRoom, forgetLastRoom } from "./storage.js";
-import { smallestTeam } from "./teams.js";
+import { smallestTeam, teamCount } from "./teams.js";
 
 // ---------------------------------------------------------------
 // Schermo sempre acceso dalla stanza al podio (Wake Lock API).
@@ -49,7 +49,7 @@ function makeNet() {
       const net = state.net;
       if (net?.isHost) {
         // Con le squadre attive, chi entra senza squadra va nella più piccola
-        const count = state.config.teams;
+        const count = teamCount(state.config.teams, net.players.length);
         let changed = false;
         for (const p of net.players) {
           if (count && !(Number.isInteger(p.team) && p.team < count)) { net.setTeam(p.id, smallestTeam(net.players, count)); changed = true; }

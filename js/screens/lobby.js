@@ -15,7 +15,9 @@ import { startChallenge } from "../challenge.js";
 import { showHome } from "./home.js";
 import { showPicker } from "./picker.js";
 import { showSelectionList } from "./catalog.js";
-import { TEAM_OPTIONS, teamInfo, balancedAssignment } from "../teams.js";
+import { TEAM_OPTIONS, teamInfo, balancedAssignment, teamCount, pairAssignment } from "../teams.js";
+import { THEMES, themeGames } from "../packs.js";
+import { gameIcon } from "../ui.js";
 import { snapshot as championshipSnapshot, endChampionship } from "../championship.js";
 import { closeChampionship } from "../challenge.js";
 import { dailyKey, dailyPlan, dailyLabel } from "../daily.js";
@@ -28,7 +30,7 @@ export function broadcastConfig() {
   const cfg = state.config;
   state.net?.broadcast({
     type: "config",
-    config: { games: cfg.games, rounds: cfg.rounds, difficulty: cfg.difficulty, packName: packName(cfg), auto: cfg.auto, autoDelay: cfg.autoDelay, teams: cfg.teams, special: cfg.special, championship: cfg.championship, championshipDay: state.championship?.day || 0, mode: cfg.teams ? "punti" : cfg.mode, roomName: cfg.roomName || "" },
+    config: { games: cfg.games, rounds: cfg.rounds, difficulty: cfg.difficulty, packName: packName(cfg), auto: cfg.auto, autoDelay: cfg.autoDelay, teams: cfg.teams, presenter: cfg.presenter, special: cfg.special, championship: cfg.championship, championshipDay: state.championship?.day || 0, mode: cfg.teams ? "punti" : cfg.mode, roomName: cfg.roomName || "" },
   });
 }
 
@@ -129,6 +131,28 @@ function packsRow() {
   return el("div", { class: "chips scroll" }, [...dailyChip, ...builtin, ...user]);
 }
 
+// Temi pronti: un tocco sceglie i minigiochi, sotto l'anteprima delle icone
+function themesRow() {
+  const cfg = state.config;
+  const chips = el("div", { class: "chips scroll" }, THEMES.map((t) => el("button", {
+    class: `chip pack${cfg.themeId === t.id ? " on" : ""}`,
+    text: `${t.icon} ${t.name}`,
+    title: t.description,
+    onclick: () => updateConfig({ games: themeGames(t), pack: null, themeId: t.id }),
+  })));
+  const active = THEMES.find((t) => t.id === cfg.themeId);
+  const preview = active && sameList(cfg.games, active)
+    ? el("div", { class: "theme-preview" }, [
+        ...cfg.games.slice(0, 10).map((id) => gameIcon(getEntry(id), "list-icon")),
+        cfg.games.length > 10 ? el("span", { class: "small", text: `+${cfg.games.length - 10}` }) : el("span"),
+      ])
+    : el("span");
+  return el("div", { class: "themes" }, [chips, preview]);
+}
+function sameList(games, theme) {
+  return theme.fixed ? sameSelection(games, themeGames(theme)) : true;
+}
+
 function savePackForm() {
   const wrap = el("div", { class: "save-pack" });
   const open = el("button", { class: "link", text: "💾 Salva questa selezione come pacchetto" });
@@ -167,6 +191,8 @@ function configPanel() {
     el("button", { text: "Scegli i minigiochi ›", class: "secondary", onclick: () => showPicker() }),
     el("div", { class: "label", text: "Pacchetti" }),
     packsRow(),
+    el("div", { class: "label", text: "Sfida a tema" }),
+    themesRow(),
     el("div", { class: "row-2" }, [
       el("button", {
         text: "🎲 Sorprendimi",
@@ -213,7 +239,8 @@ function configPanel() {
 let extrasOpen = false;
 function extrasSummary(cfg) {
   const parts = [];
-  if (cfg.teams) parts.push(`${cfg.teams} squadre`);
+  if (cfg.teams) parts.push(cfg.teams === "coppie" ? "a coppie" : `${cfg.teams} squadre`);
+  if (cfg.presenter) parts.push("host presentatore");
   if (!cfg.teams && cfg.mode === "eliminazione") parts.push("a eliminazione");
   if (cfg.special) parts.push("manche speciali");
   if (cfg.championship) parts.push("campionato");
@@ -227,7 +254,12 @@ function extrasCard(cfg, net) {
     head,
       el("div", { class: "label", text: "Squadre" }),
       segmented(TEAM_OPTIONS, cfg.teams, (teams) => setTeams(teams)),
-      cfg.teams ? el("p", { class: "small", text: "Tocca la squadra accanto a un nome per cambiarla. Conta la media dei punti dei membri." }) : el("span"),
+      cfg.teams === "coppie"
+        ? el("p", { class: "small", text: "Coppie: in ogni manche gioca uno solo dei due, a turno (l'altro guarda). I punti della coppia sono quelli di chi gioca. Tocca la pillola per cambiare coppia." })
+        : cfg.teams ? el("p", { class: "small", text: "Tocca la squadra accanto a un nome per cambiarla. Conta la media dei punti dei membri." }) : el("span"),
+      el("div", { class: "label", text: "Presentatore" }),
+      segmented([{ id: false, label: "L'host gioca" }, { id: true, label: "L'host presenta" }], cfg.presenter, (presenter) => updateConfig({ presenter })),
+      cfg.presenter ? el("p", { class: "small", text: "Chi ha creato la stanza non gioca: vede i risultati in diretta e a fine manche può dare un punto “simpatia” 🎁 a una persona." }) : el("span"),
       el("div", { class: "label", text: "Modalità" }),
       cfg.teams
         ? el("p", { class: "small", text: "Con le squadre si gioca a punti." })
@@ -255,7 +287,9 @@ function autoDelayRow() {
 // Squadre: numero e assegnazione (host)
 function setTeams(count) {
   const net = state.net;
-  if (count) {
+  if (count === "coppie") {
+    for (const a of pairAssignment(net.players)) net.setTeam(a.id, a.team);
+  } else if (count) {
     for (const a of balancedAssignment(net.players, count)) net.setTeam(a.id, a.team);
   } else {
     for (const p of net.players) net.setTeam(p.id, null);
@@ -266,16 +300,16 @@ function setTeams(count) {
 
 function shuffleTeams() {
   const net = state.net;
-  const count = state.config.teams;
+  const count = teamCount(state.config.teams, net.players.length);
   const order = [...net.players].sort(() => Math.random() - 0.5);
-  for (const a of balancedAssignment(order, count)) net.setTeam(a.id, a.team);
+  for (const a of (state.config.teams === "coppie" ? pairAssignment(order) : balancedAssignment(order, count))) net.setTeam(a.id, a.team);
   net.broadcastPlayers();
   showLobby();
 }
 
 function cycleTeam(id) {
   const net = state.net;
-  const count = state.config.teams;
+  const count = teamCount(state.config.teams, net.players.length);
   const p = net.players.find((x) => x.id === id);
   net.setTeam(id, ((Number.isInteger(p?.team) ? p.team : -1) + 1) % count);
   net.broadcastPlayers();
@@ -366,7 +400,7 @@ function configSummary(cfg) {
   const n = cfg.games.length;
   return el("div", { class: "card" }, [
     el("h2", { text: "La sfida" }),
-    el("p", { text: `${cfg.packName === "Sfida del giorno" ? "📅 Sfida del giorno: i 5 minigiochi di oggi, il tuo totale vale come sfida personale · " : cfg.packName ? `Pacchetto ${cfg.packName} · ` : ""}${roundsLabel(cfg)} · ${difficultyLabel(cfg.difficulty)}${cfg.auto ? ` · manche automatiche (${cfg.autoDelay} s)` : ""}${cfg.teams ? ` · ${cfg.teams} squadre` : ""}${cfg.special ? " · manche speciali" : ""}${cfg.championship ? ` · campionato${cfg.championshipDay ? ` (giornata ${cfg.championshipDay + 1})` : ""}` : ""}${cfg.mode === "eliminazione" ? " · a eliminazione" : ""}` }),
+    el("p", { text: `${cfg.packName === "Sfida del giorno" ? "📅 Sfida del giorno: i 5 minigiochi di oggi, il tuo totale vale come sfida personale · " : cfg.packName ? `Pacchetto ${cfg.packName} · ` : ""}${roundsLabel(cfg)} · ${difficultyLabel(cfg.difficulty)}${cfg.auto ? ` · manche automatiche (${cfg.autoDelay} s)` : ""}${cfg.teams ? (cfg.teams === "coppie" ? " · a coppie" : ` · ${cfg.teams} squadre`) : ""}${cfg.presenter ? " · l'host presenta" : ""}${cfg.special ? " · manche speciali" : ""}${cfg.championship ? ` · campionato${cfg.championshipDay ? ` (giornata ${cfg.championshipDay + 1})` : ""}` : ""}${cfg.mode === "eliminazione" ? " · a eliminazione" : ""}` }),
     el("p", { class: "small", text: n ? `${n} ${n === 1 ? "minigioco" : "minigiochi"}: ${categoryBreakdown(cfg.games)}` : "" }),
     el("button", { text: "Vedi i minigiochi", class: "link", onclick: () => showSelectionList(cfg.games) }),
   ]);
@@ -419,7 +453,7 @@ export function showLobby() {
         el("h2", { text: `In stanza (${net.players.length})` }),
         playersList(net.players, net.me.id, { teams, canEdit: net.isHost }),
         net.isHost ? el("p", { class: "small", text: "Tocca “Auto” accanto a un nome per dare una difficoltà personale (handicap): chi ha la stessa difficoltà gioca gli stessi parametri." }) : el("span"),
-        net.isHost && teams ? el("button", { text: "🎲 Mescola le squadre", class: "secondary small-btn", onclick: shuffleTeams }) : el("span"),
+        net.isHost && teams ? el("button", { text: teams === "coppie" ? "🎲 Mescola le coppie" : "🎲 Mescola le squadre", class: "secondary small-btn", onclick: shuffleTeams }) : el("span"),
       ])
     );
   }

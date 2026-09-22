@@ -604,3 +604,10 @@ input.room-name-input { font-size: 18px; padding: 10px 12px; }
 .story-icon { flex: 0 0 auto; }
 .card.revenge { border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
 .revenge-line { font-weight: 700; text-align: center; }
+
+/* Sfide a tema e presentatore */
+.themes { display: flex; flex-direction: column; gap: 8px; }
+.theme-preview { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.screen button.bonus-btn { font-size: 13px; padding: 6px 8px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 20%, transparent); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent); box-shadow: none; text-shadow: none; }
+.screen button.bonus-btn:disabled { opacity: 0.35; }
+.ranking li:has(.bonus-btn) { grid-template-columns: 36px 1fr auto auto; }

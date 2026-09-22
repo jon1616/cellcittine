@@ -10,7 +10,7 @@ import { show, gameIcon, gameHeading, confetti, colorDot, playerColor } from "..
 import { getEntry, loadGame, getLoaded } from "../games/catalog.js";
 import { getRecord, addHistoryEntry, forgetLastRoom } from "../storage.js";
 import { leaveRoom, exitButton } from "../room.js";
-import { nextRound, finishChallenge, replayChallenge, closeChampionship, react, REACTIONS } from "../challenge.js";
+import { nextRound, finishChallenge, replayChallenge, closeChampionship, react, REACTIONS, giveBonus } from "../challenge.js";
 import { showLobby as showLobbyScreen, championshipTable } from "./lobby.js";
 import { showCatalog, showGameInfo } from "./catalog.js";
 import { showHome } from "./home.js";
@@ -87,10 +87,12 @@ function standingsList(standings, meId, prev = null) {
       const score = el("span", { class: "score", text: `${p ? p.points : s.points} pt` });
       if (p && p.points !== s.points) countUp(score, p.points, s.points);
       const out = s.out !== null && s.out !== undefined;
+      const presenter = state.net?.isHost && state.challenge?.presenter && state.screen === "results";
       return el("li", { class: `${s.id === meId ? "me" : ""}${out ? " out" : ""}`, style: `--i: ${i}`, "data-id": s.id }, [
         el("span", { class: "pos", text: out ? "💀" : String(i + 1) }),
         el("span", { class: "who" }, [colorDot(s.color, s.id), el("span", { text: s.name }), out ? el("span", { class: "out-tag", text: `fuori alla ${s.out + 1}ª` }) : arrow]),
         score,
+        presenter ? el("button", { class: "bonus-btn", text: "🎁 +1", title: "Punto simpatia", onclick: () => giveBonus(s.id) }) : el("span"),
       ]);
     })
   );
