@@ -12,7 +12,7 @@ import { showLobby, broadcastConfig } from "./screens/lobby.js";
 import { handleMessage, checkRoundComplete, startChallenge, resumeAfterHandover } from "./challenge.js";
 import { dailyPlan } from "./daily.js";
 import { randomSelection } from "./packs.js";
-import { saveLastRoom, forgetLastRoom } from "./storage.js";
+import { saveLastRoom, forgetLastRoom, SERIES_LONG } from "./storage.js";
 import { setExpert } from "./games/shell.js";
 import { smallestTeam, teamCount } from "./teams.js";
 
@@ -251,12 +251,14 @@ export function playSolo() {
   showLobby();
 }
 
-// Prova subito: un solo minigioco da soli, dalla sua scheda (senza passare dalla stanza)
-export function playQuick(gameId, difficulty = null) {
+// Prova subito: un solo minigioco da soli, dalla sua scheda (senza passare dalla stanza).
+// series: "normale" (una partita), "lunga" (SERIES_LONG partite di fila), "infinita" (finché non si preme Fine)
+export function playQuick(gameId, difficulty = null, series = "normale") {
   state.net = makeNet();
   state.net.solo(state.name || "Tu");
   keepScreenOn();
-  startChallenge({ games: [gameId], quick: true, ...(difficulty ? { difficulty } : {}) });
+  const games = series === "lunga" ? Array(SERIES_LONG).fill(gameId) : [gameId];
+  startChallenge({ games, quick: true, ...(difficulty ? { difficulty } : {}), ...(series === "lunga" || series === "infinita" ? { series } : {}) });
 }
 
 // Giro veloce: 5 minigiochi a caso, da soli, con la difficoltà che si adatta alle stelle già prese

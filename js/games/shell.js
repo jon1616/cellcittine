@@ -8,10 +8,17 @@ import { el } from "../utils.js";
 import { sfx } from "../audio.js";
 
 let currentShell = null; // la cornice del minigioco in corso: runTimer le aggiorna la barra del tempo
+let activeTimer = null;  // l'ultimo conto alla rovescia in corso (endTimerNow lo fa scadere: pulsante Fine delle serie)
 let expertMode = false;  // Esperto: tempi dei conti alla rovescia ridotti del 25%, distintivo nell'intestazione
 export const EXPERT_TIME = 0.75;
 export function setExpert(on) { expertMode = !!on; }
 export function isExpert() { return expertMode; }
+// Fa scadere adesso il conto alla rovescia in corso (il minigioco chiude con il punteggio di ora). false se non ce n'è uno.
+export function endTimerNow() {
+  if (!activeTimer) return false;
+  activeTimer();
+  return true;
+}
 
 export function createShell(container, { title, hint = "", color = "#26254a" }) {
   const timerEl = el("span", { class: "game-timer" });
@@ -50,9 +57,10 @@ export function createShell(container, { title, hint = "", color = "#26254a" }) 
         ])
       );
     },
-    remove() { area.remove(); if (currentShell === shell) currentShell = null; },
+    remove() { area.remove(); if (currentShell === shell) currentShell = null; activeTimer = null; },
   };
   currentShell = shell;
+  activeTimer = null; // un minigioco nuovo: i conti alla rovescia di prima non contano più
   return shell;
 }
 
@@ -62,6 +70,16 @@ export function runTimer(seconds, onTick, onEnd) {
   const endAt = performance.now() + seconds * 1000;
   let stopped = false;
   let lastWhole = Math.ceil(seconds);
+  const done = () => { if (activeTimer === finish) activeTimer = null; };
+  // Scadenza forzata (pulsante Fine): come se il tempo fosse finito adesso
+  const finish = () => {
+    if (stopped) return;
+    stopped = true;
+    done();
+    currentShell?.setProgress(0);
+    onTick(0);
+    onEnd();
+  };
   const tick = () => {
     if (stopped) return;
     const remaining = Math.max(0, endAt - performance.now());
@@ -75,13 +93,15 @@ export function runTimer(seconds, onTick, onEnd) {
     onTick(remaining / 1000);
     if (remaining <= 0) {
       stopped = true;
+      done();
       onEnd();
       return;
     }
     requestAnimationFrame(tick);
   };
+  activeTimer = finish;
   tick();
-  return () => { stopped = true; };
+  return () => { stopped = true; done(); };
 }
 
 // Cronometro crescente. Ritorna { stop() -> secondi trascorsi }.

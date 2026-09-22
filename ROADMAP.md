@@ -13,6 +13,7 @@ QR code, inglese.
 
 - [x] **Pulsante "Pronto" alla prima volta**: invece del conto alla rovescia lungo, "Come si gioca" resta a schermo finché tutti non premono "✓ Ho letto, sono pronto"; l'host fa partire comunque dopo 90 s (messaggio `go`) (v1.1.0)
 - [x] **Difficoltà in "Prova subito"** (Facile/Normale/Difficile, Esperto dove sbloccato), ricordata (v1.1.0)
+- [x] **Serie in "Prova subito"**: "Una partita", "5 di fila" o "Senza fine" (si chiude col pulsante ■ Fine, nell'intestazione del minigioco o tra una partita e l'altra; durante la partita Fine fa scadere il tempo e il punteggio di ora conta). Ogni partita vale per record e stelle; tra una e l'altra niente schermata dei risultati, solo un avviso e il totale finora nel conto alla rovescia; podio della serie con totale (o migliore e media) (v1.2.0)
 - [x] **Da soli è un gioco vero**: stelle per minigioco (★ 50% · ★★ 75% · ★★★ 95%) raccolte e mostrate in catalogo, risultati, podio e statistiche; "⚡ Giro veloce" dalla home (5 minigiochi a caso con difficoltà adattiva dalle stelle, "Ancora un giro"); prossimo obiettivo sul podio; traguardi Cielo stellato / Via Lattea (v1.1.0)
 
 - [x] **Link diretto alla Sfida del giorno**: il testo condiviso termina con …/?giorno=AAAA-MM-GG; chi lo apre con il nome già scritto parte subito, altrimenti trova la card in evidenza (se il link è di un altro giorno lo dice) (v1.1.1)

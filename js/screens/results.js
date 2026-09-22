@@ -10,7 +10,7 @@ import { show, gameIcon, gameHeading, confetti, colorDot, playerColor } from "..
 import { getEntry, loadGame, getLoaded } from "../games/catalog.js";
 import { getRecord, addHistoryEntry, forgetLastRoom } from "../storage.js";
 import { leaveRoom, exitButton } from "../room.js";
-import { nextRound, finishChallenge, replayChallenge, closeChampionship, react, REACTIONS, giveBonus } from "../challenge.js";
+import { nextRound, finishChallenge, replayChallenge, closeChampionship, react, REACTIONS, giveBonus, seriesSummary } from "../challenge.js";
 import { showLobby as showLobbyScreen, championshipTable } from "./lobby.js";
 import { showCatalog, showGameInfo } from "./catalog.js";
 import { showHome } from "./home.js";
@@ -191,14 +191,7 @@ export async function showResults(msg) {
   else if (!solo && msg.specialOutcome?.winner === meId) buzz("duelWon");
   else if (!solo && msg.ranking[0]?.id === meId && msg.ranking[0].score !== null) buzz("win");
   // Statistiche personali: questa manche
-  if (round && round.myScore !== undefined) {
-    const best = msg.ranking.find((r) => r.score !== null && r.score !== undefined);
-    const mine = msg.ranking.find((r) => r.id === meId);
-    const wasUnlocked = isExpertUnlocked(msg.gameId);
-    recordRound(msg.gameId, { pct: ratingOf(game, round.myScore, round.params), won: !solo && !!mine && !!best && mine.score === best.score, solo, seconds: getEntry(msg.gameId)?.duration || 0, difficulty: round.difficulty });
-    if (!wasUnlocked && isExpertUnlocked(msg.gameId)) setTimeout(() => { toast(`🔓 Esperto sbloccato in ${getEntry(msg.gameId)?.title || msg.gameId}!`); sfx.play("cheer"); }, 1200);
-    else if (!wasUnlocked && round.difficulty === "difficile" && expertProgress(msg.gameId) > 0 && ratingOf(game, round.myScore, round.params) >= 80) setTimeout(() => toast(`Verso Esperto: ${expertProgress(msg.gameId)} su ${EXPERT_UNLOCK} in ${getEntry(msg.gameId)?.title}`), 1200);
-  }
+  recordMyRound(game, round, msg, { solo, meId });
   const prev = solo ? null : previousStandings(ch.history, msg.standings);
   const cfg0 = net.isHost ? state.config : state.hostConfig;
   const lines = solo
@@ -275,6 +268,19 @@ export async function showResults(msg) {
     el("div", { class: "spacer" }),
     el("button", { text: "Abbandona", class: "link", onclick: () => { leaveRoom(); forgetLastRoom(); showHome(); } })
   );
+}
+
+// Statistiche personali della manche appena giocata (stelle, verso Esperto, missioni) con gli avvisi.
+// Usata dai risultati di manche e, nelle serie di Prova subito, tra una partita e l'altra.
+export function recordMyRound(game, round, msg, { solo, meId }) {
+  if (!round || round.myScore === undefined) return;
+  const best = msg.ranking.find((r) => r.score !== null && r.score !== undefined);
+  const mine = msg.ranking.find((r) => r.id === meId);
+  const wasUnlocked = isExpertUnlocked(msg.gameId);
+  const pct = ratingOf(game, round.myScore, round.params);
+  recordRound(msg.gameId, { pct, won: !solo && !!mine && !!best && mine.score === best.score, solo, seconds: getEntry(msg.gameId)?.duration || 0, difficulty: round.difficulty });
+  if (!wasUnlocked && isExpertUnlocked(msg.gameId)) setTimeout(() => { toast(`🔓 Esperto sbloccato in ${getEntry(msg.gameId)?.title || msg.gameId}!`); sfx.play("cheer"); }, 1200);
+  else if (!wasUnlocked && round.difficulty === "difficile" && expertProgress(msg.gameId) > 0 && pct >= 80) setTimeout(() => toast(`Verso Esperto: ${expertProgress(msg.gameId)} su ${EXPERT_UNLOCK} in ${getEntry(msg.gameId)?.title}`), 1200);
 }
 
 // Testo della manche speciale nei risultati (il Duello dice chi ha vinto)
@@ -371,6 +377,18 @@ function revengeCard(meId) {
   return el("div", { class: "card revenge" }, list.map((r) => el("div", { class: "revenge-line", text: `🔁 Rivincita su ${r.name}!${r.balance ? ` Ora ${r.balance}.` : ""}` })));
 }
 
+// Serie di Prova subito: quante partite, totale o migliore
+function seriesCard(ch) {
+  const game = getLoaded(ch.rounds?.[0]?.gameId);
+  const s = seriesSummary(ch, game);
+  if (!s) return el("span");
+  return el("div", { class: "card tone", style: "--c: var(--ok)" }, [
+    el("div", { class: "series-big", text: `${s.n} ${s.n === 1 ? "partita" : "partite"} di fila` }),
+    el("p", { text: s.text }),
+    el("p", { class: "small", text: "Ogni partita è valsa per record e stelle come una prova normale." }),
+  ]);
+}
+
 // Da soli: stelle prese in questa sfida, totale, prossimo obiettivo
 function soloStarsCard(ch, meId) {
   const rows = ch.history.map((h) => {
@@ -378,7 +396,8 @@ function soloStarsCard(ch, meId) {
     const pct = game ? ratingOf(game, h.myScore, h.myParams) : 0;
     return { gameId: h.gameId, stars: starsOf(pct), pct };
   });
-  const earned = rows.reduce((s, r) => s + r.stars, 0);
+  // In una serie è sempre lo stesso minigioco: contano le stelle della partita migliore
+  const earned = ch.series ? rows.reduce((s, r) => Math.max(s, r.stars), 0) : rows.reduce((s, r) => s + r.stars, 0);
   const total = totalStars();
   const goal = nextGoal();
   return el("div", { class: "card tone", style: "--c: var(--accent)" }, [
@@ -595,7 +614,8 @@ export function showFinal(msg) {
   if (solo && ch.daily) {
     parts.push(...dailyFinal(ch));
   } else if (solo) {
-    parts.push(el("h2", { text: ch.quick ? "Prova finita!" : ch.adaptive ? "Giro veloce finito!" : "Allenamento completato!" }));
+    parts.push(el("h2", { text: ch.series ? "Serie finita!" : ch.quick ? "Prova finita!" : ch.adaptive ? "Giro veloce finito!" : "Allenamento completato!" }));
+    if (ch.series) parts.push(seriesCard(ch));
     parts.push(soloStarsCard(ch, meId));
     parts.push(
       el("div", { class: "card" }, [

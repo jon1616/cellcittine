@@ -67,6 +67,12 @@ export const EXPERT_UNLOCK = 3;
 const KEY_QUICK_DIFF = "quickDifficulty";
 export function getQuickDifficulty() { try { const d = localStorage.getItem(KEY_QUICK_DIFF); return ["facile", "normale", "difficile", "esperto"].includes(d) ? d : "normale"; } catch (_) { return "normale"; } }
 export function setQuickDifficulty(d) { try { localStorage.setItem(KEY_QUICK_DIFF, d); } catch (_) { /* privato */ } } // risultati oltre l'80% a Difficile per sbloccare Esperto in un minigioco
+// Prova subito, serie: una partita sola, 5 di fila (SERIES_LONG), o senza fine (si chiude col pulsante Fine)
+export const SERIES_LONG = 5;
+export const SERIES_OPTIONS = [{ id: "normale", label: "Una partita" }, { id: "lunga", label: `${SERIES_LONG} di fila` }, { id: "infinita", label: "Senza fine" }];
+const KEY_QUICK_SERIES = "quickSeries";
+export function getQuickSeries() { try { const s = localStorage.getItem(KEY_QUICK_SERIES); return SERIES_OPTIONS.some((o) => o.id === s) ? s : "normale"; } catch (_) { return "normale"; } }
+export function setQuickSeries(s) { try { localStorage.setItem(KEY_QUICK_SERIES, s); } catch (_) { /* privato */ } }
 
 // "tutti" = una manche per ogni minigioco scelto
 export const ROUND_OPTIONS = [3, 5, 7, 10, 15, 20, "tutti"];

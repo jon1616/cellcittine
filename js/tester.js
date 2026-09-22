@@ -10,7 +10,8 @@
                   partita simulata (tocchi a caso, orologio accelerato) finisce
                   senza errori con un punteggio sensato.
     Allenamento   l'app vera dentro un riquadro: home → Allenamento → Inizia →
-                  conto alla rovescia → minigioco → risultati → fine.
+                  conto alla rovescia → minigioco → risultati → fine; poi Prova
+                  subito "Senza fine": una partita, Fine al conto della seconda.
 
   L'orologio accelerato sostituisce performance.now / Date.now / setTimeout:
   una manche da 30 secondi dura un secondo e mezzo. requestAnimationFrame viene
@@ -519,7 +520,7 @@ async function testAllenamento(gameId, difficulty) {
     steps.push("home");
     const v = doc.getElementById("version")?.textContent.trim();
     if (v && !v.includes(VERSION)) errors.push(`la home mostra "${v}" ma version.js dice ${VERSION}`);
-    const link = [...doc.querySelectorAll("button.link")].find((b) => /minigioch/.test(b.textContent));
+    const link = button("Tutti i");
     if (link && !link.textContent.includes(String(CATALOG.length))) errors.push(`la home dice "${link.textContent}" ma il catalogo ne ha ${CATALOG.length}`);
 
     button("Allenamento").click();
@@ -570,6 +571,101 @@ async function testAllenamento(gameId, difficulty) {
   const path = steps.join(" → ");
   if (errors.length) running.set("fail", `${path || "niente"} · ${[...new Set(errors)].join(" · ")}`);
   else running.set("ok", `${path} (minigioco "${CATALOG.find((g) => g.id === gameId)?.title}", difficoltà ${difficulty})`);
+}
+
+// ---------------------------------------------------------------
+// PROVA SUBITO SENZA FINE: catalogo → scheda → "Senza fine" → una partita →
+// al conto della seconda si preme Fine → podio della serie con una partita
+// ---------------------------------------------------------------
+
+async function testProvaSubito(gameId) {
+  section("Prova subito senza fine (app intera)");
+  stageTitle.textContent = "App · Prova subito";
+  const running = row("running", "Serie senza fine: una partita, poi Fine", "in corso…");
+  const backup = Object.fromEntries(Object.keys(localStorage).map((k) => [k, localStorage.getItem(k)]));
+  const restore = () => { localStorage.clear(); for (const [k, v] of Object.entries(backup)) localStorage.setItem(k, v); };
+  localStorage.setItem("name", "Tester");
+  localStorage.setItem("music", "off");
+  localStorage.removeItem("stats");
+  localStorage.removeItem("quickSeries");
+
+  const iframe = el("iframe", { src: `index.html?tester=${Date.now()}`, title: "app" });
+  stage.replaceChildren(iframe);
+  const steps = [];
+  const errors = [];
+  let win, doc;
+  const waitFor = async (what, test, ms) => {
+    const until = warp.realNow() + ms;
+    while (warp.realNow() < until) {
+      let v = null;
+      try { v = test(); } catch (_) { /* ancora niente */ }
+      if (v) return v;
+      await realSleep(50);
+    }
+    throw new Error(`aspettando: ${what}`);
+  };
+  const button = (text) => [...doc.querySelectorAll("button")].find((b) => b.textContent.replace(/^[^\p{L}\p{N}]+/u, "").trim().startsWith(text));
+  const entry = CATALOG.find((g) => g.id === gameId);
+
+  try {
+    await new Promise((res, rej) => { iframe.onload = res; iframe.onerror = rej; });
+    win = iframe.contentWindow;
+    doc = iframe.contentDocument;
+    win.addEventListener("error", (ev) => errors.push(ev.message));
+    win.addEventListener("unhandledrejection", (ev) => errors.push(`promise: ${ev.reason?.message || ev.reason}`));
+    installWarp(win, getFactor);
+
+    await waitFor("la home", () => button("Allenamento"), 8000);
+    const link = button("Tutti i");
+    if (!link) throw new Error("in home manca il pulsante del catalogo (Tutti i N minigiochi)");
+    link.click();
+    steps.push("catalogo");
+    const rowEl = await waitFor("la riga del minigioco nel catalogo", () => [...doc.querySelectorAll(".game-row")].find((r) => r.textContent.includes(entry.title)), 3000);
+    rowEl.click();
+    await waitFor("la scheda del minigioco", () => button("Prova subito"), 3000);
+    steps.push("scheda");
+    const seg = await waitFor("la scelta Senza fine", () => [...doc.querySelectorAll(".seg")].find((b) => b.textContent === "Senza fine"), 2000);
+    seg.click();
+    (await waitFor("il pulsante Gioca senza fine", () => button("Gioca senza fine"), 2000)).click();
+    steps.push("serie avviata");
+
+    const number = await waitFor("il conto alla rovescia", () => doc.querySelector("#app .game-area .big"), 3000);
+    await waitFor("la fine del conto alla rovescia", () => { doc.querySelector(".ready-btn")?.click(); return !doc.contains(number); }, 6000 / getFactor() + 3000);
+    if (!doc.querySelector("#app .game-area")) throw new Error("dopo il conto alla rovescia non c'è nessun minigioco a schermo");
+    if (!doc.querySelector("#app .series-end")) errors.push("nel minigioco manca il pulsante Fine della serie");
+    steps.push("partita 1");
+
+    const monkey = makeMonkey(stage, doc, doc.body, ".game-area");
+    const game = await loadGame(gameId);
+    let countdown2;
+    try {
+      countdown2 = await waitFor("il conto alla rovescia della seconda partita", () => { const a = doc.querySelector("#app .game-area.countdown"); return a && /Partita 2/.test(a.textContent) ? a : null; }, ((game.maxSeconds + 12) * 1000) / getFactor() + 3000);
+    } finally { monkey.stop(); }
+    steps.push(`partita 2 (${monkey.taps} tocchi)`);
+    if (!/Finora 1 partita/.test(countdown2.textContent)) errors.push(`al conto della seconda partita manca il riassunto "Finora 1 partita": "${countdown2.textContent.replace(/\s+/g, " ").trim().slice(0, 120)}"`);
+    const fine = countdown2.querySelector(".series-end");
+    if (!fine) throw new Error("nel conto alla rovescia manca il pulsante Fine");
+    fine.click();
+    await waitFor("il podio della serie", () => /Serie finita/.test(doc.querySelector("#app")?.textContent || ""), 3000);
+    steps.push("fine");
+    const big = doc.querySelector("#app .series-big")?.textContent || "";
+    if (!/^1 partita/.test(big)) errors.push(`il podio dice "${big}" invece di "1 partita di fila"`);
+    const stats = JSON.parse(win.localStorage.getItem("stats") || "{}");
+    if (!stats[gameId] || stats[gameId].n !== 1) errors.push(`le statistiche dovrebbero contare 1 partita di ${gameId}: ${JSON.stringify(stats[gameId] || null)}`);
+    else steps.push("statistiche");
+    (await waitFor("il pulsante della scheda", () => button("Scheda del minigioco"), 2000)).click();
+    await waitFor("la scheda di nuovo", () => button("Gioca senza fine"), 3000);
+    steps.push("scheda di nuovo");
+  } catch (e) {
+    errors.push(e.message);
+  }
+
+  await realSleep(200);
+  iframe.remove();
+  restore();
+  const path = steps.join(" → ");
+  if (errors.length) running.set("fail", `${path || "niente"} · ${[...new Set(errors)].join(" · ")}`);
+  else running.set("ok", `${path} (minigioco "${entry?.title}")`);
 }
 
 // ---------------------------------------------------------------
@@ -799,6 +895,7 @@ async function run() {
       // Per la manche completa: il minigioco scelto, oppure uno breve che finisce da solo
       const pick = only !== "*" ? only : (CATALOG.find((g) => g.id === "tocchi") || CATALOG[0]).id;
       await testAllenamento(pick, difficulty);
+      await testProvaSubito(pick);
     }
     if (document.getElementById("optDaily")?.checked) await testSfidaDelGiorno();
     if (document.getElementById("optMulti")?.checked) await testMultiplayer();

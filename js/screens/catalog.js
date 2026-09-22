@@ -9,7 +9,7 @@ import { show, gameIcon, gameRow } from "../ui.js";
 import { CATALOG, CATEGORIES, getCategory, getEntry, isNew, PACES } from "../games/catalog.js";
 import { DIFFICULTIES, getRecord, EXPERT_UNLOCK } from "../storage.js";
 import { isExpertUnlocked, expertProgress, starsFor } from "../stats.js";
-import { getQuickDifficulty, setQuickDifficulty } from "../storage.js";
+import { getQuickDifficulty, setQuickDifficulty, getQuickSeries, setQuickSeries, SERIES_OPTIONS, SERIES_LONG } from "../storage.js";
 import { segmented } from "../ui.js";
 import { starsText } from "../rating.js";
 import { showHome } from "./home.js";
@@ -76,17 +76,27 @@ export function showGameInfo(g, back) {
   );
 }
 
-// Prova subito: scelta della difficoltà (Esperto solo dove è sbloccato) e stelle prese
+// Prova subito: scelta della difficoltà (Esperto solo dove è sbloccato), della serie
+// (una partita, 5 di fila, senza fine) e stelle prese
+const SERIES_NOTE = {
+  normale: "Una partita sola, con record e stelle.",
+  lunga: `${SERIES_LONG} partite di fila dello stesso minigioco: ogni partita vale per record e stelle, alla fine il totale.`,
+  infinita: "Si va avanti finché non premi Fine (durante la partita o tra una e l'altra). Ogni partita vale per record e stelle.",
+};
 function quickCard(g) {
   const opts = [...DIFFICULTIES, ...(isExpertUnlocked(g.id) ? [{ id: "esperto", label: "Esperto" }] : [])];
   let current = getQuickDifficulty();
   if (!opts.some((o) => o.id === current)) current = "normale";
+  let series = getQuickSeries();
   const wrap = el("div", { class: "card tone", style: "--c: var(--ok)" });
   const render = () => wrap.replaceChildren(
     el("div", { class: "label", text: "Prova subito" }),
     el("p", { class: "small", text: `Stelle prese: ${starsText(starsFor(g.id))} · ★ dal 50%, ★★ dal 75%, ★★★ dal 95%` }),
     segmented(opts, current, (d) => { current = d; setQuickDifficulty(d); render(); }),
-    el("button", { text: "▶ Prova subito", onclick: () => playQuick(g.id, current) })
+    el("div", { class: "label", text: "Quante partite" }),
+    segmented(SERIES_OPTIONS, series, (s) => { series = s; setQuickSeries(s); render(); }),
+    el("p", { class: "small", text: SERIES_NOTE[series] }),
+    el("button", { text: series === "infinita" ? "▶ Gioca senza fine" : series === "lunga" ? `▶ Gioca ${SERIES_LONG} partite` : "▶ Prova subito", onclick: () => playQuick(g.id, current, series) })
   );
   render();
   return wrap;

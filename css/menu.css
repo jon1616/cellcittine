@@ -377,3 +377,6 @@ input.room-name-input { font-size: 18px; padding: 10px 12px; }
 .stars { font-size: 30px; letter-spacing: 4px; color: var(--accent); text-shadow: 0 0 14px var(--accent-glow); animation: bump 0.5s; }
 .stars.full { color: #fff6d5; }
 .stars-big { font-size: 28px; letter-spacing: 3px; text-align: center; color: var(--accent); text-shadow: 0 0 16px var(--accent-glow); line-height: 1.3; word-break: break-all; }
+
+/* Podio di una serie di Prova subito */
+.series-big { font-size: 24px; font-weight: 900; text-align: center; }

@@ -16,16 +16,18 @@ import { sfx } from "./audio.js";
 import { state, setScreen, isSolo } from "./state.js";
 import { setStatus, gameIcon, difficultyLabel, appRoot, colorDot, toast } from "./ui.js";
 import { syncBackGuard } from "./nav.js";
-import { getEntry, getCategory, loadGame, preloadGames } from "./games/catalog.js";
+import { getEntry, getCategory, loadGame, preloadGames, getLoaded } from "./games/catalog.js";
 import { shuffle } from "./games/shell.js";
 import { randomSelection } from "./packs.js";
 import { updateRecord, markSeen, getGroupRecord, saveGroupRecord } from "./storage.js";
 import { ratingOf } from "./rating.js";
 import { bumpWeekly } from "./missions.js";
 import { isExpertUnlocked, adaptiveDifficulty } from "./stats.js";
-import { setExpert } from "./games/shell.js";
+import { setExpert, endTimerNow } from "./games/shell.js";
 import { showLobby } from "./screens/lobby.js";
-import { showResults, showFinal } from "./screens/results.js";
+import { showResults, showFinal, recordMyRound } from "./screens/results.js";
+import { showGameInfo, showCatalog } from "./screens/catalog.js";
+import { starsOf, starsText } from "./rating.js";
 import { computeAwards } from "./awards.js";
 import { teamRound, pairTurn } from "./teams.js";
 import { SPECIALS, roundDifficulty, assignSpecials, applySpecial, pickDuel } from "./specials.js";
@@ -47,6 +49,8 @@ const GRACE_SECONDS = 8;   // margine oltre maxSeconds prima di chiudere la manc
 //   difficulty  al posto di quella configurata
 //   daily     { key } se è la Sfida del giorno
 //   quick     true = "Prova subito" di un solo minigioco (podio con Riprova e ritorno al catalogo)
+//   series    con quick: "lunga" (le partite sono già in games) o "infinita" (partite dello stesso
+//             minigioco finché non si preme Fine: nextRound ne aggiunge una alla volta)
 export async function startChallenge(opts = {}) {
   if (!opts || typeof opts !== "object" || opts instanceof Event) opts = {}; // (un evento del click non è un'opzione)
   const cfg = state.config;
@@ -78,10 +82,12 @@ export async function startChallenge(opts = {}) {
   const difficulty = opts.difficulty || cfg.difficulty;
   const specials = !isSolo() && cfg.special && !opts.daily ? assignSpecials(rounds.length, rng, difficulty, { teams: cfg.teams, players: state.net.players.length }) : [];
   rounds.forEach((r, i) => { r.special = specials[i] || null; });
+  const series = opts.quick === true && (opts.series === "lunga" || opts.series === "infinita") ? opts.series : null;
 
   state.challenge = {
     rounds,
-    total: rounds.length,
+    total: series === "infinita" ? Infinity : rounds.length,
+    series, // Prova subito a serie: partite dello stesso minigioco una dopo l'altra, senza la schermata dei risultati in mezzo
     difficulty,
     index: -1,
     standings: new Map(),
@@ -117,6 +123,8 @@ export function nextRound() {
   const ch = state.challenge;
   const net = state.net;
   ch.index++;
+  // Serie senza fine: la partita successiva nasce qui (stesso minigioco, seme nuovo)
+  if (ch.series === "infinita" && ch.index >= ch.rounds.length) ch.rounds.push({ gameId: ch.rounds[0].gameId, seed: Math.floor(Math.random() * 2 ** 31), special: null });
   const r = ch.rounds[ch.index];
   // Se per qualcuno in stanza è la prima volta, presentazione più lunga per tutti
   const intro = net.players.some((p) => !net.hasSeen(p.id, r.gameId));
@@ -167,7 +175,96 @@ export function replayChallenge() {
   state.round = null;
   // La Sfida del giorno si rigioca identica (stessi semi): vale come allenamento
   if (ch.adaptive) { startChallenge({ games: randomSelection(5), adaptive: true, difficulty: "adattiva" }); return; }
-  startChallenge(ch.daily ? { games, seeds: ch.rounds.map((r) => r.seed), difficulty: ch.difficulty, daily: ch.daily } : { games, quick: ch.quick, ...(ch.quick ? { difficulty: ch.difficulty } : {}) });
+  // Prova subito a serie: si riparte con la stessa serie (senza fine: una partita, le altre nascono strada facendo)
+  if (ch.quick) { startChallenge({ games: ch.series === "infinita" ? [games[0]] : games, quick: true, difficulty: ch.difficulty, ...(ch.series ? { series: ch.series } : {}) }); return; }
+  startChallenge(ch.daily ? { games, seeds: ch.rounds.map((r) => r.seed), difficulty: ch.difficulty, daily: ch.daily } : { games });
+}
+
+// ---------------------------------------------------------------
+// Prova subito a serie (5 di fila / senza fine): totale finora e pulsante Fine
+// ---------------------------------------------------------------
+
+// Riassunto delle partite fatte finora: { n, best, text } (null se nessuna)
+export function seriesSummary(ch, game) {
+  if (!ch?.series || !game) return null;
+  const n = ch.history.length; // partite giocate
+  if (n === 0) return null;
+  // Contano solo i risultati validi (niente false partenze e simili)
+  const scores = ch.history.map((h) => h.myScore).filter((s) => typeof s === "number" && Number.isFinite(s) && game.isValidScore(s));
+  if (scores.length === 0) return { n, best: null, sum: 0, text: "nessun risultato valido" };
+  const high = game.order === "desc"; // desc = vince il punteggio più alto, asc = il più basso (tempi, errori)
+  const best = high ? Math.max(...scores) : Math.min(...scores);
+  const sum = scores.reduce((a, b) => a + b, 0);
+  const avg = Math.round((sum / scores.length) * 10) / 10;
+  const text = high
+    ? `Totale ${game.formatScore(sum)} · migliore ${game.formatScore(best)}`
+    : `Migliore ${game.formatScore(best)} · media ${game.formatScore(avg)}`;
+  return { n, best, sum, text };
+}
+
+// Fine della serie: tra una partita e l'altra si chiude subito; durante la partita si fa scadere il conto
+// alla rovescia (il punteggio di ora conta), altrimenti la partita in corso viene lasciata e non conta.
+export function stopSeries() {
+  const ch = state.challenge;
+  const round = state.round;
+  if (!ch?.series || ch.stopping) return;
+  ch.stopping = true;
+  document.querySelectorAll(".series-end").forEach((b) => { b.disabled = true; b.textContent = "Chiudo…"; });
+  const closeNow = () => {
+    clearTimeout(round?.deadline);
+    clearTimeout(round?.stopGuard);
+    if (state.screen === "game") { try { round?.game?.unmount(); } catch (_) { /* già smontato */ } }
+    endSeries();
+  };
+  if (state.screen !== "game" || !round?.game || round.myScore !== undefined) { closeNow(); return; }
+  if (!endTimerNow()) { closeNow(); return; }
+  // Il minigioco deve mandare il punteggio a breve: se non lo fa (era un conto di una fase), si chiude comunque
+  round.stopGuard = setTimeout(() => { if (state.round === round && state.screen === "game") closeNow(); }, 2500);
+}
+
+// Chiude la serie: podio con tutte le partite, oppure la scheda del minigioco se non se n'è finita nemmeno una
+function endSeries() {
+  const ch = state.challenge;
+  if (!ch) return;
+  if (ch.history.length === 0) {
+    const id = ch.rounds?.[0]?.gameId;
+    const g = getEntry(id);
+    leaveRoomForSeries();
+    g ? showGameInfo(g, showCatalog) : showCatalog();
+    return;
+  }
+  state.round = null;
+  finishChallenge();
+}
+// (leaveRoom vive in room.js, che importa questo modulo: si passa dalla stessa strada di exitButton)
+function leaveRoomForSeries() {
+  const net = state.net;
+  setExpert(false);
+  clearTimeout(state.round?.deadline);
+  net?.leave();
+  state.net = null; state.round = null; state.challenge = null;
+}
+
+// Tra una partita e l'altra della serie: statistiche, avviso del risultato, avanti (o fine)
+function seriesStep(msg) {
+  const ch = state.challenge;
+  const round = state.round;
+  const net = state.net;
+  const last = ch.history[ch.history.length - 1];
+  if (last && round) { last.myDetail = round.myDetail; last.myMax = round.myMax; last.myScore = round.myScore; last.myParams = round.params; }
+  recordMyRound(round.game, round, msg, { solo: true, meId: net.me.id });
+  const pct = ratingOf(round.game, round.myScore, round.params);
+  sfx.play(round.isRecord ? "record" : "roundEnd");
+  try { round.game.unmount(); } catch (_) { /* già smontato */ } // come fa la schermata dei risultati
+  if (ch.stopping || msg.last) { state.round = null; finishChallenge(); return; }
+  toast(`Partita ${msg.index + 1}: ${round.game.formatScore(round.myScore)} · ${starsText(starsOf(pct))}${round.isRecord ? " · record!" : ""}`);
+  state.round = null;
+  nextRound();
+}
+
+// Pulsante Fine (nell'intestazione del minigioco e nel conto alla rovescia)
+function seriesEndButton(cls = "") {
+  return el("button", { class: `series-end ${cls}`.trim(), text: "■ Fine", onclick: () => stopSeries() });
 }
 
 export function finishChallenge() {
@@ -378,8 +475,13 @@ function showCountdown(entry, msg) {
   const special = msg.special ? SPECIALS[msg.special] : null;
   if (special) sfx.play("special");
   const amOut = state.challenge?.eliminated?.has(net.me.id);
+  const ch = state.challenge;
+  const sofar = ch?.series ? seriesSummary(ch, getLoaded(msg.gameId)) : null;
   const area = el("div", { class: `game-area${msg.intro ? " intro" : ""}` }, [
-    el("div", { class: "hint", text: `Manche ${msg.index + 1} di ${msg.total} · ${difficultyLabel(state.round?.difficulty || msg.difficulty)}${msg.difficulties?.[net.me.id] ? " (la tua difficoltà)" : msg.difficulty === "esperto" && state.round?.difficulty !== "esperto" ? " (Esperto non ancora sbloccato qui)" : ""}` }),
+    el("div", { class: "hint", text: ch?.series
+      ? `Partita ${msg.index + 1}${Number.isFinite(msg.total) ? ` di ${msg.total}` : ""} · ${difficultyLabel(state.round?.difficulty || msg.difficulty)}`
+      : `Manche ${msg.index + 1} di ${msg.total} · ${difficultyLabel(state.round?.difficulty || msg.difficulty)}${msg.difficulties?.[net.me.id] ? " (la tua difficoltà)" : msg.difficulty === "esperto" && state.round?.difficulty !== "esperto" ? " (Esperto non ancora sbloccato qui)" : ""}` }),
+    sofar ? el("div", { class: "series-sofar", text: `Finora ${sofar.n} ${sofar.n === 1 ? "partita" : "partite"} · ${sofar.text}` }) : el("span"),
     special
       ? el("div", { class: "special-banner" }, [
           el("div", { class: "special-title", text: `${special.icon} ${special.label}` }),
@@ -396,6 +498,7 @@ function showCountdown(entry, msg) {
     number,
     msg.startAt ? el("span") : readyButton(msg.index),
     isSolo() ? el("span") : el("div", { class: "ready-list" }),
+    ch?.series ? seriesEndButton("between") : el("span"),
   ]);
   const cat = getCategory(entry?.category);
   if (cat) area.style.setProperty("--cat", cat.color);
@@ -450,6 +553,12 @@ function mountGame() {
   const cat = getCategory(getEntry(round.game.id)?.category);
   const area = appRoot().querySelector(".game-area");
   if (cat && area) area.style.setProperty("--cat", cat.color);
+  // Serie: il pulsante Fine nell'intestazione (o in un angolo, se il minigioco non usa la cornice comune)
+  if (state.challenge?.series) {
+    const header = appRoot().querySelector(".game-header");
+    if (header) header.insertBefore(seriesEndButton(), header.querySelector(".game-timer"));
+    else appRoot().append(el("div", { class: "series-end-float" }, [seriesEndButton()]));
+  }
 }
 
 function submitScore(score, detail = null) {
@@ -545,9 +654,11 @@ function publishResults() {
   const round = state.round;
   const ch = state.challenge;
   const net = state.net;
-  if (!round || !round.game || state.screen === "results") return;
+  if (!round || !round.game || round.published || state.screen === "results") return;
+  round.published = true;
   clearTimeout(round.deadline);
   clearTimeout(round.readyTimer);
+  clearTimeout(round.stopGuard);
 
   const infoOf = (id) => net.players.find((p) => p.id === id) || ch.standings.get(id) || { name: "?", color: 0 };
   const order = round.game.order;
@@ -637,6 +748,7 @@ function publishResults() {
     alive: elimination ? ranking.filter((r) => !ch.eliminated.has(r.id)).length : null,
     last: round.index === ch.total - 1 || (elimination && ranking.filter((r) => !ch.eliminated.has(r.id)).length <= 1),
   };
+  if (ch.series) { seriesStep(msg); return; } // serie da soli: niente schermata dei risultati in mezzo
   net.broadcast(msg);
   showResults(msg);
 }
