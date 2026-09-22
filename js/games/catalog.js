@@ -1045,6 +1045,7 @@ export const CATALOG = [
   },
   {
     id: "specchio",
+    image: "assets/icons/specchio.webp",
     title: "Specchio",
     icon: "🪞",
     description: "Ricopia il disegno allo specchio: le caselle accese, ribaltate.",
@@ -1064,6 +1065,7 @@ export const CATALOG = [
   },
   {
     id: "maggiore",
+    image: "assets/icons/maggiore.webp",
     title: "Maggiore",
     icon: "🆚",
     description: "Due conti, uno a sinistra e uno a destra: tocca quello che vale di più.",
@@ -1083,6 +1085,7 @@ export const CATALOG = [
   },
   {
     id: "sillabe",
+    image: "assets/icons/sillabe.webp",
     title: "Sillabe",
     icon: "🔡",
     description: "Le sillabe di una parola in disordine: toccale nell'ordine giusto.",
@@ -1102,6 +1105,7 @@ export const CATALOG = [
   },
   {
     id: "manopola",
+    image: "assets/icons/manopola.webp",
     title: "Manopola",
     icon: "🎛️",
     description: "Ruota la manopola e lascia la lancetta esattamente sulla tacca.",
@@ -1121,6 +1125,7 @@ export const CATALOG = [
   },
   {
     id: "alvolo",
+    image: "assets/icons/alvolo.webp",
     title: "Al volo",
     icon: "🟢",
     description: "Il cursore corre sulla barra: tocca quando è nella zona verde.",
@@ -1140,6 +1145,7 @@ export const CATALOG = [
   },
   {
     id: "percorso",
+    image: "assets/icons/percorso.webp",
     title: "Percorso",
     icon: "🛤️",
     description: "Guarda il percorso che si accende sulla griglia, poi rifallo.",
@@ -1159,6 +1165,7 @@ export const CATALOG = [
   },
   {
     id: "resto",
+    image: "assets/icons/resto.webp",
     title: "Resto",
     icon: "💶",
     description: "Costa tanto, paghi con una banconota: quanto è il resto?",
@@ -1178,6 +1185,7 @@ export const CATALOG = [
   },
   {
     id: "lettere",
+    image: "assets/icons/lettere.webp",
     title: "Lettere",
     icon: "🔍",
     description: "Quante volte compare la lettera nella frase? Conta e rispondi.",
@@ -1197,6 +1205,7 @@ export const CATALOG = [
   },
   {
     id: "cerchi",
+    image: "assets/icons/cerchi.webp",
     title: "Cerchi",
     icon: "⭕",
     description: "Un cerchio si restringe: tocca quando combacia con l'anello.",
@@ -1216,6 +1225,7 @@ export const CATALOG = [
   },
   {
     id: "rimbalzo",
+    image: "assets/icons/rimbalzo.webp",
     title: "Rimbalzo",
     icon: "🏓",
     description: "Muovi la racchetta e tieni la pallina in gioco: ogni rimbalzo un punto.",
@@ -1235,6 +1245,7 @@ export const CATALOG = [
   },
   {
     id: "abbinamenti",
+    image: "assets/icons/abbinamenti.webp",
     title: "Abbinamenti",
     icon: "🎨",
     description: "Quattro oggetti su quattro colori: ricorda chi stava su cosa.",
@@ -1254,6 +1265,7 @@ export const CATALOG = [
   },
   {
     id: "plurali",
+    image: "assets/icons/plurali.webp",
     title: "Plurali",
     icon: "🐑",
     description: "Uovo… uova! Tocca il plurale giusto della parola in alto.",

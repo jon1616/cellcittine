@@ -88,7 +88,7 @@ Idee già discusse, tutte con suoni, prestazione e icona nello stile delle altre
 - [x] Icone disegnate dei 18 nuovi minigiochi (foglio assets/game-icons-3.png, card chiare rimosse in ritaglio) (v0.25.1)
 - [x] 6 minigiochi nuovi → 56 totali: Specchio (attenzione: ricopia il disegno ribaltato), Maggiore (calcolo: quale conto vale di più), Sillabe (parole: ricomponi la parola), Manopola (destrezza: ruota fino alla tacca), Al volo (riflessi: tocca nella zona verde), Percorso (memoria: rifai il percorso sulla griglia); icone emoji in attesa del foglio (v0.30.0)
 - [x] 6 minigiochi nuovi → 62 totali: Resto (calcolo: il resto giusto), Lettere (attenzione: conta la lettera nella frase), Cerchi (riflessi: tocca quando il cerchio combacia con l'anello), Rimbalzo (destrezza: racchetta e pallina), Abbinamenti (memoria: il colore di ogni oggetto), Plurali (parole: il plurale giusto, anche irregolare) (v0.31.0)
-- [ ] Icone disegnate dei minigiochi nuovi dalla v0.30.0 (foglio assets/game-icons-4.png da generare: stesso prompt degli altri fogli, soggetti direttamente sul fondo scuro #1E1F34, niente card)
+- [x] Icone disegnate dei 12 minigiochi nuovi (foglio assets/game-icons-4.png 6×2 sul fondo scuro, ritagliato in assets/icons/<id>.webp) → 62 minigiochi tutti con icona (v0.34.2)
 
 ## 4. Grafica, audio, temi
 
