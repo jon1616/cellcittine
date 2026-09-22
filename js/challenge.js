@@ -120,7 +120,7 @@ export function nextRound() {
   const special = r.special ? SPECIALS[r.special] : null;
   // Handicap: chi ha una difficoltà personale la usa (salvo le manche speciali Difficile/Facile, uguali per tutti)
   const difficulties = {};
-  for (const p of net.players) if (p.handicap && !special?.difficulty) difficulties[p.id] = p.handicap;
+  for (const p of net.players) if (p.handicap && !special?.difficulty && !ch.daily) difficulties[p.id] = p.handicap;
   const msg = {
     type: "start",
     index: ch.index,
@@ -133,6 +133,7 @@ export function nextRound() {
     special: special ? special.id : null,
     duel: r.duel || null,
     mode: ch.mode,
+    daily: ch.daily?.key || null,
     out: [...ch.eliminated.keys()],
     intro,
     startAt: net.now() + (intro ? INTRO_MS : COUNTDOWN_MS),
@@ -186,6 +187,7 @@ async function beginRound(msg) {
   }
   state.challenge.index = msg.index;
   if (msg.mode) state.challenge.mode = msg.mode;
+  if (!net.isHost) state.challenge.daily = msg.daily ? { key: msg.daily, group: true } : null;
   if (Array.isArray(msg.out)) { state.challenge.eliminated = new Map(msg.out.map((id) => [id, true])); }
 
   // Segnaposto subito (così i messaggi di questa manche non vengono scartati)…

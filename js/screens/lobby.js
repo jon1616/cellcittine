@@ -18,6 +18,7 @@ import { showSelectionList } from "./catalog.js";
 import { TEAM_OPTIONS, teamInfo, balancedAssignment } from "../teams.js";
 import { snapshot as championshipSnapshot, endChampionship } from "../championship.js";
 import { closeChampionship } from "../challenge.js";
+import { dailyKey, dailyPlan, dailyLabel } from "../daily.js";
 
 // ---------------------------------------------------------------
 // Configurazione della sfida (host)
@@ -52,6 +53,7 @@ export function detectPack(games) {
 
 function packName(cfg) {
   if (!cfg.pack) return null;
+  if (cfg.pack.type === "daily") return cfg.pack.id === dailyKey() ? "Sfida del giorno" : `Sfida del giorno di ${dailyLabel(cfg.pack.id)}`;
   if (cfg.pack.type === "builtin") return getBuiltinPack(cfg.pack.id)?.name || null;
   return getUserPacks().find((p) => p.id === cfg.pack.id)?.name || null;
 }
@@ -77,6 +79,15 @@ function categoryBreakdown(games) {
 function packsRow() {
   const cfg = state.config;
   const isActive = (type, id) => cfg.pack?.type === type && cfg.pack?.id === id;
+
+  // Sfida del giorno in gruppo: i 5 minigiochi di oggi, stessi semi per tutti (solo in stanza)
+  const plan = dailyPlan();
+  const dailyChip = isSolo() ? [] : [el("button", {
+    class: `chip pack${isActive("daily", plan.key) ? " on" : ""}`,
+    text: `📅 Sfida del giorno (${plan.games.length})`,
+    title: "I 5 minigiochi di oggi, uguali per tutti: il totale di ognuno vale come Sfida del giorno personale",
+    onclick: () => updateConfig({ games: [...plan.games], rounds: "tutti", difficulty: "normale", pack: { type: "daily", id: plan.key } }),
+  })];
 
   const builtin = BUILTIN_PACKS.filter((p) => resolvePack(p).length > 0).map((p) => {
     const n = resolvePack(p).length;
@@ -115,7 +126,7 @@ function packsRow() {
     return el("span", { class: "chip-wrap" }, [chip, del]);
   });
 
-  return el("div", { class: "chips scroll" }, [...builtin, ...user]);
+  return el("div", { class: "chips scroll" }, [...dailyChip, ...builtin, ...user]);
 }
 
 function savePackForm() {
@@ -327,12 +338,21 @@ export function championshipTable(table, meId) {
   ));
 }
 
+// Se il pacchetto scelto è la Sfida del giorno di oggi (stessi minigiochi, in ordine), si parte con i semi del giorno
+function dailyStartOptions() {
+  const cfg = state.config;
+  if (cfg.pack?.type !== "daily") return {};
+  const plan = dailyPlan();
+  if (cfg.pack.id !== plan.key || cfg.games.join() !== plan.games.join()) return {};
+  return { games: [...plan.games], seeds: [...plan.seeds], difficulty: plan.difficulty, daily: { key: plan.key, group: true } };
+}
+
 // Riassunto per gli ospiti (dalla configurazione ricevuta dall'host).
 function configSummary(cfg) {
   const n = cfg.games.length;
   return el("div", { class: "card" }, [
     el("h2", { text: "La sfida" }),
-    el("p", { text: `${cfg.packName ? `Pacchetto ${cfg.packName} · ` : ""}${roundsLabel(cfg)} · ${difficultyLabel(cfg.difficulty)}${cfg.auto ? ` · manche automatiche (${cfg.autoDelay} s)` : ""}${cfg.teams ? ` · ${cfg.teams} squadre` : ""}${cfg.special ? " · manche speciali" : ""}${cfg.championship ? ` · campionato${cfg.championshipDay ? ` (giornata ${cfg.championshipDay + 1})` : ""}` : ""}${cfg.mode === "eliminazione" ? " · a eliminazione" : ""}` }),
+    el("p", { text: `${cfg.packName === "Sfida del giorno" ? "📅 Sfida del giorno: i 5 minigiochi di oggi, il tuo totale vale come sfida personale · " : cfg.packName ? `Pacchetto ${cfg.packName} · ` : ""}${roundsLabel(cfg)} · ${difficultyLabel(cfg.difficulty)}${cfg.auto ? ` · manche automatiche (${cfg.autoDelay} s)` : ""}${cfg.teams ? ` · ${cfg.teams} squadre` : ""}${cfg.special ? " · manche speciali" : ""}${cfg.championship ? ` · campionato${cfg.championshipDay ? ` (giornata ${cfg.championshipDay + 1})` : ""}` : ""}${cfg.mode === "eliminazione" ? " · a eliminazione" : ""}` }),
     el("p", { class: "small", text: n ? `${n} ${n === 1 ? "minigioco" : "minigiochi"}: ${categoryBreakdown(cfg.games)}` : "" }),
     el("button", { text: "Vedi i minigiochi", class: "link", onclick: () => showSelectionList(cfg.games) }),
   ]);
@@ -393,7 +413,7 @@ export function showLobby() {
     const snap = championshipSnapshot();
     if (snap?.day) parts.push(championshipCard(snap));
     parts.push(...configPanel());
-    const startBtn = el("button", { text: solo ? "Inizia!" : "Inizia la sfida!", onclick: () => startChallenge() });
+    const startBtn = el("button", { text: solo ? "Inizia!" : "Inizia la sfida!", onclick: () => startChallenge(dailyStartOptions()) });
     startBtn.disabled = state.config.games.length === 0;
     const away = net.players.filter((p) => p.away).map((p) => p.name);
     if (away.length) parts.push(el("p", { class: "small", text: `💤 ${away.join(", ")} ${away.length === 1 ? "è altrove" : "sono altrove"} (app in secondo piano): aspetta o inizia comunque.` }));

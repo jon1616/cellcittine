@@ -370,6 +370,29 @@ function dailyFinal(ch) {
   ];
 }
 
+// Sfida del giorno giocata in gruppo: il MIO totale (vale se è il primo tentativo di oggi)
+function dailyGroupCard(ch) {
+  const key = ch.daily.key;
+  const rounds = dailyRounds(ch);
+  if (!rounds.length) return el("span");
+  const total = rounds.reduce((s, r) => s + r.points, 0);
+  const first = recordDaily(key, rounds);
+  const official = todayResult(key);
+  const share = el("button", { text: "📤 Condividi il mio risultato", class: "secondary small-btn" });
+  share.addEventListener("click", async () => {
+    const text = shareText(key, official || { total, rounds });
+    if (navigator.share) { try { await navigator.share({ text }); return; } catch (_) { /* copia */ } }
+    try { await navigator.clipboard.writeText(text); share.textContent = "Copiato!"; } catch (_) { share.textContent = "Non riesco a copiare"; }
+    setTimeout(() => { share.textContent = "📤 Condividi il mio risultato"; }, 2000);
+  });
+  return el("div", { class: "card daily done" }, [
+    el("div", { class: "daily-head" }, [el("span", { class: "daily-title", text: "📅 La tua Sfida del giorno" }), el("span", { class: "daily-date", text: dailyLabel(key) })]),
+    el("div", { class: "daily-score", text: `${formatPoints(total)} punti` }),
+    el("p", { class: "small", text: first ? `Registrata come la tua sfida di oggi (su ${formatPoints(DAILY_ROUNDS * DAILY_ROUND_MAX)}). ${rounds.map((r) => ratingBar(r.pct)).join(" ")}` : official ? `Oggi avevi già fatto la sfida: vale quella (${formatPoints(official.total)} punti). Questa era una prova.` : "" }),
+    share,
+  ]);
+}
+
 // ---------------------------------------------------------------
 // Podio finale / riepilogo dell'allenamento
 // ---------------------------------------------------------------
@@ -521,6 +544,8 @@ export function showFinal(msg) {
       el("p", { class: "small", text: c.table[0] ? `In testa ${c.table[0].name} con ${c.table[0].points} punti.` : "" }),
     ]));
   }
+
+  if (!solo && ch?.daily) parts.push(dailyGroupCard(ch));
 
   const actions = net.isHost
     ? [
