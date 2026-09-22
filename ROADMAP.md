@@ -47,6 +47,8 @@ M = due-tre passi, L = più passi). L'ordine dentro ogni blocco è quello consig
 ## 2. Più divertimento (priorità media)
 
 - [x] **Sfida del giorno** in home: 5 minigiochi di 5 categorie, uguali per tutti (piano e semi dalla data), difficoltà normale; ogni manche vale fino a 1000 punti (percentuale di prestazione, js/rating.js); conta il primo tentativo, si può rigiocare; serie di giorni di fila 🔥; condivisione del risultato in stile "uno al giorno" (js/daily.js) (v0.26.0)
+- [x] **Manche speciali** (opzione in stanza, solo in gruppo): decise dall'host all'avvio e annunciate al conto alla rovescia con suono: 🔥 Punti doppi, 🎯 Tutto o niente (solo chi vince prende punti), 🚀 Rimonta (metà bassa della classifica a punti doppi), ⚡ Manche difficile, 🍃 Manche facile; l'ultima manche è sempre 🏁 Finale doppia (js/specials.js) (v0.27.0)
+- [x] **Difficoltà "Crescente"**: le manche vanno da Facile a Difficile lungo la sfida; i record si salvano con la difficoltà vera di ogni manche (v0.27.0)
 - [x] **Percentuale di prestazione per tutti i 50 minigiochi** (js/rating.js): massimo del minigioco dove c'è, altrimenti un riferimento per minigioco (tabella REFS, ritoccabile) (v0.26.0)
 
 - [x] **Premi di fine sfida** sul podio: uno per categoria (Fulmine ⚡, Cecchino 🎯, Elefante 🐘, Occhio di lince 🔍, Calcolatrice 🧮, Fortuna 🍀, Dizionario 📖) a chi vince più manche di quel tipo, più Dominio 👑, Costante 🧱, Rimonta 🚀 e Da record ★ (js/awards.js) (v0.18.0)
@@ -94,6 +96,7 @@ Idee già discusse, tutte con suoni, prestazione e icona nello stile delle altre
 - [ ] Server di presentazione (PeerJS) di riserva se quello pubblico non risponde. — M
 - [ ] Passaggio di host: se l'host esce, un altro telefono prende il comando (serve stato condiviso). — L
 - [ ] Modalità spettatore: chi entra a sfida iniziata vede le classifiche e gioca dalla manche successiva (oggi entra e aspetta). — S
+- [x] Tester da riga di comando: `node tools/tester.mjs` apre test.html in Chrome headless e stampa il rapporto (v0.27.0)
 - [ ] Prova automatica del multiplayer nel tester (due iframe: host + ospite). — M
 
 ## 6. Più avanti

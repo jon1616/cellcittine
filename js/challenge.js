@@ -23,6 +23,7 @@ import { showLobby } from "./screens/lobby.js";
 import { showResults, showFinal } from "./screens/results.js";
 import { computeAwards } from "./awards.js";
 import { teamRound } from "./teams.js";
+import { SPECIALS, roundDifficulty, assignSpecials, applySpecial } from "./specials.js";
 
 const COUNTDOWN_MS = 3500; // dal messaggio "start" al via
 const INTRO_MS = 7000;     // …quando per qualcuno è la prima volta: si legge come si gioca
@@ -64,10 +65,15 @@ export async function startChallenge(opts = {}) {
     rounds.push({ gameId: pool.shift(), seed: Math.floor(rng() * 2 ** 31) });
   }
 
+  // Manche speciali (solo in gruppo, se attive): decise ora, annunciate manche per manche
+  const difficulty = opts.difficulty || cfg.difficulty;
+  const specials = !isSolo() && cfg.special && !opts.daily ? assignSpecials(rounds.length, rng, difficulty) : [];
+  rounds.forEach((r, i) => { r.special = specials[i] || null; });
+
   state.challenge = {
     rounds,
     total: rounds.length,
-    difficulty: opts.difficulty || cfg.difficulty,
+    difficulty,
     index: -1,
     standings: new Map(),
     teamStandings: new Map(), // squadra -> punti (solo con le squadre attive)
@@ -100,13 +106,16 @@ export function nextRound() {
   const r = ch.rounds[ch.index];
   // Se per qualcuno in stanza è la prima volta, presentazione più lunga per tutti
   const intro = net.players.some((p) => !net.hasSeen(p.id, r.gameId));
+  const special = r.special ? SPECIALS[r.special] : null;
   const msg = {
     type: "start",
     index: ch.index,
     total: ch.total,
     gameId: r.gameId,
     seed: r.seed,
-    difficulty: ch.difficulty,
+    difficulty: special?.difficulty || roundDifficulty(ch.difficulty, ch.index, ch.total),
+    challengeDifficulty: ch.difficulty,
+    special: special ? special.id : null,
     intro,
     startAt: net.now() + (intro ? INTRO_MS : COUNTDOWN_MS),
   };
@@ -141,12 +150,12 @@ async function beginRound(msg) {
 
   // Un guest arrivato a sfida iniziata crea la propria vista della sfida qui.
   if (!net.isHost && (!state.challenge || msg.index === 0)) {
-    state.challenge = { total: msg.total, difficulty: msg.difficulty, index: msg.index, standings: new Map(), history: [] };
+    state.challenge = { total: msg.total, difficulty: msg.challengeDifficulty || msg.difficulty, index: msg.index, standings: new Map(), history: [] };
   }
   state.challenge.index = msg.index;
 
   // Segnaposto subito (così i messaggi di questa manche non vengono scartati)…
-  state.round = { index: msg.index, game: null, params: null, startAt: msg.startAt, scores: new Map(), records: new Set(), participants: net.players.map((p) => p.id), deadline: null };
+  state.round = { index: msg.index, game: null, params: null, startAt: msg.startAt, difficulty: msg.difficulty, special: msg.special || null, scores: new Map(), records: new Set(), participants: net.players.map((p) => p.id), deadline: null };
   showCountdown(getEntry(msg.gameId), msg);
 
   // …poi il codice del minigioco, caricato a richiesta.
@@ -172,8 +181,13 @@ function showCountdown(entry, msg) {
   sfx.setScene("game");
   const net = state.net;
   const number = el("div", { class: "big", text: "" });
+  const special = msg.special ? SPECIALS[msg.special] : null;
+  if (special) sfx.play("special");
   const area = el("div", { class: `game-area${msg.intro ? " intro" : ""}` }, [
     el("div", { class: "hint", text: `Manche ${msg.index + 1} di ${msg.total} · ${difficultyLabel(msg.difficulty)}` }),
+    special
+      ? el("div", { class: "special-banner" }, [el("div", { class: "special-title", text: `${special.icon} ${special.label}` }), el("div", { class: "special-desc", text: special.desc })])
+      : el("span"),
     gameIcon(entry, "countdown-icon"),
     el("div", { text: entry?.title || msg.gameId }),
     msg.intro
@@ -219,7 +233,7 @@ function mountGame() {
 
   round.game.mount(appRoot(), {
     params: round.params,
-    difficulty: state.challenge.difficulty,
+    difficulty: round.difficulty,
     me: net.me,
     now: () => net.now(),
     onFinish: (score, detail) => submitScore(score, detail),
@@ -233,7 +247,7 @@ function submitScore(score, detail = null) {
   round.myScore = score;
   round.myDetail = detail;
   round.myMax = typeof round.game.maxScore === "function" ? round.game.maxScore(round.params) : null;
-  round.isRecord = updateRecord(round.game, state.challenge.difficulty, score);
+  round.isRecord = updateRecord(round.game, round.difficulty, score);
 
   if (net.isHost) {
     recordScore(net.me.id, score, round.isRecord);
@@ -287,6 +301,8 @@ function publishResults() {
     if (i === 0 || r.score !== ranking[i - 1].score) pos = i;
     r.points = r.score === null ? 0 : n - pos;
   });
+  // Manche speciale: punti doppi, tutto o niente, rimonta…
+  if (round.special) applySpecial(round.special, ranking, standingsArray());
 
   for (const r of ranking) {
     const entry = ch.standings.get(r.id) || { name: r.name, color: r.color, points: 0 };
@@ -297,7 +313,7 @@ function publishResults() {
     if (Number.isInteger(team)) entry.team = team;
     ch.standings.set(r.id, entry);
   }
-  ch.history.push({ gameId: round.game.id, ranking });
+  ch.history.push({ gameId: round.game.id, ranking, special: round.special || null });
 
   // Squadre: media dei punti dei membri, poi punti per posizione tra squadre
   let teamRanking = null;
@@ -310,7 +326,9 @@ function publishResults() {
     type: "results",
     index: round.index,
     total: ch.total,
-    difficulty: ch.difficulty,
+    difficulty: round.difficulty,
+    challengeDifficulty: ch.difficulty,
+    special: round.special || null,
     gameId: round.game.id,
     ranking,
     standings: standingsArray(),
@@ -361,7 +379,7 @@ export function handleMessage(msg, fromId) {
     case "results":
       if (state.screen === "results" && state.round?.index === msg.index) return;
       // Arrivati (o rientrati) a pagina nuova: la vista della sfida si ricostruisce da qui
-      if (!state.challenge) state.challenge = { total: msg.total || msg.index + 1, difficulty: msg.difficulty || null, index: msg.index, standings: new Map(), history: [] };
+      if (!state.challenge) state.challenge = { total: msg.total || msg.index + 1, difficulty: msg.challengeDifficulty || msg.difficulty || null, index: msg.index, standings: new Map(), history: [] };
       showResults(msg);
       break;
     case "final":

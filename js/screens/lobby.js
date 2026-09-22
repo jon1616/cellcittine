@@ -9,7 +9,7 @@ import { state, setScreen, isSolo } from "../state.js";
 import { show, statusLine, segmented, difficultyLabel, colorDot } from "../ui.js";
 import { CATALOG, CATEGORIES, getEntry } from "../games/catalog.js";
 import { BUILTIN_PACKS, getBuiltinPack, resolvePack, randomSelection, sameSelection } from "../packs.js";
-import { DIFFICULTIES, ROUND_OPTIONS, AUTO_MIN, AUTO_MAX, saveConfig, getUserPacks, saveUserPack, deleteUserPack } from "../storage.js";
+import { DIFFICULTY_OPTIONS, ROUND_OPTIONS, AUTO_MIN, AUTO_MAX, saveConfig, getUserPacks, saveUserPack, deleteUserPack } from "../storage.js";
 import { exitButton, shareInvite } from "../room.js";
 import { startChallenge } from "../challenge.js";
 import { showHome } from "./home.js";
@@ -25,7 +25,7 @@ export function broadcastConfig() {
   const cfg = state.config;
   state.net?.broadcast({
     type: "config",
-    config: { games: cfg.games, rounds: cfg.rounds, difficulty: cfg.difficulty, packName: packName(cfg), auto: cfg.auto, autoDelay: cfg.autoDelay, teams: cfg.teams },
+    config: { games: cfg.games, rounds: cfg.rounds, difficulty: cfg.difficulty, packName: packName(cfg), auto: cfg.auto, autoDelay: cfg.autoDelay, teams: cfg.teams, special: cfg.special },
   });
 }
 
@@ -127,7 +127,7 @@ function savePackForm() {
     rulesChip.addEventListener("click", () => { withRules = !withRules; rulesChip.classList.toggle("on", withRules); });
     save.addEventListener("click", () => {
       const cfg = state.config;
-      const rules = withRules ? { rounds: cfg.rounds, difficulty: cfg.difficulty, auto: cfg.auto, autoDelay: cfg.autoDelay } : null;
+      const rules = withRules ? { rounds: cfg.rounds, difficulty: cfg.difficulty, auto: cfg.auto, autoDelay: cfg.autoDelay, special: cfg.special } : null;
       const pack = saveUserPack(input.value, cfg.games, rules);
       updateConfig({ pack: { type: "user", id: pack.id } });
     });
@@ -174,7 +174,8 @@ function configPanel() {
       (rounds) => updateConfig({ rounds })
     ),
     el("div", { class: "label", text: "Difficoltà" }),
-    segmented(DIFFICULTIES, cfg.difficulty, (difficulty) => updateConfig({ difficulty })),
+    segmented(DIFFICULTY_OPTIONS, cfg.difficulty, (difficulty) => updateConfig({ difficulty })),
+    cfg.difficulty === "crescente" ? el("p", { class: "small", text: "Le manche partono facili e diventano difficili verso la fine." }) : el("span"),
     el("div", { class: "label", text: "Tra una manche e l'altra" }),
     segmented(
       [{ id: false, label: "A mano" }, { id: true, label: "Automatico" }],
@@ -186,6 +187,9 @@ function configPanel() {
       el("div", { class: "label", text: "Squadre" }),
       segmented(TEAM_OPTIONS, cfg.teams, (teams) => setTeams(teams)),
       cfg.teams ? el("p", { class: "small", text: "Tocca la squadra accanto a un nome per cambiarla. Conta la media dei punti dei membri." }) : el("span"),
+      el("div", { class: "label", text: "Manche speciali" }),
+      segmented([{ id: false, label: "No" }, { id: true, label: "Sì" }], cfg.special, (special) => updateConfig({ special })),
+      el("p", { class: "small", text: cfg.special ? "A sorpresa: 🔥 punti doppi, 🎯 tutto o niente, 🚀 rimonta, ⚡ manche difficile, 🍃 manche facile; l'ultima vale doppio 🏁." : "Tutte le manche valgono uguale." }),
     ]),
   ]);
 
@@ -246,7 +250,7 @@ function configSummary(cfg) {
   const n = cfg.games.length;
   return el("div", { class: "card" }, [
     el("h2", { text: "La sfida" }),
-    el("p", { text: `${cfg.packName ? `Pacchetto ${cfg.packName} · ` : ""}${roundsLabel(cfg)} · ${difficultyLabel(cfg.difficulty)}${cfg.auto ? ` · manche automatiche (${cfg.autoDelay} s)` : ""}${cfg.teams ? ` · ${cfg.teams} squadre` : ""}` }),
+    el("p", { text: `${cfg.packName ? `Pacchetto ${cfg.packName} · ` : ""}${roundsLabel(cfg)} · ${difficultyLabel(cfg.difficulty)}${cfg.auto ? ` · manche automatiche (${cfg.autoDelay} s)` : ""}${cfg.teams ? ` · ${cfg.teams} squadre` : ""}${cfg.special ? " · manche speciali" : ""}` }),
     el("p", { class: "small", text: n ? `${n} ${n === 1 ? "minigioco" : "minigiochi"}: ${categoryBreakdown(cfg.games)}` : "" }),
     el("button", { text: "Vedi i minigiochi", class: "link", onclick: () => showSelectionList(cfg.games) }),
   ]);

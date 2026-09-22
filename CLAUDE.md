@@ -38,6 +38,7 @@ js/room.js           stanza: createRoom, joinRoom, playSolo, leaveRoom, exitButt
 js/challenge.js      sfida e manche: startChallenge, nextRound, conto alla rovescia, mount, punteggi, classifiche, handleMessage
 js/rating.js         prestazione in percentuale (0–100) per ogni minigioco: maxScore o riferimento in REFS
 js/daily.js          Sfida del giorno: piano dalla data (5 minigiochi, semi), primo tentativo, serie, testo da condividere
+js/specials.js       manche speciali (punti doppi, tutto o niente, rimonta, difficile/facile, finale doppia) e difficoltà "crescente"
 js/awards.js         premi di fine sfida (computeAwards dallo storico delle manche; inviati nel messaggio "final")
 js/teams.js          squadre: TEAMS, assegnazione bilanciata, classifica di squadra per manche (media dei membri)
 js/screens/home.js   home (nome, pulsanti, collegamenti, temi)
@@ -62,8 +63,11 @@ js/version.js        VERSION mostrata nell'angolo
 vendor/peerjs.min.js PeerJS 1.5.4 (MIT): unica libreria esterna, copiata nel progetto (niente CDN)
 js/tester.js + test.html   tester nel browser (struttura, ogni minigioco, allenamento completo)
 tools/check.mjs      controllo da riga di comando (sintassi, catalogo ↔ file ↔ sw.js, PRECACHE completa, versione)
+tools/tester.mjs     esegue test.html in Chrome headless e stampa il rapporto (node tools/tester.mjs, --solo=<id>, --no-giochi)
 .claude/serve.js + .claude/launch.json   server locale di sviluppo (porta 8765), fuori da Git
 ```
+
+Difficoltà: `config.difficulty` può essere anche "crescente"; la difficoltà VERA di una manche è `msg.difficulty` del messaggio "start" (`state.round.difficulty`), da usare per mount, record e "Il tuo record". Le manche speciali viaggiano come `msg.special` (id in SPECIALS) e l'host applica `applySpecial` ai punti in `publishResults`.
 
 Rete: i partecipanti sono identificati dall'id stabile del telefono (`getClientId`), mai dall'id PeerJS; i messaggi di fase (start/results/final/lobby) devono poter arrivare due volte senza effetti (guardie in `handleMessage`). In locale `window.cellcittine.state` espone lo stato per le prove.
 
@@ -94,7 +98,7 @@ La scheda descrittiva (titolo, icona, categoria, abilità, durata, ritmo, comand
 2. Scheda completa in `js/games/catalog.js` (con `added: "AAAA-MM-GG"` per il badge NUOVO). Icona disegnata in `assets/icons/<id>.webp` (160×160, sfondo #1E1F34, stesso stile delle altre: prompt in ROADMAP/chat) e campo `image`; se manca, l'emoji `icon` fa da riserva.
 3. Righe in `PRECACHE` di `sw.js`: il file js e l'icona.
 4. Sezione del minigioco in fondo a `css/games.css` (prefisso di classe proprio, es. `.ten-`).
-5. `node tools/check.mjs` → 0 errori; poi `test.html?auto` nel browser → 0 errori (gli avvisi "non è finito da solo" su Salta/Cesto sono oscillazioni del tester con l'orologio accelerato).
+5. `node tools/check.mjs` → 0 errori; poi `node tools/tester.mjs` (test.html in Chrome headless, ~90 s) → 0 errori. Il tester aperto in una scheda del riquadro del browser nascosto è inaffidabile: Chrome rallenta i timer delle schede non visibili.
 6. Provare a mano nel browser (viewport telefono 375×812) almeno una manche.
 7. Riga nella tabella del README, voce spuntata in ROADMAP.md.
 8. Versione: alzare `VERSION` in `js/version.js` **e** `CACHE_VERSION` in `sw.js` (stesso numero).
@@ -108,9 +112,12 @@ La scheda descrittiva (titolo, icona, categoria, abilità, durata, ritmo, comand
 ## Sviluppo locale
 
 Server: `node .claude/serve.js` (o il preview "cellcittine" da `.claude/launch.json`) →
-http://localhost:8765/ · Tester: http://localhost:8765/test.html?auto (viewport desktop: con
-l'emulazione telefono il tester non funziona; e non provare l'app in un'altra scheda nel frattempo,
-condividono il localStorage) · Il multiplayer si prova con due schede (host + ospite) sullo stesso PC.
+http://localhost:8765/ · Tester: `node tools/tester.mjs` (Chrome headless, consigliato) oppure
+http://localhost:8765/test.html?auto in una scheda visibile (viewport desktop; non provare l'app in
+un'altra scheda nel frattempo, condividono il localStorage) · Il multiplayer si prova con due schede
+(host + ospite) sullo stesso PC: nella scheda ospite impostare prima `localStorage.clientId` a un
+valore diverso (altrimenti l'host la scambia per sé stesso che rientra) e, se il riquadro è nascosto,
+sostituire `requestAnimationFrame` con `setTimeout` in entrambe.
 
 ## Cose che NON si fanno (decise con l'utente)
 

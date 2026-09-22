@@ -8,7 +8,7 @@ import { el } from "./utils.js";
 import { sfx } from "./audio.js";
 import { state } from "./state.js";
 import { syncBackGuard } from "./nav.js";
-import { DIFFICULTIES, getRecord } from "./storage.js";
+import { DIFFICULTY_OPTIONS, getRecord } from "./storage.js";
 import { PACES, isNew } from "./games/catalog.js";
 
 const app = document.getElementById("app");
@@ -111,7 +111,7 @@ export function colorDot(index) {
 // ---------------------------------------------------------------
 
 export function difficultyLabel(id) {
-  return DIFFICULTIES.find((d) => d.id === id)?.label || id;
+  return DIFFICULTY_OPTIONS.find((d) => d.id === id)?.label || id;
 }
 
 // "⏱ 20 s · Veloce · tocco"
@@ -138,7 +138,7 @@ export function gameHeading(g, tag = "h2") {
 //   selected: null (nessuna spunta) | true | false
 //   onClick: tocco sulla riga · onInfo: pulsante "i" · onFav: stellina (fav = stato attuale)
 export function gameRow(g, { selected = null, onClick, onInfo, onFav = null, fav = false } = {}) {
-  const rec = getRecord(g.id, state.config.difficulty);
+  const rec = getRecord(g.id, state.config.difficulty === "crescente" ? "normale" : state.config.difficulty);
   const row = el("div", { class: `game-row${selected === true ? " on" : ""}${selected === false ? " off" : ""}${onFav ? " with-fav" : ""}` }, [
     selected === null ? el("span") : el("span", { class: "check", text: selected ? "✓" : "" }),
     gameIcon(g),

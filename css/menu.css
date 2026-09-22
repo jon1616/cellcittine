@@ -476,3 +476,6 @@ input.code { letter-spacing: 8px; text-transform: uppercase; font-weight: 700; f
 .daily-rows li { animation: award-in 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; animation-delay: calc(0.3s + var(--i, 0) * 0.12s); }
 .daily-bar { font-size: 12px; letter-spacing: -1px; }
 .daily-rows .pts { color: var(--accent); min-width: 44px; text-align: right; }
+
+/* Manche speciale nei risultati */
+.special-chip { align-self: center; font-weight: 800; font-size: 15px; padding: 6px 14px; border-radius: 999px; color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent); box-shadow: 0 0 14px var(--accent-glow); margin-top: -8px; }

@@ -528,3 +528,17 @@
 .ort-answers { display: flex; flex-direction: column; gap: 10px; }
 .ort-answer { font-size: 24px; padding: 16px; background: rgba(255,255,255,0.12); border: 2px solid rgba(255,255,255,0.15); color: var(--text); letter-spacing: 0.5px; }
 .rime-label { text-align: center; color: var(--muted); font-size: 15px; margin-bottom: 4px; }
+
+/* Manche speciale annunciata al conto alla rovescia */
+.special-banner {
+  max-width: 340px;
+  padding: 10px 16px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 35%, transparent), color-mix(in srgb, var(--accent) 12%, transparent));
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 24px var(--accent-glow);
+  animation: special-in 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.3);
+}
+.special-title { font-size: 24px; font-weight: 800; color: var(--accent); }
+.special-desc { font-size: 15px; font-weight: 500; color: rgba(255,255,255,0.9); line-height: 1.3; }
+@keyframes special-in { from { opacity: 0; transform: scale(0.6) rotate(-3deg); } to { opacity: 1; transform: none; } }

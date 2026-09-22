@@ -17,6 +17,8 @@ export const DIFFICULTIES = [
   { id: "normale", label: "Normale" },
   { id: "difficile", label: "Difficile" },
 ];
+// Opzioni della stanza: le tre difficoltà più "Crescente" (da Facile a Difficile lungo la sfida)
+export const DIFFICULTY_OPTIONS = [...DIFFICULTIES, { id: "crescente", label: "Crescente" }];
 
 // "tutti" = una manche per ogni minigioco scelto
 export const ROUND_OPTIONS = [3, 5, 7, 10, "tutti"];
@@ -26,7 +28,8 @@ export const ROUND_OPTIONS = [3, 5, 7, 10, "tutti"];
 export const AUTO_MIN = 5;
 export const AUTO_MAX = 20;
 // teams: 0 = nessuna squadra, 2 o 3 = numero di squadre (l'host assegna le persone in stanza)
-const DEFAULT_CONFIG = { games: [], rounds: 5, difficulty: "normale", pack: null, auto: false, autoDelay: 8, teams: 0 };
+// special: manche speciali (punti doppi, tutto o niente, rimonta…) decise dall'host a ogni sfida
+const DEFAULT_CONFIG = { games: [], rounds: 5, difficulty: "normale", pack: null, auto: false, autoDelay: 8, teams: 0, special: false };
 
 function read(key, fallback) {
   try {
@@ -67,10 +70,11 @@ export function loadConfig(allGameIds) {
   cfg.games = Array.isArray(saved.games) ? saved.games.filter((id) => allGameIds.includes(id)) : [...allGameIds];
   if (!Array.isArray(saved.games)) cfg.pack = { type: "builtin", id: "tutti" };
   if (!ROUND_OPTIONS.includes(cfg.rounds)) cfg.rounds = DEFAULT_CONFIG.rounds;
-  if (!DIFFICULTIES.some((d) => d.id === cfg.difficulty)) cfg.difficulty = DEFAULT_CONFIG.difficulty;
+  if (!DIFFICULTY_OPTIONS.some((d) => d.id === cfg.difficulty)) cfg.difficulty = DEFAULT_CONFIG.difficulty;
   cfg.auto = cfg.auto === true;
   cfg.autoDelay = Number.isInteger(cfg.autoDelay) ? Math.min(AUTO_MAX, Math.max(AUTO_MIN, cfg.autoDelay)) : DEFAULT_CONFIG.autoDelay;
   cfg.teams = [0, 2, 3].includes(cfg.teams) ? cfg.teams : 0;
+  cfg.special = cfg.special === true;
   return cfg;
 }
 
@@ -188,7 +192,7 @@ export function getUserPacks() {
   return Array.isArray(packs) ? packs : [];
 }
 
-// rules (facoltativo): { rounds, difficulty, auto, autoDelay } salvate insieme ai minigiochi
+// rules (facoltativo): { rounds, difficulty, auto, autoDelay, special } salvate insieme ai minigiochi
 export function saveUserPack(name, games, rules = null) {
   const packs = getUserPacks();
   const clean = name.trim().slice(0, 24) || "Il mio pacchetto";

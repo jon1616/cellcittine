@@ -15,6 +15,7 @@ import { showHome } from "./home.js";
 import { showLobby } from "./lobby.js";
 import { teamInfo, formatAvg } from "../teams.js";
 import { ratingOf, ratingBar, ratingLabel } from "../rating.js";
+import { SPECIALS } from "../specials.js";
 import { DAILY_ROUNDS, DAILY_ROUND_MAX, dailyLabel, formatPoints, todayResult, recordDaily, dailyStreak, shareText } from "../daily.js";
 
 // ---------------------------------------------------------------
@@ -120,7 +121,7 @@ export async function showResults(msg) {
 
   if (!net.isHost && state.challenge) {
     state.challenge.standings = new Map(msg.standings.map((s) => [s.id, { name: s.name, color: s.color, points: s.points }]));
-    state.challenge.history.push({ gameId: msg.gameId, ranking: msg.ranking });
+    state.challenge.history.push({ gameId: msg.gameId, ranking: msg.ranking, special: msg.special || null });
   }
   const last = state.challenge?.history[state.challenge.history.length - 1];
   if (last && round) { last.myDetail = round.myDetail; last.myMax = round.myMax; last.myScore = round.myScore; last.myParams = round.params; }
@@ -149,7 +150,7 @@ export async function showResults(msg) {
   const cards = [el("div", { class: "card" }, [gameHeading(game), roundList, performanceLine(game, round)])];
 
   if (solo) {
-    const rec = getRecord(game.id, state.challenge.difficulty);
+    const rec = getRecord(game.id, round?.difficulty || msg.difficulty);
     cards.push(el("p", { text: rec ? `Il tuo record: ${rec.text}` : "" }));
   } else {
     if (msg.teamRanking) {
@@ -179,8 +180,10 @@ export async function showResults(msg) {
     actions.push(el("p", { text: "Aspetta l'host…" }));
   }
 
+  const special = msg.special ? SPECIALS[msg.special] : null;
   show(
     el("p", { text: `Manche ${msg.index + 1} di ${state.challenge.total}` }),
+    special ? el("div", { class: "special-chip", text: `${special.icon} ${special.label}` }) : el("span"),
     ...cards,
     ...actions,
     el("div", { class: "spacer" }),
