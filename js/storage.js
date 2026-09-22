@@ -7,7 +7,9 @@ const KEY_PACKS = "packs";
 const KEY_CLIENT = "clientId";
 const KEY_HISTORY = "history";
 const KEY_FAVORITES = "favorites"; // minigiochi preferiti (stellina nella scelta)
-const KEY_SEEN = "seen"; // minigiochi già giocati su questo telefono (per la presentazione lunga la prima volta)
+const KEY_SEEN = "seen";
+const KEY_DAILY = "daily"; // risultati della Sfida del giorno: { "AAAA-MM-GG": { total, rounds, at } }
+const DAILY_MAX = 120; // giorni ricordati // minigiochi già giocati su questo telefono (per la presentazione lunga la prima volta)
 const HISTORY_MAX = 60; // sfide ricordate sul telefono
 
 export const DIFFICULTIES = [
@@ -158,6 +160,23 @@ export function addHistoryEntry(entry) {
 
 export function clearHistory() {
   write(KEY_HISTORY, []);
+}
+
+// ---------------------------------------------------------------
+// Sfida del giorno: un risultato per giorno (il primo tentativo)
+// ---------------------------------------------------------------
+
+export function getDailyResults() {
+  const obj = read(KEY_DAILY, {});
+  return obj && typeof obj === "object" && !Array.isArray(obj) ? obj : {};
+}
+
+export function saveDailyResult(key, result) {
+  const all = getDailyResults();
+  all[key] = result;
+  const keys = Object.keys(all).sort();
+  while (keys.length > DAILY_MAX) delete all[keys.shift()];
+  write(KEY_DAILY, all);
 }
 
 // ---------------------------------------------------------------

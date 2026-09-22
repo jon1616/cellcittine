@@ -36,6 +36,8 @@ js/ui.js             mattoni: show(), statusLine/setStatus, toast, confetti, gam
 js/nav.js            tasto indietro (guardia nella cronologia, doppia pressione per uscire)
 js/room.js           stanza: createRoom, joinRoom, playSolo, leaveRoom, exitButton; collega Net alle schermate
 js/challenge.js      sfida e manche: startChallenge, nextRound, conto alla rovescia, mount, punteggi, classifiche, handleMessage
+js/rating.js         prestazione in percentuale (0–100) per ogni minigioco: maxScore o riferimento in REFS
+js/daily.js          Sfida del giorno: piano dalla data (5 minigiochi, semi), primo tentativo, serie, testo da condividere
 js/awards.js         premi di fine sfida (computeAwards dallo storico delle manche; inviati nel messaggio "final")
 js/teams.js          squadre: TEAMS, assegnazione bilanciata, classifica di squadra per manche (media dei membri)
 js/screens/home.js   home (nome, pulsanti, collegamenti, temi)
@@ -49,7 +51,7 @@ js/screens/results.js  risultati di manche e podio finale
 js/relay.js          server STUN + ponte TURN (Open Relay/metered.ca) se RELAY.app/apiKey sono impostati; iceServers() con credenziali temporanee
 js/net.js            P2P (PeerJS): host(), join(), broadcast(), sendToHost(), now() sincronizzato; id stabile per telefono, ricollegamento automatico degli ospiti (30 s), ultimo messaggio di fase rimandato a chi rientra; server ICE da relay.js, ?rete=ponte per forzare il ponte
 js/audio.js          effetti sintetizzati (sfx.play/pad/step/inflate*) + musica (sfx.setScene("menu"|"game"))
-js/storage.js        localStorage: config sfida, record {score,text}, pacchetti personali, getClientId() (id stabile), storico, minigiochi già visti
+js/storage.js        localStorage: config sfida, record {score,text}, pacchetti personali, getClientId() (id stabile), storico, minigiochi già visti, risultati della Sfida del giorno
 js/packs.js          pacchetti integrati (alcuni calcolati dal catalogo) + utilità
 js/theme.js          temi: sfondo dei menu (assets/bg-<id>.webp), stagionali per data, scelta manuale
 js/games/catalog.js  CATALOGO: scheda di ogni minigioco + loadGame(id) con import() a richiesta

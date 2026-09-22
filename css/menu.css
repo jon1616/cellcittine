@@ -460,3 +460,19 @@ input.code { letter-spacing: 8px; text-transform: uppercase; font-weight: 700; f
   0%, 100% { filter: drop-shadow(0 0 12px var(--accent-glow)); }
   50% { filter: drop-shadow(0 0 30px var(--accent)); }
 }
+
+/* ---------------------------------------------------------------
+   Sfida del giorno (home e podio)
+   --------------------------------------------------------------- */
+.card.daily { gap: 10px; border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+.card.daily.done { border-color: var(--line); }
+.daily-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.daily-title { font-weight: 800; font-size: 18px; }
+.daily-date { font-size: 13px; color: var(--muted); text-transform: capitalize; }
+.daily-score { font-size: 30px; font-weight: 800; text-align: center; color: var(--accent); text-shadow: 0 0 16px var(--accent-glow); }
+.podium.daily .podium-trophy { font-size: 60px; }
+.daily-rows li { grid-template-columns: 1fr auto auto; }
+.daily-rows li:first-child { background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01)), rgba(0,0,0,0.18); border-color: var(--line); }
+.daily-rows li { animation: award-in 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; animation-delay: calc(0.3s + var(--i, 0) * 0.12s); }
+.daily-bar { font-size: 12px; letter-spacing: -1px; }
+.daily-rows .pts { color: var(--accent); min-width: 44px; text-align: right; }

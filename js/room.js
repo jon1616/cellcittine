@@ -9,7 +9,8 @@ import { state } from "./state.js";
 import { setStatus, toast } from "./ui.js";
 import { showHome } from "./screens/home.js";
 import { showLobby, broadcastConfig } from "./screens/lobby.js";
-import { handleMessage, checkRoundComplete } from "./challenge.js";
+import { handleMessage, checkRoundComplete, startChallenge } from "./challenge.js";
+import { dailyPlan } from "./daily.js";
 import { smallestTeam } from "./teams.js";
 
 // ---------------------------------------------------------------
@@ -158,4 +159,13 @@ export function playSolo() {
   state.net.solo(state.name);
   keepScreenOn();
   showLobby();
+}
+
+// Sfida del giorno: da soli, subito, con il piano di oggi (uguale per tutti)
+export function playDaily() {
+  const plan = dailyPlan();
+  state.net = makeNet();
+  state.net.solo(state.name);
+  keepScreenOn();
+  startChallenge({ games: plan.games, seeds: plan.seeds, difficulty: plan.difficulty, daily: { key: plan.key } });
 }

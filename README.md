@@ -29,6 +29,8 @@ js/storage.js           salvataggi: configurazione, record, pacchetti personali
 js/games/catalog.js     CATALOGO: scheda di ogni minigioco + caricamento a richiesta
 js/games/shell.js       cornice comune ai minigiochi (timer, cronometro, canvas)
 js/games/<id>.js        codice di un minigioco (caricato solo quando serve)
+js/rating.js            prestazione in percentuale per ogni minigioco (Sfida del giorno, statistiche)
+js/daily.js             Sfida del giorno: stessi 5 minigiochi per tutti, primo tentativo, serie, condivisione
 js/audio.js             suoni sintetizzati (WebAudio) + musica di sottofondo, interruttori 🔊 e 🎵
 js/theme.js             temi: sfondo illustrato dei menu, stagionali per data o a scelta
 js/version.js           numero di versione mostrato nell'angolo

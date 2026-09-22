@@ -46,6 +46,9 @@ M = due-tre passi, L = più passi). L'ordine dentro ogni blocco è quello consig
 
 ## 2. Più divertimento (priorità media)
 
+- [x] **Sfida del giorno** in home: 5 minigiochi di 5 categorie, uguali per tutti (piano e semi dalla data), difficoltà normale; ogni manche vale fino a 1000 punti (percentuale di prestazione, js/rating.js); conta il primo tentativo, si può rigiocare; serie di giorni di fila 🔥; condivisione del risultato in stile "uno al giorno" (js/daily.js) (v0.26.0)
+- [x] **Percentuale di prestazione per tutti i 50 minigiochi** (js/rating.js): massimo del minigioco dove c'è, altrimenti un riferimento per minigioco (tabella REFS, ritoccabile) (v0.26.0)
+
 - [x] **Premi di fine sfida** sul podio: uno per categoria (Fulmine ⚡, Cecchino 🎯, Elefante 🐘, Occhio di lince 🔍, Calcolatrice 🧮, Fortuna 🍀, Dizionario 📖) a chi vince più manche di quel tipo, più Dominio 👑, Costante 🧱, Rimonta 🚀 e Da record ★ (js/awards.js) (v0.18.0)
 - [x] **Storico delle sfide** sul telefono ("Storico" in home): data, stanza, partecipanti con punti, chi ha vinto, premi; conteggio di sfide, vittorie e allenamenti; ultime 60 (v0.19.0)
 - [x] **Presentazione più lunga la prima volta**: se per qualcuno in stanza il minigioco è nuovo (ognuno manda all'host i minigiochi già giocati), il conto alla rovescia dura 7 s per tutti e mostra "Come si gioca" completo; altrimenti 3,5 s come prima (v0.20.0)

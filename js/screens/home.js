@@ -9,7 +9,8 @@ import { state, setScreen } from "../state.js";
 import { show, statusLine, setStatus, toast } from "../ui.js";
 import { CATALOG } from "../games/catalog.js";
 import { availableThemes, getChoice, setChoice, seasonalTheme } from "../theme.js";
-import { createRoom, playSolo, joinRoom } from "../room.js";
+import { createRoom, playSolo, joinRoom, playDaily } from "../room.js";
+import { dailyKey, dailyLabel, todayResult, dailyStreak, formatPoints, shareText, DAILY_ROUNDS } from "../daily.js";
 import { showJoin } from "./join.js";
 import { showRecords } from "./records.js";
 import { showCatalog } from "./catalog.js";
@@ -53,6 +54,7 @@ export function showHome(message = "", isError = !!message) {
       el("button", { text: "Entra con un codice", class: "secondary", onclick: () => requireName() && showJoin() }),
       el("button", { text: "Allenamento", class: "secondary", onclick: () => requireName() && playSolo() }),
     ]),
+    dailyCard(requireName),
     el("div", { class: "links" }, [
       el("button", { text: "I miei record", class: "link", onclick: showRecords }),
       el("button", { text: "Storico", class: "link", onclick: showHistory }),
@@ -133,6 +135,39 @@ function inviteCard(requireName) {
     el("p", { text: state.name ? "Ti hanno invitato a giocare!" : "Ti hanno invitato a giocare! Scrivi il tuo nome qui sotto, poi entra." }),
     enter,
     el("button", { text: "Ignora l'invito", class: "link", onclick: () => { state.pendingCode = null; showHome(); } }),
+  ]);
+}
+
+// Sfida del giorno: 5 minigiochi uguali per tutti, oggi. Fatta = punteggio e condivisione.
+function dailyCard(requireName) {
+  const key = dailyKey();
+  const done = todayResult(key);
+  const streak = dailyStreak();
+  const head = el("div", { class: "daily-head" }, [
+    el("span", { class: "daily-title", text: "📅 Sfida del giorno" }),
+    el("span", { class: "daily-date", text: dailyLabel(key) }),
+  ]);
+  if (!done) {
+    return el("div", { class: "card daily" }, [
+      head,
+      el("p", { class: "small", text: `${DAILY_ROUNDS} minigiochi, gli stessi per tutti oggi. Vale il primo tentativo.${streak ? ` 🔥 ${streak} ${streak === 1 ? "giorno" : "giorni"} di fila: continua la serie!` : ""}` }),
+      el("button", { text: "Gioca la sfida di oggi", onclick: () => requireName() && playDaily() }),
+    ]);
+  }
+  const share = el("button", { text: "📤 Condividi", class: "secondary small-btn" });
+  share.addEventListener("click", async () => {
+    const text = shareText(key, done);
+    if (navigator.share) { try { await navigator.share({ text }); return; } catch (_) { /* copia */ } }
+    try { await navigator.clipboard.writeText(text); toast("Risultato copiato: incollalo in chat"); } catch (_) { toast("Non riesco a copiare"); }
+  });
+  return el("div", { class: "card daily done" }, [
+    head,
+    el("div", { class: "daily-score", text: `${formatPoints(done.total)} punti` }),
+    el("p", { class: "small", text: `Fatta!${streak > 1 ? ` 🔥 ${streak} giorni di fila.` : ""} Domani ce n'è una nuova.` }),
+    el("div", { class: "row-2" }, [
+      share,
+      el("button", { text: "🔁 Rigioca", class: "secondary small-btn", onclick: () => requireName() && playDaily() }),
+    ]),
   ]);
 }
 

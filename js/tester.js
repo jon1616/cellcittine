@@ -24,6 +24,8 @@ import { getUserPacks, DIFFICULTIES } from "./storage.js";
 import { VERSION } from "./version.js";
 import { seededRandom, el } from "./utils.js";
 import { sfx } from "./audio.js";
+import { dailyPlan, dailyKey } from "./daily.js";
+import { ratingOf, hasReference } from "./rating.js";
 
 // ---------------------------------------------------------------
 // Orologio accelerato (applicabile a qualsiasi finestra, anche un iframe)
@@ -228,6 +230,28 @@ async function testStruttura() {
   const userUnknown = userPacks.flatMap((p) => p.games.filter((id) => !ALL_GAME_IDS.includes(id)).map((id) => `${p.name}: ${id}`));
   if (userUnknown.length) row("warn", "Pacchetti personali con minigiochi che non esistono più", userUnknown.join(", "));
   else if (userPacks.length) row("ok", `${userPacks.length} pacchetti personali su questo dispositivo, tutti validi`);
+
+  // Sfida del giorno: piano deterministico, 5 minigiochi diversi, riferimenti per la percentuale
+  try {
+    const a = dailyPlan("2026-01-01"), b = dailyPlan("2026-01-01"), c = dailyPlan("2026-01-02");
+    const probs = [];
+    if (JSON.stringify(a) !== JSON.stringify(b)) probs.push("stesso giorno, piano diverso");
+    if (JSON.stringify(a.games) === JSON.stringify(c.games) && JSON.stringify(a.seeds) === JSON.stringify(c.seeds)) probs.push("due giorni con lo stesso piano");
+    if (new Set(a.games).size !== a.games.length || a.games.length !== 5) probs.push(`minigiochi: ${a.games.join(", ")}`);
+    if (a.games.some((id) => !ALL_GAME_IDS.includes(id))) probs.push("minigioco sconosciuto nel piano");
+    const noRef = [];
+    for (const g of CATALOG) {
+      const game = await loadGame(g.id);
+      const params = game.createParams(seededRandom(1), "normale");
+      if (!hasReference(game, params)) noRef.push(g.id);
+      else if (!Number.isFinite(ratingOf(game, 1, params))) probs.push(`${g.id}: percentuale non numerica`);
+    }
+    if (noRef.length) probs.push(`senza riferimento per la percentuale: ${noRef.join(", ")}`);
+    if (probs.length) row("fail", "Sfida del giorno / percentuali con problemi", probs.join(" · "));
+    else row("ok", `Sfida del giorno: piano di oggi (${dailyKey()}) = ${dailyPlan().games.join(", ")}; percentuali disponibili per tutti i minigiochi`);
+  } catch (e) {
+    row("fail", "Sfida del giorno non calcolabile", e.message);
+  }
 
   // Manifest e icone
   try {
@@ -538,6 +562,77 @@ async function testAllenamento(gameId, difficulty) {
 }
 
 // ---------------------------------------------------------------
+// SFIDA DEL GIORNO: l'app vera in un iframe, cinque manche di fila
+// ---------------------------------------------------------------
+
+async function testSfidaDelGiorno() {
+  section("Sfida del giorno (app intera)");
+  stageTitle.textContent = "App · Sfida del giorno";
+  const running = row("running", "Sfida del giorno completa", "in corso…");
+  const backup = Object.fromEntries(Object.keys(localStorage).map((k) => [k, localStorage.getItem(k)]));
+  const restore = () => { localStorage.clear(); for (const [k, v] of Object.entries(backup)) localStorage.setItem(k, v); };
+  localStorage.setItem("name", "Tester");
+  localStorage.setItem("music", "off");
+  localStorage.removeItem("daily");
+
+  const iframe = el("iframe", { src: `index.html?tester=${Date.now()}`, title: "app" });
+  stage.replaceChildren(iframe);
+  const steps = [];
+  const errors = [];
+  let win, doc;
+  const waitFor = async (what, test, ms) => {
+    const until = warp.realNow() + ms;
+    while (warp.realNow() < until) {
+      let v = null;
+      try { v = test(); } catch (_) { /* ancora niente */ }
+      if (v) return v;
+      await realSleep(50);
+    }
+    throw new Error(`aspettando: ${what}`);
+  };
+  const button = (text) => [...doc.querySelectorAll("button")].find((b) => b.textContent.trim().startsWith(text));
+  const plan = dailyPlan();
+  try {
+    await new Promise((res, rej) => { iframe.onload = res; iframe.onerror = rej; });
+    win = iframe.contentWindow;
+    doc = iframe.contentDocument;
+    win.addEventListener("error", (ev) => errors.push(ev.message));
+    win.addEventListener("unhandledrejection", (ev) => errors.push(`promise: ${ev.reason?.message || ev.reason}`));
+    installWarp(win, getFactor);
+    (await waitFor("la home", () => button("Gioca la sfida di oggi"), 8000)).click();
+    steps.push("home");
+    for (let i = 0; i < plan.games.length; i++) {
+      const game = await loadGame(plan.games[i]);
+      const number = await waitFor(`il conto alla rovescia ${i + 1}`, () => doc.querySelector("#app .game-area .big"), 5000);
+      await waitFor("la fine del conto alla rovescia", () => !doc.contains(number), 8000 / getFactor() + 3000);
+      const monkey = makeMonkey(stage, doc, doc.body);
+      try {
+        await waitFor(`i risultati della manche ${i + 1}`, () => doc.querySelector("#app .ranking"), ((game.maxSeconds + 12) * 1000) / getFactor() + 3000);
+      } finally { monkey.stop(); }
+      steps.push(`${game.title}`);
+      const next = await waitFor("il pulsante di avanzamento", () => button(i === plan.games.length - 1 ? "Vedi il risultato finale" : "Prossima manche"), 3000);
+      next.click();
+    }
+    await waitFor("il podio della sfida del giorno", () => /Sfida del giorno/.test(doc.querySelector("#app h2")?.textContent || ""), 4000);
+    const txt = doc.getElementById("app").textContent;
+    if (!/punti/.test(txt)) errors.push("nel podio non compare il totale in punti");
+    if (!button("📤 Condividi")) errors.push("manca il pulsante Condividi");
+    const saved = JSON.parse(win.localStorage.getItem("daily") || "{}");
+    const today = saved[dailyKey()];
+    if (!today || !Number.isFinite(today.total) || today.rounds?.length !== plan.games.length) errors.push(`risultato del giorno non salvato: ${JSON.stringify(today)}`);
+    else steps.push(`podio (${today.total} punti)`);
+  } catch (e) {
+    errors.push(e.message);
+  }
+  await realSleep(200);
+  iframe.remove();
+  restore();
+  const path = steps.join(" → ");
+  if (errors.length) running.set("fail", `${path || "niente"} · ${[...new Set(errors)].join(" · ")}`);
+  else running.set("ok", path);
+}
+
+// ---------------------------------------------------------------
 // Avvio
 // ---------------------------------------------------------------
 
@@ -581,6 +676,7 @@ async function run() {
       const pick = only !== "*" ? only : (CATALOG.find((g) => g.id === "tocchi") || CATALOG[0]).id;
       await testAllenamento(pick, difficulty);
     }
+    if (document.getElementById("optDaily")?.checked) await testSfidaDelGiorno();
   } catch (e) {
     section("Tester");
     row("fail", "Il tester stesso ha avuto un errore", e.stack || e.message);

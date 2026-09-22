@@ -32,11 +32,16 @@ const GRACE_SECONDS = 8;   // margine oltre maxSeconds prima di chiudere la manc
 // Avvio (host)
 // ---------------------------------------------------------------
 
-// sameGames: (rivincita) stessa sequenza di minigiochi della sfida appena finita, semi nuovi
-export async function startChallenge(sameGames = null) {
-  if (!Array.isArray(sameGames)) sameGames = null; // (un evento del click non è una lista)
+// opts (tutti facoltativi):
+//   games     sequenza fissa di minigiochi (rivincita: la stessa della sfida appena finita)
+//   seeds     semi per manche (Sfida del giorno: uguali per tutti); altrimenti nuovi
+//   difficulty  al posto di quella configurata
+//   daily     { key } se è la Sfida del giorno
+export async function startChallenge(opts = {}) {
+  if (!opts || typeof opts !== "object" || opts instanceof Event) opts = {}; // (un evento del click non è un'opzione)
   const cfg = state.config;
   const rng = seededRandom(Math.floor(Math.random() * 2 ** 31));
+  const sameGames = Array.isArray(opts.games) && opts.games.length ? opts.games : null;
 
   // "Tutti": ogni minigioco scelto una volta, in ordine casuale.
   // Altrimenti: cicla su quelli scelti, mescolati, evitando ripetizioni vicine.
@@ -45,7 +50,9 @@ export async function startChallenge(sameGames = null) {
   let pool = [];
   while (rounds.length < total) {
     if (sameGames) {
-      rounds.push({ gameId: sameGames[rounds.length], seed: Math.floor(rng() * 2 ** 31) });
+      const i = rounds.length;
+      const seed = Array.isArray(opts.seeds) && Number.isInteger(opts.seeds[i]) ? opts.seeds[i] : Math.floor(rng() * 2 ** 31);
+      rounds.push({ gameId: sameGames[i], seed });
       continue;
     }
     if (pool.length === 0) {
@@ -60,12 +67,13 @@ export async function startChallenge(sameGames = null) {
   state.challenge = {
     rounds,
     total: rounds.length,
-    difficulty: cfg.difficulty,
+    difficulty: opts.difficulty || cfg.difficulty,
     index: -1,
     standings: new Map(),
     teamStandings: new Map(), // squadra -> punti (solo con le squadre attive)
     teams: isSolo() ? 0 : cfg.teams,
     history: [],
+    daily: opts.daily || null, // { key } nella Sfida del giorno
   };
 
   setStatus("Preparo i minigiochi…");
@@ -108,10 +116,12 @@ export function nextRound() {
 
 // Rivincita: stessa sfida (stessi minigiochi, stesso ordine), nuovi semi, punti da zero
 export function replayChallenge() {
-  const games = state.challenge?.rounds?.map((r) => r.gameId);
+  const ch = state.challenge;
+  const games = ch?.rounds?.map((r) => r.gameId);
   if (!games?.length) return;
   state.round = null;
-  startChallenge(games);
+  // La Sfida del giorno si rigioca identica (stessi semi): vale come allenamento
+  startChallenge(ch.daily ? { games, seeds: ch.rounds.map((r) => r.seed), difficulty: ch.difficulty, daily: ch.daily } : { games });
 }
 
 export function finishChallenge() {

@@ -14,6 +14,8 @@ import { nextRound, finishChallenge, replayChallenge } from "../challenge.js";
 import { showHome } from "./home.js";
 import { showLobby } from "./lobby.js";
 import { teamInfo, formatAvg } from "../teams.js";
+import { ratingOf, ratingBar, ratingLabel } from "../rating.js";
+import { DAILY_ROUNDS, DAILY_ROUND_MAX, dailyLabel, formatPoints, todayResult, recordDaily, dailyStreak, shareText } from "../daily.js";
 
 // ---------------------------------------------------------------
 // "La tua prestazione": dettaglio del minigioco e confronto col massimo, dove esiste.
@@ -121,7 +123,7 @@ export async function showResults(msg) {
     state.challenge.history.push({ gameId: msg.gameId, ranking: msg.ranking });
   }
   const last = state.challenge?.history[state.challenge.history.length - 1];
-  if (last && round) { last.myDetail = round.myDetail; last.myMax = round.myMax; last.myScore = round.myScore; }
+  if (last && round) { last.myDetail = round.myDetail; last.myMax = round.myMax; last.myScore = round.myScore; last.myParams = round.params; }
 
   const solo = isSolo();
   const meId = net.me.id;
@@ -204,6 +206,60 @@ function awardsCard(awards, meId) {
 }
 
 // ---------------------------------------------------------------
+// Sfida del giorno: punteggio in percentuale per manche, totale, condivisione
+// ---------------------------------------------------------------
+
+function dailyRounds(ch) {
+  return ch.history.map((h) => {
+    const game = getLoaded(h.gameId);
+    const pct = ratingOf(game, h.myScore, h.myParams);
+    return { gameId: h.gameId, score: h.myScore ?? null, pct, points: pct * (DAILY_ROUND_MAX / 100) };
+  });
+}
+
+function dailyFinal(ch) {
+  const key = ch.daily.key;
+  const rounds = dailyRounds(ch);
+  const total = rounds.reduce((s, r) => s + r.points, 0);
+  const first = recordDaily(key, rounds); // vale solo il primo tentativo del giorno
+  const official = todayResult(key);
+  const streak = dailyStreak();
+  const max = DAILY_ROUNDS * DAILY_ROUND_MAX;
+
+  const rows = el("ol", { class: "ranking daily-rows" }, rounds.map((r, i) => {
+    const entry = getEntry(r.gameId);
+    const game = getLoaded(r.gameId);
+    const text = r.score === null || r.score === undefined ? "—" : game ? game.formatScore(r.score) : String(r.score);
+    return el("li", { style: `--i: ${i}` }, [
+      el("span", { class: "with-icon" }, [gameIcon(entry, "list-icon"), el("span", {}, [el("div", { text: entry?.title || r.gameId }), el("div", { class: "perf-small", text: `${text} · ${ratingLabel(r.pct)}` })])]),
+      el("span", { class: "daily-bar", text: ratingBar(r.pct) }),
+      el("span", { class: "pts", text: `${formatPoints(r.points)}` }),
+    ]);
+  }));
+
+  const share = el("button", { text: "📤 Condividi il risultato", class: "secondary small-btn" });
+  share.addEventListener("click", async () => {
+    const text = shareText(key, official || { total, rounds });
+    if (navigator.share) {
+      try { await navigator.share({ text }); return; } catch (_) { /* annullato: copia */ }
+    }
+    try { await navigator.clipboard.writeText(text); share.textContent = "Copiato! Incollalo in chat"; } catch (_) { share.textContent = "Non riesco a copiare"; }
+    setTimeout(() => { share.textContent = "📤 Condividi il risultato"; }, 2000);
+  });
+
+  return [
+    el("h2", { text: `Sfida del giorno · ${dailyLabel(key)}` }),
+    el("div", { class: "podium daily" }, [
+      el("div", { class: "podium-trophy", text: total >= max * 0.8 ? "🏆" : total >= max * 0.5 ? "🌟" : "📅" }),
+      el("div", { class: "podium-name", text: `${formatPoints(total)} punti` }),
+      el("div", { class: "hint", text: `su ${formatPoints(max)}${streak > 1 ? ` · 🔥 ${streak} giorni di fila` : ""}` }),
+      first ? el("span") : el("p", { class: "small", text: official ? `Oggi vale il primo tentativo: ${formatPoints(official.total)} punti. Questo era allenamento.` : "" }),
+    ]),
+    el("div", { class: "card" }, [rows, share]),
+  ];
+}
+
+// ---------------------------------------------------------------
 // Podio finale / riepilogo dell'allenamento
 // ---------------------------------------------------------------
 
@@ -221,6 +277,7 @@ function rememberChallenge(msg) {
     at: Date.now(),
     code: net.code,
     solo,
+    daily: ch.daily?.key || null,
     rounds: ch.history.length,
     difficulty: ch.difficulty,
     games: ch.history.map((h) => h.gameId),
@@ -243,7 +300,9 @@ export function showFinal(msg) {
   const meId = net.me.id;
 
   const parts = [];
-  if (solo) {
+  if (solo && ch.daily) {
+    parts.push(...dailyFinal(ch));
+  } else if (solo) {
     parts.push(el("h2", { text: "Allenamento completato!" }));
     parts.push(
       el("div", { class: "card" }, [
@@ -306,8 +365,8 @@ export function showFinal(msg) {
 
   const actions = net.isHost
     ? [
-        el("button", { text: "🔁 Rivincita (stessa sfida)", onclick: () => replayChallenge() }),
-        el("button", {
+        el("button", { text: ch.daily ? "🔁 Rigioca per allenarti" : "🔁 Rivincita (stessa sfida)", class: ch.daily ? "secondary" : "", onclick: () => replayChallenge() }),
+        ch.daily ? el("span") : el("button", {
           text: solo ? "Cambia impostazioni" : "Nuova sfida",
           class: "secondary",
           onclick: () => {
