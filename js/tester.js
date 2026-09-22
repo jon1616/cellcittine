@@ -295,8 +295,10 @@ function findUnserializable(value, path = "params") {
 }
 
 // La "scimmia": tocca, tiene premuto e trascina a caso dentro il telefono di prova.
-// `doc`/`root` diversi da quelli della pagina quando il gioco sta in un iframe.
-function makeMonkey(container, doc = document, root = container) {
+// `doc`/`root` diversi da quelli della pagina quando il gioco sta in un iframe;
+// `within` (selettore) limita i tocchi a quella zona: nell'app intera solo l'area di
+// gioco, altrimenti la scimmia tocca "Prossima manche" prima del tester.
+function makeMonkey(container, doc = document, root = container, within = null) {
   let stopped = false;
   let taps = 0;
   const inIframe = doc !== document;
@@ -307,6 +309,7 @@ function makeMonkey(container, doc = document, root = container) {
     const r = rect();
     return { x: r.left + 8 + Math.random() * (r.width - 16), y: r.top + 8 + Math.random() * (r.height - 16) };
   };
+  const allowed = (t) => !!t && root.contains(t) && !t.classList.contains("tap") && (!within || !!t.closest(within));
   const fire = (type, target, p, extra = {}) => {
     target.dispatchEvent(new W.PointerEvent(type, {
       bubbles: true, cancelable: true, composed: true, pointerId: 1, isPrimary: true, pointerType: "touch",
@@ -330,7 +333,7 @@ function makeMonkey(container, doc = document, root = container) {
     while (!stopped) {
       const p = pt();
       const target = doc.elementFromPoint(p.x, p.y) || fallback();
-      if (target && root.contains(target) && !target.classList.contains("tap")) {
+      if (allowed(target)) {
         taps++;
         ripple(p);
         fire("pointerdown", target, p);
@@ -342,10 +345,10 @@ function makeMonkey(container, doc = document, root = container) {
           await realSleep(hold / steps);
           const m = { x: p.x + ((q.x - p.x) * i) / steps, y: p.y + ((q.y - p.y) * i) / steps };
           const t = doc.elementFromPoint(m.x, m.y);
-          if (t && root.contains(t)) fire("pointermove", t, m);
+          if (allowed(t)) fire("pointermove", t, m);
         }
         const up = doc.elementFromPoint(q.x, q.y) || target;
-        if (root.contains(up)) {
+        if (!stopped && allowed(up)) {
           fire("pointerup", up, q);
           up.dispatchEvent(new W.MouseEvent("click", { bubbles: true, cancelable: true, clientX: q.x, clientY: q.y }));
         }
@@ -534,7 +537,7 @@ async function testAllenamento(gameId, difficulty) {
     if (!doc.querySelector("#app .game-area")) throw new Error("dopo il conto alla rovescia non c'è nessun minigioco a schermo");
     steps.push("minigioco partito");
 
-    const monkey = makeMonkey(stage, doc, doc.body);
+    const monkey = makeMonkey(stage, doc, doc.body, ".game-area");
     const game = await loadGame(gameId);
     try {
       await waitFor("i risultati della manche", () => doc.querySelector("#app .ranking"), ((game.maxSeconds + 12) * 1000) / getFactor() + 3000);
@@ -599,18 +602,35 @@ async function testSfidaDelGiorno() {
     win.addEventListener("error", (ev) => errors.push(ev.message));
     win.addEventListener("unhandledrejection", (ev) => errors.push(`promise: ${ev.reason?.message || ev.reason}`));
     installWarp(win, getFactor);
+    const trace = [];
+    win.__trace = (s) => trace.push(`${((warp.realNow() - t0) / 1000).toFixed(2)}s ${s}`);
+    const t0 = warp.realNow();
+    const tstep = (s) => win.__trace(`[tester] ${s}`);
+    win.__traceLog = () => trace;
     (await waitFor("la home", () => button("Gioca la sfida di oggi"), 8000)).click();
     steps.push("home");
     for (let i = 0; i < plan.games.length; i++) {
       const game = await loadGame(plan.games[i]);
       const number = await waitFor(`il conto alla rovescia ${i + 1}`, () => doc.querySelector("#app .game-area .big"), 5000);
+      tstep(`countdown ${i + 1} trovato: "${number.textContent}" in ${number.parentElement?.className}`);
       await waitFor("la fine del conto alla rovescia", () => !doc.contains(number), 8000 / getFactor() + 3000);
-      const monkey = makeMonkey(stage, doc, doc.body);
+      tstep(`countdown ${i + 1} finito; screen ${win.cellcittine?.state?.screen}`);
+      const monkey = makeMonkey(stage, doc, doc.body, ".game-area");
       try {
         await waitFor(`i risultati della manche ${i + 1}`, () => doc.querySelector("#app .ranking"), ((game.maxSeconds + 12) * 1000) / getFactor() + 3000);
       } finally { monkey.stop(); }
+      tstep(`ranking ${i + 1} trovato; screen ${win.cellcittine?.state?.screen}`);
+      const shown = doc.getElementById("app").textContent.match(/Manche (d+) di/)?.[1];
+      if (shown && Number(shown) !== i + 1) errors.push(`dopo la manche ${i + 1} a schermo c'è "Manche ${shown}" (sfida.index ${win.cellcittine?.state?.challenge?.index}, round.index ${win.cellcittine?.state?.round?.index})`);
       steps.push(`${game.title}`);
-      const next = await waitFor("il pulsante di avanzamento", () => button(i === plan.games.length - 1 ? "Vedi il risultato finale" : "Prossima manche"), 3000);
+      let next;
+      try {
+        next = await waitFor("il pulsante di avanzamento", () => button(i === plan.games.length - 1 ? "Vedi il risultato finale" : "Prossima manche"), 3000);
+      } catch (e) {
+        const st = win.cellcittine?.state;
+        throw new Error(`${e.message} (schermata: ${st?.screen}, sfida.index ${st?.challenge?.index}, round.index ${st?.round?.index}, storia ${st?.challenge?.history?.map((h) => h.gameId).join(">")}, a schermo: "${doc.getElementById("app").textContent.replace(/s+/g, " ").trim().slice(0, 160)}")`);
+      }
+      tstep(`click "${next.textContent}"`);
       next.click();
     }
     await waitFor("il podio della sfida del giorno", () => /Sfida del giorno/.test(doc.querySelector("#app h2")?.textContent || ""), 4000);
@@ -624,6 +644,7 @@ async function testSfidaDelGiorno() {
   } catch (e) {
     errors.push(e.message);
   }
+  if (errors.length && win?.__traceLog) log(win.__traceLog().join(String.fromCharCode(10)));
   await realSleep(200);
   iframe.remove();
   restore();

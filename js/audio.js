@@ -147,6 +147,7 @@ const SOUNDS = {
   perfect: () => [880, 1109, 1319, 1760].forEach((f, i) => tone({ freq: f, dur: 0.09, gain: 0.13, delay: i * 0.055 })),
 
   // momenti della sfida
+  cheer: () => [659, 784, 988, 1319].forEach((f, i) => tone({ freq: f, dur: 0.12, type: "triangle", gain: 0.13, delay: i * 0.06 })),
   special: () => [440, 554, 659, 880, 1109].forEach((f, i) => { tone({ freq: f, dur: 0.16, type: "square", gain: 0.09, delay: i * 0.07 }); tone({ freq: f * 1.5, dur: 0.16, type: "triangle", gain: 0.06, delay: i * 0.07 }); }),
   roundEnd: () => { tone({ freq: 660, dur: 0.14, type: "triangle", gain: 0.15 }); tone({ freq: 880, dur: 0.24, type: "triangle", gain: 0.15, delay: 0.14 }); },
   record: () => [523, 659, 784, 1047].forEach((f, i) => tone({ freq: f, dur: 0.12, type: "triangle", gain: 0.15, delay: i * 0.085 })),

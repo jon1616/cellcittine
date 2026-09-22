@@ -16,6 +16,8 @@ import { showLobby } from "./lobby.js";
 import { teamInfo, formatAvg } from "../teams.js";
 import { ratingOf, ratingBar, ratingLabel } from "../rating.js";
 import { SPECIALS } from "../specials.js";
+import { positionsAfter } from "../awards.js";
+import { commentRound, commentSolo } from "../commentary.js";
 import { DAILY_ROUNDS, DAILY_ROUND_MAX, dailyLabel, formatPoints, todayResult, recordDaily, dailyStreak, shareText } from "../daily.js";
 
 // ---------------------------------------------------------------
@@ -67,18 +69,56 @@ function teamsCard(teamRanking, teamStandings, myTeam) {
   return el("div", { class: "card" }, [el("h2", { text: "Squadre" }), roundList, el("div", { class: "label", text: "Classifica squadre" }), general]);
 }
 
-function standingsList(standings, meId) {
-  return el(
+// prev (facoltativo): Map id -> { pos, points } prima dell'ultima manche, per frecce e conteggio animato
+function standingsList(standings, meId, prev = null) {
+  const list = el(
     "ol",
-    { class: "ranking" },
-    standings.map((s, i) =>
-      el("li", { class: s.id === meId ? "me" : "" }, [
+    { class: `ranking${prev ? " animated" : ""}` },
+    standings.map((s, i) => {
+      const p = prev?.get(s.id);
+      const delta = p ? p.pos - (i + 1) : 0;
+      const arrow = !p ? el("span") : el("span", { class: `delta ${delta > 0 ? "up" : delta < 0 ? "down" : "same"}`, text: delta > 0 ? `▲${delta}` : delta < 0 ? `▼${-delta}` : "=" });
+      const score = el("span", { class: "score", text: `${p ? p.points : s.points} pt` });
+      if (p && p.points !== s.points) countUp(score, p.points, s.points);
+      return el("li", { class: s.id === meId ? "me" : "", style: `--i: ${i}` }, [
         el("span", { class: "pos", text: String(i + 1) }),
-        el("span", { class: "who" }, [colorDot(s.color), el("span", { text: s.name })]),
-        el("span", { class: "score", text: `${s.points} pt` }),
-      ])
-    )
+        el("span", { class: "who" }, [colorDot(s.color), el("span", { text: s.name }), arrow]),
+        score,
+      ]);
+    })
   );
+  return list;
+}
+
+// Numero che sale da `from` a `to` in 800 ms (parte dopo che la riga è comparsa)
+function countUp(node, from, to) {
+  const t0 = performance.now() + 350;
+  const tick = () => {
+    if (!node.isConnected) return;
+    const k = Math.min(1, Math.max(0, (performance.now() - t0) / 800));
+    const v = Math.round(from + (to - from) * (1 - Math.pow(1 - k, 3)));
+    node.textContent = `${v} pt`;
+    if (k < 1) requestAnimationFrame(tick); else node.classList.add("bumped");
+  };
+  requestAnimationFrame(tick);
+}
+
+// Posizioni e punti prima dell'ultima manche (da tutti, senza rete)
+function previousStandings(history, standings) {
+  if (history.length < 2) return null;
+  const ids = standings.map((s) => s.id);
+  const pos = positionsAfter(history, history.length - 1, ids);
+  const pts = new Map(ids.map((id) => [id, 0]));
+  for (const h of history.slice(0, -1)) for (const r of h.ranking) pts.set(r.id, (pts.get(r.id) || 0) + (r.points || 0));
+  return new Map(ids.map((id) => [id, { pos: pos.get(id) || ids.length, points: pts.get(id) || 0 }]));
+}
+
+// Il commentatore: una o due frasi in un fumetto
+function commentaryCard(lines) {
+  if (!lines?.length) return el("span");
+  return el("div", { class: "commentary" }, lines.map((l, i) =>
+    el("div", { class: `comment${l.mine ? " mine" : ""}`, style: `--i: ${i}` }, [el("span", { class: "comment-icon", text: l.icon }), el("span", { text: l.text })])
+  ));
 }
 
 // ---------------------------------------------------------------
@@ -129,6 +169,13 @@ export async function showResults(msg) {
   const solo = isSolo();
   const meId = net.me.id;
   sfx.play(round?.isRecord ? "record" : "roundEnd");
+  const ch = state.challenge;
+  const prev = solo ? null : previousStandings(ch.history, msg.standings);
+  const cfg0 = net.isHost ? state.config : state.hostConfig;
+  const lines = solo
+    ? [commentSolo({ game, score: round?.myScore, record: getRecord(game.id, round?.difficulty || msg.difficulty), isRecord: round?.isRecord, pct: ratingOf(game, round?.myScore, round?.params) })].filter(Boolean)
+    : commentRound({ history: ch.history, standings: msg.standings, meId, total: ch.total, hasSpecials: !!cfg0?.special });
+  if (!solo && lines.some((l) => l.mine) && !round?.isRecord) setTimeout(() => sfx.play("cheer"), 500);
 
   const roundList = el(
     "ol",
@@ -157,8 +204,9 @@ export async function showResults(msg) {
       const myTeam = net.players.find((p) => p.id === meId)?.team;
       cards.push(teamsCard(msg.teamRanking, msg.teamStandings, myTeam));
     }
-    cards.push(el("div", { class: "card" }, [el("h2", { text: msg.teamRanking ? "Classifica individuale" : "Classifica generale" }), standingsList(msg.standings, meId)]));
+    cards.push(el("div", { class: "card" }, [el("h2", { text: msg.teamRanking ? "Classifica individuale" : "Classifica generale" }), standingsList(msg.standings, meId, prev)]));
   }
+  cards.splice(1, 0, commentaryCard(lines));
 
   const actions = [];
   const cfg = net.isHost ? state.config : state.hostConfig;

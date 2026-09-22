@@ -39,6 +39,7 @@ js/challenge.js      sfida e manche: startChallenge, nextRound, conto alla roves
 js/rating.js         prestazione in percentuale (0–100) per ogni minigioco: maxScore o riferimento in REFS
 js/daily.js          Sfida del giorno: piano dalla data (5 minigiochi, semi), primo tentativo, serie, testo da condividere
 js/specials.js       manche speciali (punti doppi, tutto o niente, rimonta, difficile/facile, finale doppia) e difficoltà "crescente"
+js/commentary.js     il commentatore: frasi dopo ogni manche (commentRound) e in allenamento (commentSolo), calcolate da tutti senza rete
 js/awards.js         premi di fine sfida (computeAwards dallo storico delle manche; inviati nel messaggio "final")
 js/teams.js          squadre: TEAMS, assegnazione bilanciata, classifica di squadra per manche (media dei membri)
 js/screens/home.js   home (nome, pulsanti, collegamenti, temi)

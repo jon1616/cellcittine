@@ -47,6 +47,8 @@ M = due-tre passi, L = più passi). L'ordine dentro ogni blocco è quello consig
 ## 2. Più divertimento (priorità media)
 
 - [x] **Sfida del giorno** in home: 5 minigiochi di 5 categorie, uguali per tutti (piano e semi dalla data), difficoltà normale; ogni manche vale fino a 1000 punti (percentuale di prestazione, js/rating.js); conta il primo tentativo, si può rigiocare; serie di giorni di fila 🔥; condivisione del risultato in stile "uno al giorno" (js/daily.js) (v0.26.0)
+- [x] **Il commentatore**: dopo ogni manche una o due frasi calcolate da tutti dalla storia della sfida (si parte, sorpasso, testa a testa, vittoria matematica, ultima manche, serie di vittorie, rimonta, record, dall'ultimo posto…); in allenamento il confronto col record; suono "cheer" quando riguarda chi guarda (js/commentary.js) (v0.28.0)
+- [x] **Classifica generale animata**: righe che entrano una alla volta, freccia di posizione (▲2 / ▼1 / =) e punti che salgono contando (v0.28.0)
 - [x] **Manche speciali** (opzione in stanza, solo in gruppo): decise dall'host all'avvio e annunciate al conto alla rovescia con suono: 🔥 Punti doppi, 🎯 Tutto o niente (solo chi vince prende punti), 🚀 Rimonta (metà bassa della classifica a punti doppi), ⚡ Manche difficile, 🍃 Manche facile; l'ultima manche è sempre 🏁 Finale doppia (js/specials.js) (v0.27.0)
 - [x] **Difficoltà "Crescente"**: le manche vanno da Facile a Difficile lungo la sfida; i record si salvano con la difficoltà vera di ogni manche (v0.27.0)
 - [x] **Percentuale di prestazione per tutti i 50 minigiochi** (js/rating.js): massimo del minigioco dove c'è, altrimenti un riferimento per minigioco (tabella REFS, ritoccabile) (v0.26.0)

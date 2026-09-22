@@ -10,6 +10,11 @@
 import { positionsAfter } from "./awards.js";
 import { getEntry } from "./games/catalog.js";
 
+// "Ada, Bo e Cy"
+function listNames(names) {
+  return names.length <= 1 ? names.join("") : `${names.slice(0, -1).join(", ")} e ${names[names.length - 1]}`;
+}
+
 // Chi ha vinto la manche (tutti a pari punteggio col primo che ha giocato)
 function winners(ranking) {
   const best = ranking.find((r) => r.score !== null && r.score !== undefined);
@@ -41,9 +46,9 @@ export function commentRound({ history, standings, meId, total, hasSpecials = fa
   // 1) Chi comanda: sorpasso, pareggio in testa, vittoria matematica
   if (rounds === 1) {
     if (w.length === 1) add("🚀", `Si parte! ${name(w[0].id)} vince la prima manche.`, w[0].id);
-    else if (w.length > 1) add("🤝", `Partenza in parità: ${w.map((x) => name(x.id)).join(" e ")} appaiati.`);
+    else if (w.length > 1) add("🤝", `Partenza in parità: ${listNames(w.map((x) => name(x.id)))} appaiati.`);
   } else if (coLeaders.length > 1) {
-    add("🤝", `Testa a testa: ${coLeaders.map((s) => name(s.id)).join(" e ")} a ${leader.points} punti!`);
+    add("🤝", `Testa a testa: ${listNames(coLeaders.map((s) => name(s.id)))} a ${leader.points} punti!`);
   } else if (before.get(leader.id) !== 1) {
     add("👑", `Sorpasso! ${name(leader.id)} vola in testa.`, leader.id);
   } else if (remaining > 0) {
@@ -52,6 +57,11 @@ export function commentRound({ history, standings, meId, total, hasSpecials = fa
     const left = pointsLeft(remaining, standings.length, hasSpecials);
     if (gap > left) add("🏆", `${name(leader.id)} ha già vinto: nessuno può più raggiungere i suoi ${leader.points} punti.`, leader.id);
     else if (remaining === 1) add("🏁", `Ultima manche: ${name(leader.id)} guida di ${gap} ${gap === 1 ? "punto" : "punti"} su ${name(second.id)}. Si decide tutto ora!`);
+    else if (w.length === 1 && w[0].id === leader.id) add("💪", `${name(leader.id)} vince la manche e allunga: ${gap} ${gap === 1 ? "punto" : "punti"} su ${name(second.id)}.`, leader.id);
+    else if (w.length === 1) {
+      const diff = leader.points - (standings.find((s) => s.id === w[0].id)?.points || 0);
+      add("⚡", `${name(w[0].id)} vince la manche: ${diff === 0 ? "è in testa a pari punti" : `a ${diff} ${diff === 1 ? "punto" : "punti"} dalla testa`}.`, w[0].id);
+    }
   }
 
   // 2) Serie, rimonte, record
@@ -73,7 +83,7 @@ export function commentRound({ history, standings, meId, total, hasSpecials = fa
     else {
       const rec = last.ranking.filter((r) => r.record);
       if (rec.length === 1) add("★", `${name(rec[0].id)} ha battuto il suo record personale in ${getEntry(last.gameId)?.title || "questa manche"}!`, rec[0].id);
-      else if (rec.length > 1) add("★", `${rec.map((r) => name(r.id)).join(" e ")} hanno battuto il loro record!`);
+      else if (rec.length > 1) add("★", `${listNames(rec.map((r) => name(r.id)))} hanno battuto il loro record!`);
       else if (w.length === 1 && rounds > 1 && before.get(w[0].id) === ids.length) add("💪", `${name(w[0].id)} dall'ultimo posto vince la manche!`, w[0].id);
     }
   }

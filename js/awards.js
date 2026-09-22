@@ -43,7 +43,7 @@ function uniqueMax(counts, min = 1) {
 }
 
 // Classifica (posizioni) dopo le prime k manche
-function positionsAfter(history, k, ids) {
+export function positionsAfter(history, k, ids) {
   const points = new Map(ids.map((id) => [id, 0]));
   for (const h of history.slice(0, k)) {
     for (const r of h.ranking) points.set(r.id, (points.get(r.id) || 0) + (r.points || 0));
