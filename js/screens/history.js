@@ -20,7 +20,7 @@ function entryCard(e) {
   const meId = e.meId; // chi ero io in quella sfida (salvato con la voce)
   const head = el("div", { class: "hist-head" }, [
     el("span", { class: "hist-date", text: formatDate(e.at) }),
-    el("span", { class: "hist-tag", text: e.championship ? `Campionato · ${e.days} ${e.days === 1 ? "giornata" : "giornate"}` : e.daily ? "Sfida del giorno" : e.solo ? "Allenamento" : `Stanza ${e.code || ""}${e.championshipDay ? ` · giornata ${e.championshipDay}` : ""}` }),
+    el("span", { class: "hist-tag", text: e.championship ? `Campionato · ${e.days} ${e.days === 1 ? "giornata" : "giornate"}` : e.daily ? "Sfida del giorno" : e.solo ? "Allenamento" : `${e.roomName || `Stanza ${e.code || ""}`}${e.championshipDay ? ` · giornata ${e.championshipDay}` : ""}` }),
   ]);
   const meta = el("div", { class: "hist-meta", text: e.championship ? "Classifica finale del campionato" : `${e.rounds} ${e.rounds === 1 ? "manche" : "manche"} · ${difficultyLabel(e.difficulty)} · ${[...new Set(e.games)].map((id) => getEntry(id)?.title || id).join(", ")}` });
 

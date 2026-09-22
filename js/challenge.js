@@ -18,7 +18,8 @@ import { setStatus, gameIcon, difficultyLabel, appRoot, colorDot } from "./ui.js
 import { syncBackGuard } from "./nav.js";
 import { getEntry, getCategory, loadGame, preloadGames } from "./games/catalog.js";
 import { shuffle } from "./games/shell.js";
-import { updateRecord, markSeen } from "./storage.js";
+import { updateRecord, markSeen, getGroupRecord, saveGroupRecord } from "./storage.js";
+import { ratingOf } from "./rating.js";
 import { showLobby } from "./screens/lobby.js";
 import { showResults, showFinal } from "./screens/results.js";
 import { computeAwards } from "./awards.js";
@@ -156,7 +157,7 @@ export function replayChallenge() {
 
 export function finishChallenge() {
   const standings = standingsArray();
-  const msg = { type: "final", standings, awards: computeAwards(state.challenge.history, standings), teamStandings: teamStandingsArray() };
+  const msg = { type: "final", standings, awards: computeAwards(state.challenge.history, standings, { reactions: state.challenge.reactions || new Map() }), teamStandings: teamStandingsArray() };
   // Campionato: questa sfida è una giornata
   if (!isSolo() && state.config.championship) {
     if (!isChampionship()) startChampionship();
@@ -465,6 +466,19 @@ function publishResults() {
     if (Number.isInteger(team)) entry.team = team;
     ch.standings.set(r.id, entry);
   }
+  // Percentuale di prestazione di ognuno (per i premi) e record del gruppo (per stanza/nome)
+  for (const r of ranking) r.pct = r.score === null ? 0 : ratingOf(round.game, r.score, round.params);
+  let groupRecord = null;
+  {
+    const best = ranking.find((r) => r.score !== null && !r.out && round.game.isValidScore(r.score));
+    const roomName = state.config.roomName || "";
+    const old = getGroupRecord(roomName, round.game.id);
+    const better = best && (!old || (order === "asc" ? best.score < old.score : best.score > old.score));
+    if (better) {
+      groupRecord = { name: best.name, id: best.id, text: round.game.formatScore(best.score), isNew: true, previous: old ? { name: old.name, text: old.text } : null };
+      saveGroupRecord(roomName, round.game.id, { score: best.score, text: groupRecord.text, name: best.name, at: Date.now() });
+    } else if (old) groupRecord = { name: old.name, text: old.text, isNew: false };
+  }
   ch.history.push({ gameId: round.game.id, ranking, special: round.special || null, eliminated: eliminatedNow.map((e) => e.id) });
 
   // Squadre: media dei punti dei membri, poi punti per posizione tra squadre
@@ -489,6 +503,7 @@ function publishResults() {
     teamRanking,
     teamStandings: teamStandingsArray(),
     mode: ch.mode,
+    groupRecord,
     eliminated: eliminatedNow,
     alive: elimination ? ranking.filter((r) => !ch.eliminated.has(r.id)).length : null,
     last: round.index === ch.total - 1 || (elimination && ranking.filter((r) => !ch.eliminated.has(r.id)).length <= 1),
@@ -506,6 +521,7 @@ export function sendReaction(id, emoji) {
   const now = Date.now();
   if (now - (lastReaction.get(id) || 0) < 900) return;
   lastReaction.set(id, now);
+  if (state.challenge) { const m = state.challenge.reactions || (state.challenge.reactions = new Map()); m.set(id, (m.get(id) || 0) + 1); }
   net.broadcast({ type: "react", id, emoji });
   showReaction(id, emoji);
 }

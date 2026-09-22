@@ -28,7 +28,7 @@ export function broadcastConfig() {
   const cfg = state.config;
   state.net?.broadcast({
     type: "config",
-    config: { games: cfg.games, rounds: cfg.rounds, difficulty: cfg.difficulty, packName: packName(cfg), auto: cfg.auto, autoDelay: cfg.autoDelay, teams: cfg.teams, special: cfg.special, championship: cfg.championship, championshipDay: state.championship?.day || 0, mode: cfg.teams ? "punti" : cfg.mode },
+    config: { games: cfg.games, rounds: cfg.rounds, difficulty: cfg.difficulty, packName: packName(cfg), auto: cfg.auto, autoDelay: cfg.autoDelay, teams: cfg.teams, special: cfg.special, championship: cfg.championship, championshipDay: state.championship?.day || 0, mode: cfg.teams ? "punti" : cfg.mode, roomName: cfg.roomName || "" },
   });
 }
 
@@ -338,6 +338,20 @@ export function championshipTable(table, meId) {
   ));
 }
 
+// Nome della stanza: l'host lo scrive (facoltativo), gli altri lo vedono
+export function roomName() {
+  const net = state.net;
+  if (!net) return "";
+  return (net.isHost ? state.config.roomName : state.hostConfig?.roomName) || "";
+}
+function roomTitle(net) {
+  if (!net.isHost) return roomName() ? el("h2", { class: "room-name", text: roomName() }) : el("span");
+  const input = el("input", { type: "text", class: "room-name-input", maxlength: "24", placeholder: "Nome della stanza (facoltativo)", value: state.config.roomName || "", autocomplete: "off" });
+  input.addEventListener("change", () => updateConfig({ roomName: input.value.trim().slice(0, 24) }, { rerender: false }));
+  input.addEventListener("keydown", (ev) => { if (ev.key === "Enter") input.blur(); });
+  return input;
+}
+
 // Se il pacchetto scelto è la Sfida del giorno di oggi (stessi minigiochi, in ordine), si parte con i semi del giorno
 function dailyStartOptions() {
   const cfg = state.config;
@@ -389,6 +403,7 @@ export function showLobby() {
   const header = solo
     ? [el("h2", { text: "Allenamento" }), el("p", { text: "Da soli, contro i tuoi record" })]
     : [
+        roomTitle(net),
         el("p", { text: "Codice della stanza" }),
         el("div", { class: "code-big", text: net.code }),
         el("p", { text: "Chi vuole entrare tocca “Entra con un codice”, oppure mandagli il link" }),

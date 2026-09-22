@@ -206,7 +206,8 @@ export async function showResults(msg) {
     )
   );
 
-  const cards = [el("div", { class: "card" }, [gameHeading(game), roundList, performanceLine(game, round)])];
+  const cards = [el("div", { class: "card" }, [gameHeading(game), roundList, performanceLine(game, round), groupRecordLine(msg.groupRecord, meId)])];
+  if (msg.groupRecord?.isNew && !solo) setTimeout(() => sfx.play("cheer"), 700);
 
   if (solo) {
     const rec = getRecord(game.id, round?.difficulty || msg.difficulty);
@@ -260,6 +261,13 @@ function specialText(special, msg) {
     return o.winner ? `⚔️ Duello: ${name(o.winner)} batte ${name(o.loser)} (+${o.bonus})` : "⚔️ Duello in parità: niente punti extra";
   }
   return `${special.icon} ${special.label}`;
+}
+
+// Record del gruppo (per stanza): nuovo o da battere
+function groupRecordLine(rec, meId) {
+  if (!rec) return el("span");
+  if (rec.isNew) return el("div", { class: "group-record new", text: `🎉 Nuovo record del gruppo: ${rec.id === meId ? "tu" : rec.name} · ${rec.text}${rec.previous ? ` (prima ${rec.previous.name}, ${rec.previous.text})` : ""}` });
+  return el("div", { class: "group-record", text: `🏆 Record del gruppo: ${rec.name} · ${rec.text}` });
 }
 
 // Barra delle faccine (solo in gruppo)
@@ -411,6 +419,7 @@ function rememberChallenge(msg) {
   addHistoryEntry({
     at: Date.now(),
     code: net.code,
+    roomName: (net.isHost ? state.config.roomName : state.hostConfig?.roomName) || "",
     solo,
     daily: ch.daily?.key || null,
     championshipDay: msg.championship?.day || null,

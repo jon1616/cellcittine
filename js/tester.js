@@ -737,7 +737,7 @@ async function testMultiplayer() {
       const txt = doc.getElementById("app").textContent;
       for (const n of names) if (!txt.includes(n)) errors.push(`${who}: nei risultati manca "${n}"`);
     }
-    if (!da.querySelector(".ready-list") && !db.querySelector("#app .ranking")) errors.push("niente classifica");
+    if (!da.querySelector(".group-record") || !db.querySelector(".group-record")) errors.push("manca la riga del record del gruppo nei risultati");
     (await waitFor("il pulsante del risultato finale", () => button(da, "Vedi il risultato finale"), 5000)).click();
     await waitFor("il podio su entrambi", () => /Fine della sfida/.test(da.getElementById("app").textContent) && /Fine della sfida/.test(db.getElementById("app").textContent), 8000);
     steps.push("podio");

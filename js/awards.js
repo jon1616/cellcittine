@@ -57,7 +57,8 @@ export function positionsAfter(history, k, ids) {
   return pos;
 }
 
-export function computeAwards(history, standings) {
+//   extra.reactions: Map id -> faccine mandate (premio Gentile)
+export function computeAwards(history, standings, extra = {}) {
   const awards = [];
   const ids = standings.map((s) => s.id);
   const who = (id) => standings.find((s) => s.id === id) || { id, name: "?", color: 0 };
@@ -113,6 +114,29 @@ export function computeAwards(history, standings) {
     const top2 = uniqueMax(gains, 1);
     if (top2) add(top2.id, { icon: "🚀", title: "Rimonta" }, `dal ${first.get(top2.id)}º al ${last.get(top2.id)}º posto`);
   }
+
+  if (rounds >= 3) {
+    // Sangue freddo: mai un punteggio non valido (falsa partenza, non finito…) e sempre presente
+    const valid = (r) => r && r.score !== null && r.score !== undefined && (r.pct ?? 1) > 0;
+    const cool = ids.filter((id) => history.every((h) => valid(h.ranking.find((x) => x.id === id))));
+    const badAny = history.some((h) => h.ranking.some((r) => !valid(r)));
+    if (cool.length === 1 && badAny) add(cool[0], { icon: "🧊", title: "Sangue freddo" }, `sempre un risultato valido in ${rounds} manche`);
+  }
+  if (rounds >= 4) {
+    // Maratoneta: miglior media di punti nelle ultime 3 manche
+    const last3 = history.slice(-3);
+    const avg = new Map(ids.map((id) => [id, last3.reduce((s, h) => s + (h.ranking.find((r) => r.id === id)?.points || 0), 0)]));
+    const top3 = uniqueMax(avg, 1);
+    if (top3) add(top3.id, { icon: "🏃", title: "Maratoneta" }, `${top3.n} punti nelle ultime 3 manche`);
+  }
+  // Specialista: il massimo (100%) in una manche
+  const perfect = new Map(ids.map((id) => [id, history.filter((h) => (h.ranking.find((r) => r.id === id)?.pct || 0) >= 100).length]));
+  const topP = uniqueMax(perfect, 1);
+  if (topP) add(topP.id, { icon: "💯", title: "Specialista" }, plural(topP.n, "manche al massimo", "manche al massimo"));
+  // Gentile: più faccine mandate
+  const reactions = extra.reactions instanceof Map ? extra.reactions : new Map();
+  const topG = uniqueMax(new Map(ids.map((id) => [id, reactions.get(id) || 0])), 3);
+  if (topG) add(topG.id, { icon: "💛", title: "Gentile" }, plural(topG.n, "faccina mandata", "faccine mandate"));
 
   // Record: più record personali battuti
   const records = new Map(ids.map((id) => [id, 0]));

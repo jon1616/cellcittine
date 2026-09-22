@@ -16,6 +16,18 @@ const KEY_AVATAR = "avatar"; // simbolo personale (emoji tra AVATARS)
 
 // Ultima stanza in cui si è entrati come ospiti (per "Rientra nella stanza" in home, entro 10 minuti)
 const KEY_LAST_ROOM = "lastRoom";
+// Record del gruppo (host): { "<nome stanza>": { <gameId>: { score, text, name, at } } }
+const KEY_GROUP_RECORDS = "groupRecords";
+export function getGroupRecord(roomName, gameId) {
+  return read(KEY_GROUP_RECORDS, {})?.[roomName || ""]?.[gameId] || null;
+}
+export function saveGroupRecord(roomName, gameId, rec) {
+  const all = read(KEY_GROUP_RECORDS, {});
+  const key = roomName || "";
+  all[key] = all[key] || {};
+  all[key][gameId] = rec;
+  write(KEY_GROUP_RECORDS, all);
+}
 export const LAST_ROOM_MS = 10 * 60 * 1000;
 export function getLastRoom() {
   const r = read(KEY_LAST_ROOM, null);
@@ -54,7 +66,8 @@ export const AUTO_MAX = 20;
 // special: manche speciali (punti doppi, tutto o niente, rimonta…) decise dall'host a ogni sfida
 // championship: le sfide di questa stanza fanno classifica cumulativa a giornate
 // mode: "punti" (classifica a punti) | "eliminazione" (ogni manche l'ultimo esce, vince chi resta)
-const DEFAULT_CONFIG = { games: [], rounds: 5, difficulty: "normale", pack: null, auto: false, autoDelay: 8, teams: 0, special: false, championship: false, mode: "punti" };
+// roomName: nome dato dall'host alla stanza (facoltativo), mostrato a tutti e usato per i record del gruppo
+const DEFAULT_CONFIG = { games: [], rounds: 5, difficulty: "normale", pack: null, auto: false, autoDelay: 8, teams: 0, special: false, championship: false, mode: "punti", roomName: "" };
 export const MODE_OPTIONS = [{ id: "punti", label: "A punti" }, { id: "eliminazione", label: "A eliminazione" }];
 
 function read(key, fallback) {
@@ -106,6 +119,7 @@ export function loadConfig(allGameIds) {
   cfg.special = cfg.special === true;
   cfg.championship = cfg.championship === true;
   cfg.mode = MODE_OPTIONS.some((m) => m.id === cfg.mode) ? cfg.mode : "punti";
+  cfg.roomName = typeof cfg.roomName === "string" ? cfg.roomName.trim().slice(0, 24) : "";
   return cfg;
 }
 

@@ -138,7 +138,8 @@ export function inviteLink(code) {
 // Menu di condivisione del telefono se c'è, altrimenti copia negli appunti.
 export async function shareInvite(code) {
   const url = inviteLink(code);
-  const text = `Entra nella mia stanza Cellcittine! Codice ${code}`;
+  const name = state.config?.roomName?.trim();
+  const text = `Entra nella mia stanza Cellcittine${name ? ` “${name}”` : ""}! Codice ${code}`;
   if (navigator.share) {
     try { await navigator.share({ title: "Cellcittine", text, url }); return; } catch (_) { /* annullato o non riuscito: copia */ }
   }

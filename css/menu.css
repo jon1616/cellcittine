@@ -578,3 +578,9 @@ input.code { letter-spacing: 8px; text-transform: uppercase; font-weight: 700; f
 .screen button.avatar-pick { font-size: 20px; width: 40px; height: 40px; padding: 0; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid var(--line); box-shadow: none; text-shadow: none; line-height: 1; opacity: 0.7; }
 .screen button.avatar-pick.on { opacity: 1; background: color-mix(in srgb, var(--accent) 22%, transparent); border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); transform: scale(1.1); }
 .avatar-dot { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; font-size: 14px; line-height: 1; background: color-mix(in srgb, var(--c) 30%, transparent); border: 2px solid var(--c); box-shadow: 0 0 8px var(--c); flex: 0 0 auto; }
+
+/* Nome della stanza e record del gruppo */
+.room-name { color: var(--accent); }
+input.room-name-input { font-size: 18px; padding: 10px 12px; }
+.group-record { text-align: center; font-size: 14px; color: var(--muted); padding: 6px 10px; border-radius: 10px; background: rgba(255,255,255,0.05); }
+.group-record.new { color: var(--ink); background: var(--gradient-accent); font-weight: 700; box-shadow: 0 0 16px var(--accent-glow); animation: bump 0.5s; }

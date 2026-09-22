@@ -3,46 +3,52 @@
 Qui si segna ogni aggiunta futura **prima** di farla, e la si spunta quando è online.
 Una riga per idea: `- [ ] cosa` → `- [x] cosa (vX.Y.Z)`. Le decisioni prese stanno in CLAUDE.md.
 
-Roadmap riprogettata il 22/09/2026 (v0.34.2): le idee vecchie non ancora fatte sono state tolte e sostituite
-dalla lista proposta dall'agente e approvata dall'utente, messa in pratica a cicli continui senza il suo
-intervento (v0.35.0 → v0.43.0, tutto fatto il 22/09/2026). Rimandati a dopo, per scelta dell'utente: taratura dei riferimenti con le ragazze, minigiochi a due
-mani, tema Compleanno, QR code, inglese.
+Terza roadmap (22/09/2026, dalla v0.43.0): tutte le proposte dell'agente accettate dall'utente, più il restyling
+grafico e sonoro voluto da lui in coda ("decisamente più curato, pensato per gestire meglio le tante cose aggiunte,
+colorato e ben leggibile"). Da mettere in pratica a cicli continui senza il suo intervento.
+Rimandati per scelta dell'utente: taratura dei riferimenti con le ragazze, minigiochi a due mani, tema Compleanno,
+QR code, inglese.
 
-## A. La partita più viva
+## 1. Per chi gioca spesso
 
-- [x] **Pronti al conto alla rovescia**: durante il conto alla rovescia i nomi di chi è in stanza si accendono man mano che il loro telefono è pronto ("Giulia ✓"). Come: messaggio `ready` ospite → host, `ready` host → tutti; lista nel countdown. (v0.35.0)
-- [x] **Presenza in stanza**: chi ha l'app in secondo piano compare con 💤 nella lista, e l'host vede "X è altrove" prima di iniziare. Come: `visibilitychange` → messaggio `presence`, campo `away` nei partecipanti. (v0.35.0)
-- [x] **Risultati in diretta**: chi ha finito vede, nella schermata "In attesa degli altri…", chi ha già finito e con che punteggio, uno alla volta. Come: messaggio `progress` dall'host a ogni punteggio ricevuto; lista nella schermata di fine minigioco. (v0.36.0)
-- [x] **Classifica di manche animata**: righe che entrano una alla volta con il punteggio che si svela, come la classifica generale. (v0.35.0)
-- [x] **Reazioni con le faccine**: nei risultati e sul podio, un tocco su 👏 😂 😱 🔥 ❤️ e tutti vedono la faccina volare sul nome di chi l'ha mandata (una al secondo a persona). Come: `react` ospite → host → tutti. (v0.36.0)
-- [x] **Handicap per persona**: l'host può dare Facile/Normale/Difficile a ognuno dalla stanza (pillola accanto al nome); i parametri restano uguali tra chi ha la stessa difficoltà; i record si salvano con la difficoltà vera. Come: `config.handicaps`, campo `difficulties` nel messaggio `start`. (v0.37.0)
+- [ ] **Nome della stanza**: l'host può dare un nome alla stanza ("Casa Rossi", "Compleanno Anna"), mostrato in stanza, nell'invito, nello storico e nei testi condivisi. — S
+- [ ] **Record di stanza**: per ogni minigioco il miglior punteggio mai fatto dal gruppo (l'host li conserva per stanza/nome e li manda a tutti); nei risultati "🏆 record del gruppo: Anna, 41 tocchi" e festa quando lo si batte. — M
+- [ ] **Premi nuovi**: Sangue freddo (mai un punteggio non valido), Maratoneta (miglior media nelle ultime 3 manche), Specialista (100% in un minigioco), Gentile (più reazioni mandate). — S
+- [ ] **Missioni della settimana**: 3 obiettivi rinnovati ogni lunedì (dal seme della settimana), con progresso in home e medaglia della settimana nelle statistiche. — M
+- [ ] **Minigioco del giorno in allenamento**: un minigioco in evidenza ogni giorno (dalla data), "Prova subito" dalla home, conta doppio nelle statistiche. — S
+- [ ] **Rivali**: dallo storico, con chi hai giocato di più e il bilancio testa a testa; sul podio "Ti sei preso la rivincita su Anna" (linguaggio neutro: "Rivincita su Anna"). — M
 
-## B. Più varietà nelle sfide
+## 2. Sfide più raccontate
 
-- [x] **Manche Duello** (manche speciale): due persone sorteggiate si sfidano; chi delle due fa meglio prende punti extra; gli altri giocano normalmente. Come: `specials.js` con dati per manche, sorteggio dell'host dal seme. (v0.38.0)
-- [x] **Manche Staffetta** (manche speciale con le squadre): per una manche la squadra vale la somma dei punti dei membri invece della media. (v0.38.0)
-- [x] **Sfida Maratona**: un pulsante in stanza imposta una serata intera: 15 manche, difficoltà Crescente, manche speciali, manche automatiche; opzioni 15 e 20 tra le manche. (v0.38.0)
-- [x] **Sfida del giorno in gruppo**: dalla stanza si può giocare esattamente i 5 minigiochi del giorno con gli stessi semi; il totale di ognuno vale come Sfida del giorno personale (se è il primo tentativo). (v0.39.0)
+- [ ] **Riassunto della serata**: a fine sfida una schermata "la storia della sfida" (chi ha guidato quando, sorpassi, manche decisiva, record), condivisibile come testo. — M
+- [ ] **Cronologia della classifica**: grafico a linee, manche per manche, delle posizioni (i sorpassi si vedono), nel podio e nel riassunto. — M
 
-## C. Minigiochi
+## 3. Modi di giocare nuovi
 
-- [x] **Prova subito**: dalla scheda di un minigioco, "▶ Prova subito" lo fa giocare da soli senza passare dalla stanza dell'allenamento, con record e "Riprova". (v0.40.0)
-- [x] **Suoni caratterizzati per minigioco**: nuovi effetti sintetizzati (moneta, tuffo, rimbalzo, campanella, fischio, gong…) usati dai minigiochi a cui appartengono, sempre e solo da `audio.js`. (v0.40.0)
+- [ ] **Sfida a tema**: in stanza, temi pronti in tre tocchi con anteprima delle icone ("Parole e numeri", "Solo canvas", "Riflessi puri", "Memoria di ferro", "Mix equilibrato"). — S
+- [ ] **Coppie**: squadre da due con turni alterni (uno gioca le manche pari, l'altro le dispari) e conteggio unico; per quando i telefoni sono pochi. — M
+- [ ] **Presentatore ("Tutti contro l'host")**: l'host non gioca, vede tutti i risultati in diretta, può dare un punto bonus "simpatia" a fine manche. — M
 
-## D. Rifiniture visive
+## 4. Minigiochi
 
-- [x] **Colore della categoria durante il gioco**: cornice sottile con il colore della categoria anche nel minigioco, non solo al conto alla rovescia. (v0.41.0)
-- [x] **Simbolo personale**: ognuno sceglie in home un simbolo (⭐🔥⚡🌙🍀🎈🐱🐶🦊🐸🦄🐼) che compare accanto al nome in stanza, nelle classifiche e sul podio. Come: `localStorage.avatar`, campo `avatar` nel `join` e nei partecipanti. (v0.41.0)
+- [ ] **Sei minigiochi nuovi** con meccaniche che mancano: corsa a scorrimento continuo (ostacoli), disegno (ricalca la forma, somiglianza), ritmo con barra che scorre, trova le differenze tra due griglie, lettura veloce (vero/falso), stima (tempo/lunghezza). Icone da foglio 6×1. — L
+- [ ] **Difficoltà Esperto**: quarta difficoltà per i minigiochi, che si apre quando si supera l'80% a Difficile tre volte in quel minigioco (una porta, non una moneta). — M
 
-## E. Piccole cose pratiche
+## 5. Rifiniture
 
-- [x] **Rientra nella stanza**: se l'app si chiude per sbaglio, in home compare "Rientra nella stanza XXXX" per 10 minuti (per gli ospiti). Come: `localStorage.lastRoom`. (v0.42.0)
-- [x] **Statistiche condivisibili**: dalla schermata delle statistiche, titolo e punti forti come testo da mandare in chat. (v0.42.0)
+- [ ] **Vibrazione con pattern diversi** per vittoria di manche, record, eliminazione, sconfitta al duello. — S
+- [ ] **Modalità una mano**: opzione che tiene i comandi in basso nei minigiochi a tastierino/risposte. — S
+- [ ] **Meno movimento e contrasto alto**: interruttori in home (oltre all'impostazione del telefono). — S
+- [ ] **Prova del collegamento in stanza**: indicatore "linea buona / lenta / assente" per ogni persona, dal ping periodico. — M
 
-## F. Più avanti
+## 6. Rete
 
-- [x] **Tester del multiplayer**: nel tester una prova con due riquadri (host + ospite) che fanno una manche insieme. (v0.43.0)
-- [x] **Modalità spettatore**: chi entra a sfida iniziata vede la manche in corso (nome, risultati in diretta) e gioca dalla successiva. (v0.43.0)
+- [ ] **Trasferimento dell'host**: se chi ha creato la stanza esce, un altro telefono prende il comando senza perdere la sfida (stato condiviso, nuovo codice annunciato a tutti). Ultimo, con prove a parte. — L
+
+## 7. Restyling grafico e sonoro (richiesta dell'utente, in coda)
+
+- [ ] **Restyling grafico**: nuova palette più colorata e leggibile, scala tipografica, gerarchia delle schermate (home per compiti, stanza a schede, risultati a colpo d'occhio), icone coerenti per categorie e azioni, temi rivisti, animazioni misurate. — L
+- [ ] **Restyling sonoro**: set di suoni rifatto (interfaccia, esiti, momenti della sfida), volume bilanciato, stinger per manche speciali e traguardi, musica con varianti (menu, stanza, podio). — M
 
 ## Idee parcheggiate
 
@@ -53,6 +59,24 @@ mani, tema Compleanno, QR code, inglese.
 
 ## Fatto (storico, in ordine di arrivo)
 
+- [x] **Pronti al conto alla rovescia**: durante il conto alla rovescia i nomi di chi è in stanza si accendono man mano che il loro telefono è pronto ("Giulia ✓"). Come: messaggio `ready` ospite → host, `ready` host → tutti; lista nel countdown. (v0.35.0)
+- [x] **Presenza in stanza**: chi ha l'app in secondo piano compare con 💤 nella lista, e l'host vede "X è altrove" prima di iniziare. Come: `visibilitychange` → messaggio `presence`, campo `away` nei partecipanti. (v0.35.0)
+- [x] **Risultati in diretta**: chi ha finito vede, nella schermata "In attesa degli altri…", chi ha già finito e con che punteggio, uno alla volta. Come: messaggio `progress` dall'host a ogni punteggio ricevuto; lista nella schermata di fine minigioco. (v0.36.0)
+- [x] **Classifica di manche animata**: righe che entrano una alla volta con il punteggio che si svela, come la classifica generale. (v0.35.0)
+- [x] **Reazioni con le faccine**: nei risultati e sul podio, un tocco su 👏 😂 😱 🔥 ❤️ e tutti vedono la faccina volare sul nome di chi l'ha mandata (una al secondo a persona). Come: `react` ospite → host → tutti. (v0.36.0)
+- [x] **Handicap per persona**: l'host può dare Facile/Normale/Difficile a ognuno dalla stanza (pillola accanto al nome); i parametri restano uguali tra chi ha la stessa difficoltà; i record si salvano con la difficoltà vera. Come: `config.handicaps`, campo `difficulties` nel messaggio `start`. (v0.37.0)
+- [x] **Manche Duello** (manche speciale): due persone sorteggiate si sfidano; chi delle due fa meglio prende punti extra; gli altri giocano normalmente. Come: `specials.js` con dati per manche, sorteggio dell'host dal seme. (v0.38.0)
+- [x] **Manche Staffetta** (manche speciale con le squadre): per una manche la squadra vale la somma dei punti dei membri invece della media. (v0.38.0)
+- [x] **Sfida Maratona**: un pulsante in stanza imposta una serata intera: 15 manche, difficoltà Crescente, manche speciali, manche automatiche; opzioni 15 e 20 tra le manche. (v0.38.0)
+- [x] **Sfida del giorno in gruppo**: dalla stanza si può giocare esattamente i 5 minigiochi del giorno con gli stessi semi; il totale di ognuno vale come Sfida del giorno personale (se è il primo tentativo). (v0.39.0)
+- [x] **Prova subito**: dalla scheda di un minigioco, "▶ Prova subito" lo fa giocare da soli senza passare dalla stanza dell'allenamento, con record e "Riprova". (v0.40.0)
+- [x] **Suoni caratterizzati per minigioco**: nuovi effetti sintetizzati (moneta, tuffo, rimbalzo, campanella, fischio, gong…) usati dai minigiochi a cui appartengono, sempre e solo da `audio.js`. (v0.40.0)
+- [x] **Colore della categoria durante il gioco**: cornice sottile con il colore della categoria anche nel minigioco, non solo al conto alla rovescia. (v0.41.0)
+- [x] **Simbolo personale**: ognuno sceglie in home un simbolo (⭐🔥⚡🌙🍀🎈🐱🐶🦊🐸🦄🐼) che compare accanto al nome in stanza, nelle classifiche e sul podio. Come: `localStorage.avatar`, campo `avatar` nel `join` e nei partecipanti. (v0.41.0)
+- [x] **Rientra nella stanza**: se l'app si chiude per sbaglio, in home compare "Rientra nella stanza XXXX" per 10 minuti (per gli ospiti). Come: `localStorage.lastRoom`. (v0.42.0)
+- [x] **Statistiche condivisibili**: dalla schermata delle statistiche, titolo e punti forti come testo da mandare in chat. (v0.42.0)
+- [x] **Tester del multiplayer**: nel tester una prova con due riquadri (host + ospite) che fanno una manche insieme. (v0.43.0)
+- [x] **Modalità spettatore**: chi entra a sfida iniziata vede la manche in corso (nome, risultati in diretta) e gioca dalla successiva. (v0.43.0)
 - [x] Telaio: stanze con codice, P2P host-arbitro, manche sincronizzate, PWA installabile (v0.1.0)
 - [x] Sfida configurabile: minigiochi, manche, difficoltà; punti per posizione; allenamento con record (v0.2.0)
 - [x] 13 minigiochi disegnati da codice (v0.2.0–v0.3.0)
