@@ -1,6 +1,6 @@
 # Cellcittine
 
-Party game di 62 minigiochi per telefono, giocabile da soli o in gruppo (2-6 persone)
+Party game di 68 minigiochi per telefono, giocabile da soli o in gruppo (2-6 persone)
 tramite codice stanza. È una pagina web installabile (PWA): niente store, aggiornamenti istantanei.
 
 **Gioco online:** https://jon1616.github.io/cellcittine/
@@ -116,6 +116,12 @@ CLAUDE.md · ROADMAP.md  guida per chi lavora sul codice · elenco di fatto / da
 | 🏓 Rimbalzo | destrezza | rimbalzi sulla racchetta in 30 s (3 palline) |
 | 🎨 Abbinamenti | memoria | colori giusti su 9 |
 | 🐑 Plurali | parole | giuste − sbagliate in 25 s |
+| 🏎️ Corsa | destrezza | secondi di corsa su 30 |
+| ✏️ Ricalco | destrezza | punti di somiglianza su 300 (3 forme) |
+| 🥁 Battito | riflessi | punti di tempismo su 1600 (16 note) |
+| 🔎 Differenze | attenzione | differenze trovate su 24 in 40 s |
+| ✅ Vero o falso | parole | giuste − sbagliate in 25 s |
+| 📏 Stima | calcolo | punti di precisione su 600 (6 domande) |
 
 ## Aggiungere un minigioco
 

@@ -659,3 +659,38 @@
 /* Spettatore (entrati a manche iniziata) */
 .game-area.spectate .game-done { margin-top: 8px; }
 .spectate-note { max-width: 340px; font-size: 15px; font-weight: 500; color: rgba(255,255,255,0.85); padding: 8px 14px; border-radius: 12px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); }
+
+/* ---------------------------------------------------------------
+   Corsa, Ricalco, Battito: canvas (usano .run-canvas)
+   --------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------
+   Differenze (differenze.js)
+   --------------------------------------------------------------- */
+.diff-wrap { display: flex; gap: 10px; align-items: flex-start; justify-content: center; width: 100%; }
+.diff-grid { display: grid; gap: 4px; flex: 1; max-width: 190px; }
+.diff-cell { aspect-ratio: 1; border-radius: 8px; background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 22px; }
+.diff-grid.right .diff-cell { cursor: pointer; border-color: rgba(54,207,201,0.35); }
+.diff-cell.ok { background: var(--ok); border-color: var(--ok); }
+.diff-cell.ko { background: var(--danger); border-color: var(--danger); }
+
+/* ---------------------------------------------------------------
+   Vero o falso (verofalso.js)
+   --------------------------------------------------------------- */
+.vf-sentence { font-size: 26px; font-weight: 800; text-align: center; line-height: 1.25; padding: 16px 8px 24px; min-height: 110px; display: flex; align-items: center; justify-content: center; }
+.vf-row { display: flex; gap: 12px; }
+.vf-btn { flex: 1; font-size: 26px; padding: 26px 8px; border-radius: 18px; color: white; border: 3px solid transparent; }
+.vf-btn.yes { background: #2a9d5c; }
+.vf-btn.no { background: #c1121f; }
+.vf-btn.ok { border-color: #fff; }
+.vf-btn.ko { opacity: 0.5; }
+
+/* ---------------------------------------------------------------
+   Stima (stima.js)
+   --------------------------------------------------------------- */
+.stima-canvas { margin-bottom: 8px; }
+.stima-prompt { text-align: center; font-size: 17px; font-weight: 600; min-height: 46px; padding: 0 6px; }
+.stima-slider { width: 100%; accent-color: var(--accent); margin: 8px 0; }
+.stima-value { text-align: center; font-size: 22px; font-weight: 800; color: var(--accent); min-height: 30px; }
+.stima-ok { margin-top: 8px; }
+.stima-ok.tap { background: var(--ok); color: var(--ink); font-size: 26px; padding: 26px; }
