@@ -63,6 +63,7 @@ QR code, inglese.
 - Roblox / Google Play: no (vedi CLAUDE.md)
 - Monete e sblocchi: solo se il gruppo lo chiede
 - Rimandati dall'utente (22/09/2026): taratura dei riferimenti di rating.js con le ragazze, minigiochi a due mani, tema Compleanno, QR code in stanza, traduzione in inglese
+- Classifica automatica della Sfida del giorno tra telefoni: richiede un servizio esterno (Cloudflare Worker + KV, gratuito, senza chiavi nel codice); rinviata il 22/09/2026 per non complicare
 - Ponte di rete (TURN): rinunciato il 21/09/2026 (servirebbe un account esterno); `js/relay.js` resta predisposto e spento
 
 ## Fatto (storico, in ordine di arrivo)

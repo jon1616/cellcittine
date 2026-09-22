@@ -142,4 +142,5 @@ sostituire `requestAnimationFrame` con `setTimeout` in entrambe.
 - Avatar rimandati: per ora solo il nome.
 - Tutto sbloccato: niente monete/progressione finché non richiesto.
 - Niente minigiochi di fortuna: la categoria Azzardo è stata eliminata (21/09/2026); in ogni minigioco deve contare un'abilità (riflessi, controllo, memoria…), mai il caso.
+- Niente classifica automatica della Sfida del giorno tra telefoni (servirebbe un servizio esterno, es. Cloudflare Worker): rinviata dall'utente il 22/09/2026 ("per il momento non complichiamo le cose"). Resta il link condiviso con ?giorno=data.
 - Niente ponte di rete (TURN) con account esterno: deciso il 21/09/2026 per non mettere una chiave nel codice pubblico. `js/relay.js` resta predisposto e spento; non riproporlo salvo richiesta.
