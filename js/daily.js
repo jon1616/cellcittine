@@ -103,6 +103,6 @@ export function shareText(key, result) {
     lines.push(`${g?.icon || "•"} ${ratingBar(r.pct)} ${r.pct}%`);
   }
   lines.push(`Totale ${formatPoints(result.total)} / ${formatPoints(DAILY_ROUNDS * DAILY_ROUND_MAX)}`);
-  lines.push("https://jon1616.github.io/cellcittine/");
+  lines.push(`Provaci anche tu: https://jon1616.github.io/cellcittine/?giorno=${key}`);
   return lines.join("\n");
 }

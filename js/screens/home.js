@@ -219,9 +219,13 @@ function dailyCard(requireName) {
     el("span", { class: "daily-title", text: "📅 Sfida del giorno" }),
     el("span", { class: "daily-date", text: dailyLabel(key) }),
   ]);
+  // Arrivo da un link condiviso: la card si mette in evidenza (e dice se il link era di un altro giorno)
+  const fromLink = state.pendingDaily;
+  const linkNote = fromLink && fromLink !== "oggi" && fromLink !== key ? el("p", { class: "small", text: `Il link era della sfida di ${dailyLabel(fromLink)}: ogni giorno ce n'è una nuova, questa è quella di oggi.` }) : fromLink ? el("p", { class: "small", text: "Ti hanno sfidato! Scrivi il tuo nome qui sopra e gioca la stessa sfida." }) : el("span");
   if (!done) {
-    return el("div", { class: "card daily" }, [
+    return el("div", { class: `card daily${fromLink ? " invite" : ""}` }, [
       head,
+      linkNote,
       el("p", { class: "small", text: `${DAILY_ROUNDS} minigiochi, gli stessi per tutti oggi. Vale il primo tentativo.${streak ? ` 🔥 ${streak} ${streak === 1 ? "giorno" : "giorni"} di fila: continua la serie!` : ""}` }),
       el("button", { text: "Gioca la sfida di oggi", onclick: () => requireName() && playDaily() }),
     ]);

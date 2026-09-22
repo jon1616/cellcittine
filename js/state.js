@@ -20,6 +20,7 @@ export const state = {
   picker: null,                     // stato della schermata di scelta minigiochi
   infoBack: null,                   // dove torna la scheda di un minigioco
   pendingCode: null,                // codice stanza arrivato da un link di invito (?stanza=XXXX)
+  pendingDaily: null,               // arrivo da un link alla Sfida del giorno (?giorno=AAAA-MM-GG): data del link
   installPrompt: null,              // evento beforeinstallprompt (Android/Chrome), se il browser lo offre
   championship: null,               // host: { day, table: Map } quando il campionato è attivo (championship.js)
 };

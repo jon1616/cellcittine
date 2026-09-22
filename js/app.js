@@ -15,7 +15,8 @@ import { state } from "./state.js";
 import { applyPrefs } from "./utils.js";
 import { detectPack } from "./screens/lobby.js";
 import { showHome } from "./screens/home.js";
-import { readInviteFromUrl, joinRoom, leaveRoom } from "./room.js";
+import { readInviteFromUrl, readDailyFromUrl, joinRoom, leaveRoom, playDaily } from "./room.js";
+import { dailyKey, todayResult } from "./daily.js";
 
 document.getElementById("version").textContent = `v${VERSION}`;
 applyTheme();
@@ -61,7 +62,12 @@ if (location.hostname === "localhost") window.cellcittine = { state };
 
 // Arrivo da un link di invito (?stanza=XXXX)
 state.pendingCode = readInviteFromUrl();
-if (state.pendingCode && state.name) {
+state.pendingDaily = readDailyFromUrl();
+// Link alla Sfida del giorno: con il nome già scritto si parte subito (se oggi non è ancora fatta)
+if (state.pendingDaily && !state.pendingCode && state.name && !todayResult(dailyKey())) {
+  state.pendingDaily = null;
+  playDaily();
+} else if (state.pendingCode && state.name) {
   showHome(`Entro nella stanza ${state.pendingCode}…`, false);
   joinRoom(state.pendingCode)
     .then(() => { state.pendingCode = null; })

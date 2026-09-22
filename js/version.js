@@ -1,3 +1,3 @@
 // Numero di versione mostrato nell'angolo dello schermo.
 // Va aggiornato insieme a CACHE_VERSION in sw.js a ogni pubblicazione.
-export const VERSION = "1.1.0";
+export const VERSION = "1.1.1";

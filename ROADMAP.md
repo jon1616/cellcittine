@@ -15,6 +15,8 @@ QR code, inglese.
 - [x] **Difficoltà in "Prova subito"** (Facile/Normale/Difficile, Esperto dove sbloccato), ricordata (v1.1.0)
 - [x] **Da soli è un gioco vero**: stelle per minigioco (★ 50% · ★★ 75% · ★★★ 95%) raccolte e mostrate in catalogo, risultati, podio e statistiche; "⚡ Giro veloce" dalla home (5 minigiochi a caso con difficoltà adattiva dalle stelle, "Ancora un giro"); prossimo obiettivo sul podio; traguardi Cielo stellato / Via Lattea (v1.1.0)
 
+- [x] **Link diretto alla Sfida del giorno**: il testo condiviso termina con …/?giorno=AAAA-MM-GG; chi lo apre con il nome già scritto parte subito, altrimenti trova la card in evidenza (se il link è di un altro giorno lo dice) (v1.1.1)
+
 ## 1. Per chi gioca spesso
 
 - [x] **Nome della stanza**: l'host può dare un nome alla stanza ("Casa Rossi", "Compleanno Anna"), mostrato in stanza, nell'invito, nello storico e nei testi condivisi. (v0.44.0)

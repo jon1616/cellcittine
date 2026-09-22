@@ -234,6 +234,16 @@ export function readInviteFromUrl() {
   return /^[A-Z]{4}$/.test(clean) ? clean : null;
 }
 
+// Link alla Sfida del giorno: …/?giorno=AAAA-MM-GG (letto una volta e tolto dalla barra)
+export function readDailyFromUrl() {
+  const params = new URLSearchParams(location.search);
+  const day = params.get("giorno");
+  if (!day) return null;
+  params.delete("giorno");
+  history.replaceState(history.state, "", location.pathname + (params.toString() ? `?${params}` : ""));
+  return /^\d{4}-\d{2}-\d{2}$/.test(day) ? day : "oggi";
+}
+
 export function playSolo() {
   state.net = makeNet();
   state.net.solo(state.name);
