@@ -584,3 +584,38 @@
 .path-cell.lit { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 14px var(--accent-glow); transform: scale(1.05); }
 .path-cell.ok { background: var(--ok); border-color: var(--ok); }
 .path-cell.ko { background: var(--danger); border-color: var(--danger); color: white; }
+
+/* ---------------------------------------------------------------
+   Resto (resto.js) — usa .quiz-answers
+   --------------------------------------------------------------- */
+.resto-box { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; align-items: center; justify-items: center; margin-bottom: 8px; }
+.resto-price { font-size: 34px; font-weight: 800; color: var(--accent); }
+.resto-note { font-size: 30px; font-weight: 800; color: #43d17a; padding: 4px 14px; border-radius: 10px; background: rgba(67,209,122,0.15); border: 2px solid rgba(67,209,122,0.5); }
+
+/* ---------------------------------------------------------------
+   Lettere (lettere.js) — usa .keypad
+   --------------------------------------------------------------- */
+.letters-letter { font-size: 56px; font-weight: 800; text-align: center; color: var(--accent); line-height: 1; }
+.letters-sentence { font-size: 22px; font-weight: 600; text-align: center; line-height: 1.35; padding: 10px 6px 16px; }
+.letters-hit { color: var(--accent); text-decoration: underline; }
+
+/* ---------------------------------------------------------------
+   Cerchi (cerchi.js) e Rimbalzo (rimbalzo.js): canvas (usano .run-canvas)
+   --------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------
+   Abbinamenti (abbinamenti.js)
+   --------------------------------------------------------------- */
+.pair-stage { display: flex; flex-direction: column; gap: 14px; width: 100%; }
+.pair-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pair-card { aspect-ratio: 1; border-radius: 18px; background: var(--c); display: flex; align-items: center; justify-content: center; font-size: 64px; box-shadow: inset 0 -6px 0 rgba(0,0,0,0.15); }
+.pair-question { font-size: 80px; text-align: center; line-height: 1.1; }
+.pair-answers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pair-answer { font-size: 20px; font-weight: 800; padding: 18px 8px; border-radius: 14px; background: var(--bg-2); color: var(--text); border: 3px solid var(--c); }
+.pair-answer.ok { background: var(--c); color: var(--ink); }
+.pair-answer.ko { opacity: 0.4; }
+
+/* ---------------------------------------------------------------
+   Plurali (plurali.js) — usa .quiz-answers
+   --------------------------------------------------------------- */
+.plur-target { letter-spacing: 1px; text-transform: none; }

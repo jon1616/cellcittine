@@ -5,7 +5,7 @@
   salvata l'ultima volta.
 */
 
-const CACHE_VERSION = "0.30.0"; // tenere allineato a js/version.js
+const CACHE_VERSION = "0.31.0"; // tenere allineato a js/version.js
 const CACHE = `cellcittine-${CACHE_VERSION}`;
 
 const PRECACHE = [
@@ -104,6 +104,12 @@ const PRECACHE = [
   "./js/games/manopola.js",
   "./js/games/alvolo.js",
   "./js/games/percorso.js",
+  "./js/games/resto.js",
+  "./js/games/lettere.js",
+  "./js/games/cerchi.js",
+  "./js/games/rimbalzo.js",
+  "./js/games/abbinamenti.js",
+  "./js/games/plurali.js",
   "./fonts/fredoka-latin.woff2",
   "./fonts/fredoka-latin-ext.woff2",
   "./icons/icon-192.png",
