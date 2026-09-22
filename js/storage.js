@@ -14,6 +14,17 @@ const KEY_STATS = "stats"; // statistiche per minigioco (vedi stats.js)
 const KEY_ACHIEVEMENTS = "achievements"; // traguardi sbloccati: { id: data }
 const KEY_AVATAR = "avatar"; // simbolo personale (emoji tra AVATARS)
 
+// Ultima stanza in cui si è entrati come ospiti (per "Rientra nella stanza" in home, entro 10 minuti)
+const KEY_LAST_ROOM = "lastRoom";
+export const LAST_ROOM_MS = 10 * 60 * 1000;
+export function getLastRoom() {
+  const r = read(KEY_LAST_ROOM, null);
+  if (!r || typeof r.code !== "string" || Date.now() - (r.at || 0) > LAST_ROOM_MS) return null;
+  return r;
+}
+export function saveLastRoom(code) { write(KEY_LAST_ROOM, { code, at: Date.now() }); }
+export function forgetLastRoom() { try { localStorage.removeItem(KEY_LAST_ROOM); } catch (_) { /* privato */ } }
+
 export const AVATARS = ["⭐", "🔥", "⚡", "🌙", "🍀", "🎈", "🐱", "🐶", "🦊", "🐸", "🦄", "🐼"];
 export function getAvatar() {
   try { const a = localStorage.getItem(KEY_AVATAR); return AVATARS.includes(a) ? a : ""; } catch (_) { return ""; }

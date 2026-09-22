@@ -8,7 +8,7 @@ import { sfx } from "../audio.js";
 import { state, setScreen, isSolo } from "../state.js";
 import { show, gameIcon, gameHeading, confetti, colorDot, playerColor } from "../ui.js";
 import { getEntry, loadGame, getLoaded } from "../games/catalog.js";
-import { getRecord, addHistoryEntry } from "../storage.js";
+import { getRecord, addHistoryEntry, forgetLastRoom } from "../storage.js";
 import { leaveRoom, exitButton } from "../room.js";
 import { nextRound, finishChallenge, replayChallenge, closeChampionship, react, REACTIONS } from "../challenge.js";
 import { showLobby as showLobbyScreen, championshipTable } from "./lobby.js";
@@ -248,7 +248,7 @@ export async function showResults(msg) {
     ...actions,
     solo ? el("span") : reactionBar(),
     el("div", { class: "spacer" }),
-    el("button", { text: "Abbandona", class: "link", onclick: () => { leaveRoom(); showHome(); } })
+    el("button", { text: "Abbandona", class: "link", onclick: () => { leaveRoom(); forgetLastRoom(); showHome(); } })
   );
 }
 

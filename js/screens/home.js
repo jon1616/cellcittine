@@ -17,7 +17,7 @@ import { showCatalog } from "./catalog.js";
 import { showHistory } from "./history.js";
 import { showStats } from "./stats.js";
 import { playerTitle, summary } from "../stats.js";
-import { AVATARS, getAvatar, setAvatar } from "../storage.js";
+import { AVATARS, getAvatar, setAvatar, getLastRoom, forgetLastRoom } from "../storage.js";
 
 // message: riga di stato (per default in rosso: è quasi sempre un errore)
 export function showHome(message = "", isError = !!message) {
@@ -51,6 +51,7 @@ export function showHome(message = "", isError = !!message) {
     el("h1", { class: "home-title", text: "CELLCITTINE" }),
     el("p", { text: "Sfide a minigiochi, da soli o in gruppo" }),
     inviteCard(requireName),
+    rejoinCard(requireName),
     el("div", { class: "card" }, [
       nameInput,
       avatarRow(),
@@ -117,6 +118,30 @@ function installRow() {
     });
   }
   return el("span");
+}
+
+// Ultima stanza (ospite) lasciata senza volerlo negli ultimi 10 minuti: "Rientra"
+function rejoinCard(requireName) {
+  const last = getLastRoom();
+  if (!last || state.pendingCode || state.net) return el("span");
+  const enter = el("button", { text: `Rientra nella stanza ${last.code}` });
+  enter.addEventListener("click", async () => {
+    if (!requireName()) return;
+    enter.disabled = true;
+    setStatus("Rientro…");
+    try {
+      await joinRoom(last.code);
+    } catch (err) {
+      forgetLastRoom();
+      showHome(err.message);
+    }
+  });
+  return el("div", { class: "card invite" }, [
+    el("div", { class: "label", text: "Stanza di poco fa" }),
+    el("p", { text: "Eri in una stanza: se si è chiusa l'app per sbaglio, puoi rientrare con lo stesso nome e i tuoi punti." }),
+    enter,
+    el("button", { text: "No, lascia perdere", class: "link", onclick: () => { forgetLastRoom(); showHome(); } }),
+  ]);
 }
 
 // Invito arrivato da un link (?stanza=XXXX): riquadro in evidenza con "Entra".

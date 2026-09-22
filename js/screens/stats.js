@@ -10,6 +10,7 @@ import { getEntry } from "../games/catalog.js";
 import { summary, categoryStrengths, mostPlayed, neverPlayed, playerTitle, ACHIEVEMENTS, unlockedAchievements, checkAchievements } from "../stats.js";
 import { formatPoints } from "../daily.js";
 import { showHome } from "./home.js";
+import { toast } from "../ui.js";
 
 function stat(num, label) {
   return el("div", { class: "hist-stat" }, [el("div", { class: "hist-num", text: String(num) }), el("div", { class: "hist-lbl", text: label })]);
@@ -77,12 +78,29 @@ export function showStats() {
     ]))),
   ]);
 
+  const share = el("button", { text: "📤 Condividi le statistiche", class: "secondary small-btn" });
+  share.addEventListener("click", async () => {
+    const lines = [
+      `Cellcittine · le statistiche di ${(localStorage.getItem("name") || "").trim() || "chi gioca"}`,
+      `🏅 ${t.title}`,
+      `Manche ${s.rounds} · Sfide ${s.challenges} · Vittorie ${s.victories} · Record ${s.records}`,
+      cats.length ? `Punti forti: ${cats.slice(0, 3).map((c) => `${c.icon} ${c.label} ${c.avg}%`).join(" · ")}` : null,
+      `Traguardi ${unlocked.length}/${ACHIEVEMENTS.length}${unlocked.length ? `: ${unlocked.slice(0, 5).map((a) => a.icon).join(" ")}` : ""}`,
+      s.dailies ? `Sfida del giorno: miglior totale ${formatPoints(s.dailyBest)}${s.streak > 1 ? ` · 🔥 ${s.streak} giorni di fila` : ""}` : null,
+      "https://jon1616.github.io/cellcittine/",
+    ].filter(Boolean);
+    const text = lines.join("\n");
+    if (navigator.share) { try { await navigator.share({ text }); return; } catch (_) { /* copia */ } }
+    try { await navigator.clipboard.writeText(text); toast("Statistiche copiate: incollale in chat"); } catch (_) { toast("Non riesco a copiare"); }
+  });
+
   show(
     el("h2", { text: "Le mie statistiche" }),
     head,
     strengths,
     games,
     badges,
+    share,
     el("div", { class: "spacer" }),
     el("button", { text: "Indietro", class: "secondary", onclick: () => showHome() })
   );

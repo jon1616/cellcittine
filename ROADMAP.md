@@ -36,8 +36,8 @@ mani, tema Compleanno, QR code, inglese.
 
 ## E. Piccole cose pratiche
 
-- [ ] **Rientra nella stanza**: se l'app si chiude per sbaglio, in home compare "Rientra nella stanza XXXX" per 10 minuti (per gli ospiti). Come: `localStorage.lastRoom`. — S
-- [ ] **Statistiche condivisibili**: dalla schermata delle statistiche, titolo e punti forti come testo da mandare in chat. — S
+- [x] **Rientra nella stanza**: se l'app si chiude per sbaglio, in home compare "Rientra nella stanza XXXX" per 10 minuti (per gli ospiti). Come: `localStorage.lastRoom`. (v0.42.0)
+- [x] **Statistiche condivisibili**: dalla schermata delle statistiche, titolo e punti forti come testo da mandare in chat. (v0.42.0)
 
 ## F. Più avanti
 

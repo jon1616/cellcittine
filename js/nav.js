@@ -13,6 +13,7 @@
 import { state, isSolo } from "./state.js";
 import { toast, hideToast } from "./ui.js";
 import { leaveRoom } from "./room.js";
+import { forgetLastRoom } from "./storage.js";
 import { showHome } from "./screens/home.js";
 import { showLobby } from "./screens/lobby.js";
 
@@ -45,6 +46,7 @@ function confirmBack(text, action) {
 
 function exitToHome() {
   leaveRoom();
+  forgetLastRoom();
   showHome();
 }
 

@@ -11,6 +11,7 @@ import { showHome } from "./screens/home.js";
 import { showLobby, broadcastConfig } from "./screens/lobby.js";
 import { handleMessage, checkRoundComplete, startChallenge } from "./challenge.js";
 import { dailyPlan } from "./daily.js";
+import { saveLastRoom, forgetLastRoom } from "./storage.js";
 import { smallestTeam } from "./teams.js";
 
 // ---------------------------------------------------------------
@@ -68,6 +69,7 @@ function makeNet() {
     },
     onDisconnected: () => {
       leaveRoom();
+      forgetLastRoom();
       showHome("La stanza è stata chiusa o non risponde più.");
     },
   });
@@ -92,6 +94,7 @@ export function exitButton(text = "Esci") {
     class: "secondary",
     onclick: () => {
       leaveRoom();
+      forgetLastRoom();
       showHome();
     },
   });
@@ -115,6 +118,7 @@ export async function joinRoom(code) {
   try {
     await state.net.join(code, state.name);
     keepScreenOn();
+    saveLastRoom(code); // se l'app si chiude per sbaglio, in home si può rientrare
     // Se rientrando abbiamo già ricevuto una manche o dei risultati, la schermata è già quella giusta
     if (!state.challenge) showLobby();
   } catch (err) {
