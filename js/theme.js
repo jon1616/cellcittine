@@ -64,6 +64,13 @@ export function currentTheme() {
   return seasonalTheme() || THEMES[0];
 }
 
+// Miscela due colori esadecimali (k = quanto del primo)
+function mix(a, b, k) {
+  const pa = a.match(/[0-9a-f]{2}/gi).map((h) => parseInt(h, 16));
+  const pb = b.match(/[0-9a-f]{2}/gi).map((h) => parseInt(h, 16));
+  return "#" + pa.map((v, i) => Math.round(v * k + pb[i] * (1 - k)).toString(16).padStart(2, "0")).join("");
+}
+
 export function applyTheme() {
   const t = currentTheme();
   const root = document.documentElement;
@@ -72,5 +79,8 @@ export function applyTheme() {
   if (t.accent) root.style.setProperty("--accent", t.accent);
   else root.style.removeProperty("--accent");
   root.dataset.theme = t.id;
+  // Barra di stato del telefono (Android): il colore di sfondo, scurito verso l'accento del tema
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute("content", t.accent ? mix(t.accent, "#1e1f34", 0.25) : "#1e1f34");
   return t;
 }

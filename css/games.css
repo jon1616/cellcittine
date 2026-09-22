@@ -622,3 +622,19 @@
 
 /* Chi è fuori (modalità a eliminazione) al conto alla rovescia */
 .out-banner { max-width: 340px; padding: 8px 14px; border-radius: 12px; font-size: 15px; font-weight: 600; color: #ffb4b4; background: rgba(255,77,109,0.18); border: 1px solid rgba(255,77,109,0.5); }
+
+/* Barra del tempo sotto l'intestazione (runTimer la aggiorna); "hurry" negli ultimi secondi */
+.game-progress { width: 100%; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.12); overflow: hidden; margin-top: -2px; opacity: 0; transition: opacity 0.3s; }
+.game-progress.on { opacity: 1; }
+.game-progress i { display: block; height: 100%; width: 100%; transform-origin: left; transform: scaleX(1); background: var(--accent); border-radius: 3px; transition: transform 0.1s linear, background 0.3s; }
+.game-shell.hurry .game-progress i { background: var(--danger); }
+.game-shell.hurry .game-timer { color: var(--danger); animation: hurry-pulse 0.5s ease-in-out infinite; }
+@keyframes hurry-pulse { 50% { transform: scale(1.15); } }
+
+/* Ingresso del minigioco e del conto alla rovescia */
+.game-shell, .game-area:not(.countdown) { animation: game-in 0.3s ease-out; }
+@keyframes game-in { from { opacity: 0; transform: scale(1.02); } to { opacity: 1; transform: none; } }
+.game-area.countdown { animation: screen-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.game-area.countdown img.countdown-icon { box-shadow: 0 0 0 4px var(--cat, transparent), 0 10px 30px rgba(0,0,0,0.4); }
+.game-area.countdown .big { color: var(--cat, var(--accent)); text-shadow: 0 0 24px var(--cat, var(--accent)); }
+@media (prefers-reduced-motion: reduce) { .game-shell, .game-area, .game-shell.hurry .game-timer { animation: none !important; } }

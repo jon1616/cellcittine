@@ -250,6 +250,20 @@ export async function showResults(msg) {
   );
 }
 
+// Tre gradini per i primi tre (2º a sinistra, 1º al centro, 3º a destra)
+function podiumSteps(standings, meId) {
+  const top = standings.slice(0, 3);
+  const order = [top[1], top[0], top[2]].filter(Boolean);
+  const heights = { 0: 96, 1: 70, 2: 52 };
+  return el("div", { class: "steps" }, order.map((s) => {
+    const rank = standings.indexOf(s);
+    return el("div", { class: `step${s.id === meId ? " me" : ""}`, style: `--c: ${playerColor(s.color)}; --h: ${heights[rank]}px; --i: ${rank}` }, [
+      el("div", { class: "step-name", text: s.name }),
+      el("div", { class: "step-block" }, [el("span", { class: "step-rank", text: String(rank + 1) }), el("span", { class: "step-pts", text: `${s.points} pt` })]),
+    ]);
+  }));
+}
+
 // Premi di fine sfida (calcolati dall'host, vedi awards.js)
 function awardsCard(awards, meId) {
   return el("div", { class: "card" }, [
@@ -460,6 +474,7 @@ export function showFinal(msg) {
         el("div", { class: "hint", text: winner ? `${winner.points} punti` : "" }),
       ])
     );
+    if (msg.standings.length >= 2) parts.push(podiumSteps(msg.standings, meId));
     parts.push(el("div", { class: "card" }, [standingsList(msg.standings, meId)]));
     if (msg.awards?.length) parts.push(awardsCard(msg.awards, meId));
   }

@@ -16,7 +16,7 @@ import { sfx } from "./audio.js";
 import { state, setScreen, isSolo } from "./state.js";
 import { setStatus, gameIcon, difficultyLabel, appRoot } from "./ui.js";
 import { syncBackGuard } from "./nav.js";
-import { getEntry, loadGame, preloadGames } from "./games/catalog.js";
+import { getEntry, getCategory, loadGame, preloadGames } from "./games/catalog.js";
 import { shuffle } from "./games/shell.js";
 import { updateRecord, markSeen } from "./storage.js";
 import { showLobby } from "./screens/lobby.js";
@@ -219,6 +219,9 @@ function showCountdown(entry, msg) {
       : el("div", { class: "hint", text: entry?.description || "" }),
     number,
   ]);
+  const cat = getCategory(entry?.category);
+  if (cat) area.style.setProperty("--cat", cat.color);
+  area.classList.add("countdown");
   appRoot().replaceChildren(area);
   syncBackGuard();
 

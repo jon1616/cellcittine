@@ -16,6 +16,7 @@ import { showRecords } from "./records.js";
 import { showCatalog } from "./catalog.js";
 import { showHistory } from "./history.js";
 import { showStats } from "./stats.js";
+import { playerTitle, summary } from "../stats.js";
 
 // message: riga di stato (per default in rosso: è quasi sempre un errore)
 export function showHome(message = "", isError = !!message) {
@@ -51,6 +52,7 @@ export function showHome(message = "", isError = !!message) {
     inviteCard(requireName),
     el("div", { class: "card" }, [
       nameInput,
+      titleRow(),
       el("button", { text: "Crea una stanza", onclick: () => requireName() && createRoom() }),
       el("button", { text: "Entra con un codice", class: "secondary", onclick: () => requireName() && showJoin() }),
       el("button", { text: "Allenamento", class: "secondary", onclick: () => requireName() && playSolo() }),
@@ -138,6 +140,14 @@ function inviteCard(requireName) {
     enter,
     el("button", { text: "Ignora l'invito", class: "link", onclick: () => { state.pendingCode = null; showHome(); } }),
   ]);
+}
+
+// Il titolo di chi gioca (dalle statistiche), sotto il nome: tocca per le statistiche
+function titleRow() {
+  const s = summary();
+  if (s.rounds < 5) return el("span");
+  const t = playerTitle();
+  return el("button", { class: "chip small title-chip", text: `🏅 ${t.title} · ${s.rounds} manche`, onclick: showStats });
 }
 
 // Sfida del giorno: 5 minigiochi uguali per tutti, oggi. Fatta = punteggio e condivisione.

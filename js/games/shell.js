@@ -7,23 +7,35 @@
 import { el } from "../utils.js";
 import { sfx } from "../audio.js";
 
+let currentShell = null; // la cornice del minigioco in corso: runTimer le aggiorna la barra del tempo
+
 export function createShell(container, { title, hint = "", color = "#26254a" }) {
   const timerEl = el("span", { class: "game-timer" });
   const hintEl = el("div", { class: "game-hint", text: hint });
   const body = el("div", { class: "game-body" });
+  const bar = el("i");
+  const progress = el("div", { class: "game-progress" }, [bar]);
   const area = el("div", { class: "game-area game-shell" }, [
     el("div", { class: "game-header" }, [el("span", { class: "game-title", text: title }), timerEl]),
+    progress,
     hintEl,
     body,
   ]);
   area.style.background = color;
   container.append(area);
 
-  return {
+  const shell = {
     area,
     body,
     setHint(text) { hintEl.textContent = text; },
     setTimer(text) { timerEl.textContent = text; },
+    // Barra del tempo: frazione rimanente 0..1 (rossa sotto il 15%)
+    setProgress(frac) {
+      const f = Math.max(0, Math.min(1, frac));
+      progress.classList.add("on"); // compare solo nei minigiochi con un tempo che scorre
+      bar.style.transform = `scaleX(${f})`;
+      area.classList.toggle("hurry", f > 0 && f < 0.15);
+    },
     setColor(bg) { area.style.background = bg; },
     // Schermata finale del minigioco, in attesa degli altri.
     showDone(text) {
@@ -34,8 +46,10 @@ export function createShell(container, { title, hint = "", color = "#26254a" }) 
         ])
       );
     },
-    remove() { area.remove(); },
+    remove() { area.remove(); if (currentShell === shell) currentShell = null; },
   };
+  currentShell = shell;
+  return shell;
 }
 
 // Conto alla rovescia in secondi. Ritorna una funzione per fermarlo.
@@ -52,6 +66,7 @@ export function runTimer(seconds, onTick, onEnd) {
       lastWhole = whole;
       if (whole > 0 && whole <= 3) sfx.play("tock");
     }
+    currentShell?.setProgress(remaining / (seconds * 1000));
     onTick(remaining / 1000);
     if (remaining <= 0) {
       stopped = true;

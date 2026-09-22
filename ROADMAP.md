@@ -94,9 +94,11 @@ Idee già discusse, tutte con suoni, prestazione e icona nello stile delle altre
 - [x] Origine e autore della musica in `assets/music/LICENSE.txt`: brano generato con IA dall'autore del progetto (v0.25.2)
 - [ ] Una musica per tema (Halloween, Natale, Estate), stesso trattamento CC0 + FFmpeg. — S per brano
 - [ ] Effetti sonori registrati (CC0) al posto di alcuni sintetizzati, sempre dal solo `audio.js`. — M
-- [ ] `theme-color` (barra di stato Android) che segue il tema. Come: `theme.js`. — S
+- [x] `theme-color` (barra di stato Android) segue il tema (v0.34.0)
 - [ ] Temi in più (Primavera, Compleanno) con sfondo e accento; evento "Compleanno" attivabile a mano per un giorno. — S per tema
-- [ ] Animazione di ingresso/uscita dei minigiochi (dissolvenza dal conto alla rovescia). — S
+- [x] Animazione di ingresso dei minigiochi e del conto alla rovescia; colore della categoria attorno all'icona e sul numero del conto alla rovescia (v0.34.0)
+- [x] Barra del tempo in ogni minigioco con conto alla rovescia (rossa e timer pulsante negli ultimi secondi), collegata a runTimer nel telaio (v0.34.0)
+- [x] Podio a tre gradini per i primi tre; titolo di chi gioca in home (🏅 Fulmine · 42 manche) che apre le statistiche (v0.34.0)
 
 ## 5. Rete e affidabilità (più avanti)
 
