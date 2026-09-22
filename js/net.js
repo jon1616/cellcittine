@@ -27,6 +27,12 @@ const COLORS = 8;                 // quante tinte diverse esistono (la palette s
 const JOIN_TIMEOUT = 15000;       // primo ingresso: tempo massimo totale
 const RECONNECT_WINDOW = 30000;   // quanto a lungo un ospite riprova dopo aver perso la linea
 const RECONNECT_EVERY = 2000;
+const HOST_GONE_MS = 12000;       // dopo tanto senza ritrovare l'host, un altro telefono prende il comando
+
+// Codice della stanza "successiva" (lettere spostate di k posti): lo sanno tutti senza parlarsi
+export function derivedCode(code, k = 1) {
+  return [...code].map((ch) => ALPHABET[(ALPHABET.indexOf(ch) + k + ALPHABET.length) % ALPHABET.length]).join("");
+}
 const PHASE_MESSAGES = new Set(["start", "results", "final", "lobby", "champion"]); // l'ultimo viene rimandato a chi rientra
 
 // Server per il collegamento fra telefoni (vedi relay.js): STUN per il collegamento
@@ -82,10 +88,11 @@ export class Net {
   // ---------------------------------------------------------------
   // HOST
   // ---------------------------------------------------------------
-  async host(name, attempt = 0) {
+  //   fixedCode: apre la stanza con quel codice (passaggio di host); altrimenti uno a caso
+  async host(name, attempt = 0, fixedCode = null) {
     const options = await peerOptions();
     return new Promise((resolve, reject) => {
-      const code = randomCode();
+      const code = fixedCode || randomCode();
       const peer = new Peer(PREFIX + code, options);
 
       peer.on("open", () => {
@@ -101,7 +108,7 @@ export class Net {
       peer.on("connection", (conn) => this._hostAccept(conn));
 
       peer.on("error", (err) => {
-        if (err.type === "unavailable-id" && attempt < 5) {
+        if (err.type === "unavailable-id" && attempt < 5 && !fixedCode) {
           peer.destroy();
           resolve(this.host(name, attempt + 1));
           return;
@@ -218,6 +225,12 @@ export class Net {
     this.broadcast({ type: "players", players: this.players });
   }
 
+  // Passaggio di host: questo telefono ospita da ora, con i partecipanti di prima (l'host vecchio escluso)
+  adopt(players, oldHostId) {
+    this.players = [this.me, ...players.filter((p) => p.id !== oldHostId && p.id !== this.me.id).map((p) => ({ ...p, isHost: false }))];
+    delete this.me.away; delete this.me.link;
+  }
+
   // Host → una sola persona (id stabile)
   sendTo(id, msg) {
     const conn = this.conns.get(id);
@@ -332,15 +345,23 @@ export class Net {
     });
   }
 
-  // Linea con l'host persa: riprova per un po', poi si arrende.
+  // Linea con l'host persa: riprova per un po'; se l'host non torna, passaggio di host (handlers.onHostGone).
   _lost() {
     if (this._leaving || this.reconnecting) return;
     this.reconnecting = true;
     this.hostConn = null;
     this.handlers.onLink?.("lost");
     const deadline = Date.now() + RECONNECT_WINDOW;
+    const goneAt = Date.now() + HOST_GONE_MS;
+    let goneTold = false;
     const attempt = async () => {
       if (this._leaving) return;
+      if (!goneTold && Date.now() > goneAt && this.handlers.onHostGone) {
+        goneTold = true;
+        this.reconnecting = false;
+        if (this.handlers.onHostGone() === true) return; // qualcuno prende il comando: basta riprovare il vecchio host
+        this.reconnecting = true;
+      }
       if (Date.now() > deadline) {
         this.reconnecting = false;
         this.handlers.onLink?.("failed");

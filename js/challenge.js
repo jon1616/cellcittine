@@ -177,6 +177,50 @@ export function finishChallenge() {
   showFinal(msg);
 }
 
+// Passaggio di host: la sfida (classifica e storia) continua da qui; le manche restanti si sorteggiano
+// di nuovo tra i minigiochi della sfida (le vecchie le conosceva solo l'host sparito). Se non c'era una
+// sfida in corso, si torna in stanza.
+export function resumeAfterHandover() {
+  const net = state.net;
+  const ch = state.challenge;
+  if (!ch || !ch.history || ch.total === 0) {
+    state.challenge = null; state.round = null;
+    showLobby();
+    return;
+  }
+  const done = ch.history.length;
+  const cfg = state.config;
+  const pool = cfg.games?.length ? cfg.games : [...new Set(ch.history.map((h) => h.gameId))];
+  const rng = seededRandom(Math.floor(Math.random() * 2 ** 31));
+  const rounds = ch.history.map((h) => ({ gameId: h.gameId, seed: 0 }));
+  let bag = [];
+  while (rounds.length < ch.total) {
+    if (!bag.length) bag = shuffle(pool, rng);
+    rounds.push({ gameId: bag.shift(), seed: Math.floor(rng() * 2 ** 31), special: null });
+  }
+  Object.assign(ch, { rounds, index: done - 1, teamStandings: ch.teamStandings || new Map(), teams: cfg.teams || 0, eliminated: ch.eliminated || new Map(), mode: ch.mode || "punti", presenter: false, daily: null, quick: false });
+  for (const s of ch.standings.values()) delete s.team;
+  state.round = null;
+  setScreen("handover");
+  sfx.setScene("menu");
+  const left = ch.total - done;
+  const btn = el("button", { text: left > 0 ? `Continua la sfida (manche ${done + 1} di ${ch.total})` : "Vedi il risultato finale", onclick: () => { clearInterval(t); left > 0 ? nextRound() : finishChallenge(); } });
+  let secs = 12;
+  const p = el("p", { text: `Gli altri stanno rientrando nella stanza ${net.code}… si riparte tra ${secs} s` });
+  const t = setInterval(() => { secs--; p.textContent = `Gli altri stanno rientrando nella stanza ${net.code}… si riparte tra ${secs} s`; if (secs <= 0) { clearInterval(t); if (state.screen === "handover") btn.click(); } }, 1000);
+  appRoot().replaceChildren(el("div", { class: "screen" }, [
+    el("h2", { text: "🎤 Hai preso il comando" }),
+    el("div", { class: "card" }, [
+      el("p", { text: `Chi aveva creato la stanza non risponde più. La sfida continua da qui, con i punti di tutti: ${done} ${done === 1 ? "manche giocata" : "manche giocate"} su ${ch.total}.` }),
+      el("div", { class: "code-big", text: net.code }),
+      p,
+    ]),
+    btn,
+    el("div", { class: "spacer" }),
+  ]));
+  syncBackGuard();
+}
+
 // Chiude il campionato (host): tutti vedono il campione
 export function closeChampionship() {
   const snap = endChampionship();

@@ -80,6 +80,8 @@ Modalità: `config.mode` = "punti" | "eliminazione" (challenge.mode; `ch.elimina
 
 Simbolo personale: `storage.getAvatar()` (emoji tra AVATARS), inviato nel `join`, campo `avatar` nei partecipanti; `colorDot(color, id)` di ui.js lo mostra al posto del pallino quando c'è.
 
+Passaggio di host: se gli ospiti non ritrovano l'host per 12 s (`HOST_GONE_MS`), `onHostGone` in room.js elegge chi ha l'id più piccolo, che riapre la stanza con il codice "successivo" (`derivedCode`, lettere +1) e adotta i partecipanti; gli altri provano quel codice per 45 s; `resumeAfterHandover` continua la sfida con la classifica di prima e nuove manche sorteggiate per le restanti (schermata "handover").
+
 Rete: i partecipanti sono identificati dall'id stabile del telefono (`getClientId`), mai dall'id PeerJS; i messaggi di fase (start/results/final/lobby) devono poter arrivare due volte senza effetti (guardie in `handleMessage`). In locale `window.cellcittine.state` espone lo stato per le prove.
 
 Regole di dipendenza tra i moduli: le schermate importano `state`, `ui`, i dati (catalog, storage,

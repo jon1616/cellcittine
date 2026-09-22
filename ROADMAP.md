@@ -43,7 +43,7 @@ QR code, inglese.
 
 ## 6. Rete
 
-- [ ] **Trasferimento dell'host**: se chi ha creato la stanza esce, un altro telefono prende il comando senza perdere la sfida (stato condiviso, nuovo codice annunciato a tutti). Ultimo, con prove a parte. — L
+- [x] **Trasferimento dell'host**: se chi ha creato la stanza esce, un altro telefono prende il comando senza perdere la sfida (stato condiviso, nuovo codice annunciato a tutti). Ultimo, con prove a parte. (v0.51.0)
 
 ## 7. Restyling grafico e sonoro (richiesta dell'utente, in coda)
 

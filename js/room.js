@@ -3,13 +3,13 @@
   Collega gli eventi di rete (net.js) alle schermate e alla sfida.
 */
 
-import { Net } from "./net.js";
+import { Net, derivedCode } from "./net.js";
 import { el } from "./utils.js";
 import { state } from "./state.js";
 import { setStatus, toast } from "./ui.js";
 import { showHome } from "./screens/home.js";
 import { showLobby, broadcastConfig } from "./screens/lobby.js";
-import { handleMessage, checkRoundComplete, startChallenge } from "./challenge.js";
+import { handleMessage, checkRoundComplete, startChallenge, resumeAfterHandover } from "./challenge.js";
 import { dailyPlan } from "./daily.js";
 import { saveLastRoom, forgetLastRoom } from "./storage.js";
 import { setExpert } from "./games/shell.js";
@@ -73,6 +73,8 @@ function makeNet() {
       forgetLastRoom();
       showHome("La stanza è stata chiusa o non risponde più.");
     },
+    // L'host non torna: chi ha l'id più piccolo tra gli altri prende il comando con il codice "successivo"
+    onHostGone: () => handoverHost(),
   });
 }
 
@@ -127,6 +129,72 @@ export async function joinRoom(code) {
     leaveRoom();
     throw err;
   }
+}
+
+// ---------------------------------------------------------------
+// Passaggio di host (quando chi ha creato la stanza sparisce)
+// ---------------------------------------------------------------
+
+function handoverHost() {
+  const old = state.net;
+  if (!old || old.isHost || !old.code) return false;
+  const others = old.players.filter((p) => !p.isHost).map((p) => p.id).sort();
+  if (others.length === 0) return false;
+  const oldHostId = old.players.find((p) => p.isHost)?.id;
+  const newCode = derivedCode(old.code, 1);
+  const meId = old.me.id;
+  const snapshot = { players: old.players.map((p) => ({ ...p })), name: old.me.name, oldHostId };
+  if (others[0] === meId) {
+    toast("L'host è sparito: prendo io il comando…");
+    old.leave();
+    takeOver(newCode, snapshot);
+  } else {
+    toast(`L'host è sparito: passo alla stanza ${newCode}…`);
+    old.leave();
+    followNewHost(newCode, snapshot.name);
+  }
+  return true;
+}
+
+async function takeOver(code, snapshot) {
+  const net = makeNet();
+  state.net = net;
+  try {
+    await net.host(snapshot.name, 0, code);
+  } catch (_) {
+    try { await net.host(snapshot.name, 0, derivedCode(code, 1)); } catch (err) { leaveRoom(); showHome(`Non sono riuscito a riaprire la stanza: ${err.message}`); return; }
+  }
+  net.adopt(snapshot.players, snapshot.oldHostId);
+  net.me.isHost = true;
+  // La configurazione era quella dell'host: diventa la mia
+  if (state.hostConfig) state.config = { ...state.config, ...state.hostConfig, pack: null };
+  state.hostConfig = null;
+  keepScreenOn();
+  resumeAfterHandover();
+}
+
+// Gli altri: provano il codice successivo per un po' (il nuovo host ci mette qualche secondo)
+async function followNewHost(code, name) {
+  const until = Date.now() + 45000;
+  let lastErr = null;
+  while (Date.now() < until) {
+    const net = makeNet();
+    state.net = net;
+    try {
+      await net.join(code, name);
+      keepScreenOn();
+      saveLastRoom(code);
+      toast("Stanza ritrovata!");
+      if (!state.challenge) showLobby();
+      return;
+    } catch (err) {
+      lastErr = err;
+      await new Promise((r) => setTimeout(r, 2500));
+    }
+  }
+  leaveRoom();
+  forgetLastRoom();
+  showHome(`Non ho ritrovato la stanza: ${lastErr?.message || "nessuno ha preso il comando"}`);
 }
 
 // ---------------------------------------------------------------
