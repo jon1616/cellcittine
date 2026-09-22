@@ -34,6 +34,7 @@ js/daily.js             Sfida del giorno: stessi 5 minigiochi per tutti, primo t
 js/specials.js          manche speciali (punti doppi, tutto o niente, rimonta…) e difficoltà crescente
 js/commentary.js        il commentatore (frasi dopo ogni manche)
 js/stats.js             statistiche personali e traguardi
+js/championship.js      campionato a giornate
 js/awards.js            premi di fine sfida · js/teams.js squadre
 js/audio.js             suoni sintetizzati (WebAudio) + musica di sottofondo, interruttori 🔊 e 🎵
 js/theme.js             temi: sfondo illustrato dei menu, stagionali per data o a scelta

@@ -27,7 +27,7 @@ const COLORS = 8;                 // quante tinte diverse esistono (la palette s
 const JOIN_TIMEOUT = 15000;       // primo ingresso: tempo massimo totale
 const RECONNECT_WINDOW = 30000;   // quanto a lungo un ospite riprova dopo aver perso la linea
 const RECONNECT_EVERY = 2000;
-const PHASE_MESSAGES = new Set(["start", "results", "final", "lobby"]); // l'ultimo viene rimandato a chi rientra
+const PHASE_MESSAGES = new Set(["start", "results", "final", "lobby", "champion"]); // l'ultimo viene rimandato a chi rientra
 
 // Server per il collegamento fra telefoni (vedi relay.js): STUN per il collegamento
 // diretto, più il ponte TURN se configurato. Con ?rete=ponte nell'indirizzo si usa

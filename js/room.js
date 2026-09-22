@@ -80,6 +80,7 @@ export function leaveRoom() {
   state.round = null;
   state.challenge = null;
   state.hostConfig = null;
+  state.championship = null;
 }
 
 export function exitButton(text = "Esci") {

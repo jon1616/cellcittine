@@ -42,6 +42,7 @@ js/specials.js       manche speciali (punti doppi, tutto o niente, rimonta, diff
 js/stats.js          statistiche per minigioco (recordRound a ogni manche), totali, punti forti, titolo, traguardi (ACHIEVEMENTS, checkAchievements a fine sfida)
 js/commentary.js     il commentatore: frasi dopo ogni manche (commentRound) e in allenamento (commentSolo), calcolate da tutti senza rete
 js/awards.js         premi di fine sfida (computeAwards dallo storico delle manche; inviati nel messaggio "final")
+js/championship.js   campionato: giornate (addDay dalla classifica finale), tabella (snapshot), chiusura (endChampionship); messaggi "final.championship" e "champion"
 js/teams.js          squadre: TEAMS, assegnazione bilanciata, classifica di squadra per manche (media dei membri)
 js/screens/home.js   home (nome, pulsanti, collegamenti, temi)
 js/screens/join.js   entra con un codice
@@ -78,6 +79,7 @@ Regole di dipendenza tra i moduli: le schermate importano `state`, `ui`, i dati 
 packs) e le altre schermate a cui portano; nessun modulo esegue codice al caricamento che usi
 un'altra schermata (i cicli di import sono ammessi solo tra funzioni). Nuova schermata = nuovo file in
 `js/screens/`, una voce in `state.screen`, un caso in `goBack()` di `nav.js`, riga in PRECACHE.
+Nuovo messaggio di fase (host → tutti, da rimandare a chi rientra): aggiungerlo a PHASE_MESSAGES in `net.js` e un caso con guardia in `handleMessage`.
 
 ## Contratto di un minigioco (`js/games/<id>.js`)
 

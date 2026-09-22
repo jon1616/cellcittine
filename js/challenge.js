@@ -24,6 +24,8 @@ import { showResults, showFinal } from "./screens/results.js";
 import { computeAwards } from "./awards.js";
 import { teamRound } from "./teams.js";
 import { SPECIALS, roundDifficulty, assignSpecials, applySpecial } from "./specials.js";
+import { addDay, endChampionship, isChampionship, startChampionship } from "./championship.js";
+import { showChampion } from "./screens/results.js";
 
 const COUNTDOWN_MS = 3500; // dal messaggio "start" al via
 const INTRO_MS = 7000;     // …quando per qualcuno è la prima volta: si legge come si gioca
@@ -136,8 +138,22 @@ export function replayChallenge() {
 export function finishChallenge() {
   const standings = standingsArray();
   const msg = { type: "final", standings, awards: computeAwards(state.challenge.history, standings), teamStandings: teamStandingsArray() };
+  // Campionato: questa sfida è una giornata
+  if (!isSolo() && state.config.championship) {
+    if (!isChampionship()) startChampionship();
+    msg.championship = addDay(standings);
+  }
   state.net.broadcast(msg);
   showFinal(msg);
+}
+
+// Chiude il campionato (host): tutti vedono il campione
+export function closeChampionship() {
+  const snap = endChampionship();
+  if (!snap) return;
+  const msg = { type: "champion", ...snap };
+  state.net.broadcast(msg);
+  showChampion(msg);
 }
 
 // ---------------------------------------------------------------
@@ -392,6 +408,12 @@ export function handleMessage(msg, fromId) {
       state.challenge = null;
       state.round = null;
       showLobby();
+      break;
+    case "champion":
+      if (state.screen === "champion") return;
+      state.challenge = null;
+      state.round = null;
+      showChampion(msg);
       break;
   }
 }

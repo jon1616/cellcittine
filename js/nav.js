@@ -76,6 +76,7 @@ function goBack() {
     case "game":
     case "results":
     case "final":
+    case "champion":
       confirmBack(inRoom ? "Premi ancora ◀ per abbandonare la sfida" : "Premi ancora ◀ per interrompere l'allenamento", exitToHome);
       break;
     default:

@@ -16,6 +16,8 @@ import { showHome } from "./home.js";
 import { showPicker } from "./picker.js";
 import { showSelectionList } from "./catalog.js";
 import { TEAM_OPTIONS, teamInfo, balancedAssignment } from "../teams.js";
+import { snapshot as championshipSnapshot, endChampionship } from "../championship.js";
+import { closeChampionship } from "../challenge.js";
 
 // ---------------------------------------------------------------
 // Configurazione della sfida (host)
@@ -25,7 +27,7 @@ export function broadcastConfig() {
   const cfg = state.config;
   state.net?.broadcast({
     type: "config",
-    config: { games: cfg.games, rounds: cfg.rounds, difficulty: cfg.difficulty, packName: packName(cfg), auto: cfg.auto, autoDelay: cfg.autoDelay, teams: cfg.teams, special: cfg.special },
+    config: { games: cfg.games, rounds: cfg.rounds, difficulty: cfg.difficulty, packName: packName(cfg), auto: cfg.auto, autoDelay: cfg.autoDelay, teams: cfg.teams, special: cfg.special, championship: cfg.championship, championshipDay: state.championship?.day || 0 },
   });
 }
 
@@ -190,6 +192,9 @@ function configPanel() {
       el("div", { class: "label", text: "Manche speciali" }),
       segmented([{ id: false, label: "No" }, { id: true, label: "Sì" }], cfg.special, (special) => updateConfig({ special })),
       el("p", { class: "small", text: cfg.special ? "A sorpresa: 🔥 punti doppi, 🎯 tutto o niente, 🚀 rimonta, ⚡ manche difficile, 🍃 manche facile; l'ultima vale doppio 🏁." : "Tutte le manche valgono uguale." }),
+      el("div", { class: "label", text: "Campionato" }),
+      segmented([{ id: false, label: "No" }, { id: true, label: "Sì" }], cfg.championship, (championship) => updateConfig({ championship })),
+      el("p", { class: "small", text: cfg.championship ? "Ogni sfida è una giornata: i punti per posizione si sommano in una classifica di campionato, finché non lo chiudi." : "Ogni sfida fa storia a sé." }),
     ]),
   ]);
 
@@ -245,12 +250,44 @@ function teamPill(p, canEdit) {
   return el("button", { ...attrs, title: "Cambia squadra", onclick: () => cycleTeam(p.id) });
 }
 
+// Campionato in corso (host): classifica e chiusura
+function championshipCard(snap) {
+  const close = el("button", { text: "Chiudi il campionato e proclama il campione", class: "link" });
+  close.addEventListener("click", () => {
+    if (close.dataset.armed) { closeChampionship(); return; }
+    close.dataset.armed = "1";
+    close.textContent = "Sicuro? Tocca ancora per chiudere";
+    setTimeout(() => { delete close.dataset.armed; close.textContent = "Chiudi il campionato e proclama il campione"; }, 3000);
+  });
+  const abandon = el("button", { text: "Annulla il campionato", class: "link" });
+  abandon.addEventListener("click", () => { endChampionship(); updateConfig({ championship: false }); });
+  return el("div", { class: "card champ" }, [
+    el("h2", { text: `🏆 Campionato · ${snap.day} ${snap.day === 1 ? "giornata giocata" : "giornate giocate"}` }),
+    championshipTable(snap.table, state.net.me.id),
+    el("p", { class: "small", text: "La prossima sfida sarà la giornata " + (snap.day + 1) + "." }),
+    close,
+    abandon,
+  ]);
+}
+
+// Tabella del campionato: posizione, nome, punti, giornate vinte
+export function championshipTable(table, meId) {
+  return el("ol", { class: "ranking champ-table" }, table.map((r, i) =>
+    el("li", { class: r.id === meId ? "me" : "", style: `--i: ${i}` }, [
+      el("span", { class: "pos", text: i === 0 ? "🏆" : String(i + 1) }),
+      el("span", { class: "who" }, [colorDot(r.color), el("span", { text: r.name })]),
+      el("span", { class: "score", text: `${r.wins} ${r.wins === 1 ? "vinta" : "vinte"}` }),
+      el("span", { class: "pts", text: `${r.points} pt` }),
+    ])
+  ));
+}
+
 // Riassunto per gli ospiti (dalla configurazione ricevuta dall'host).
 function configSummary(cfg) {
   const n = cfg.games.length;
   return el("div", { class: "card" }, [
     el("h2", { text: "La sfida" }),
-    el("p", { text: `${cfg.packName ? `Pacchetto ${cfg.packName} · ` : ""}${roundsLabel(cfg)} · ${difficultyLabel(cfg.difficulty)}${cfg.auto ? ` · manche automatiche (${cfg.autoDelay} s)` : ""}${cfg.teams ? ` · ${cfg.teams} squadre` : ""}${cfg.special ? " · manche speciali" : ""}` }),
+    el("p", { text: `${cfg.packName ? `Pacchetto ${cfg.packName} · ` : ""}${roundsLabel(cfg)} · ${difficultyLabel(cfg.difficulty)}${cfg.auto ? ` · manche automatiche (${cfg.autoDelay} s)` : ""}${cfg.teams ? ` · ${cfg.teams} squadre` : ""}${cfg.special ? " · manche speciali" : ""}${cfg.championship ? ` · campionato${cfg.championshipDay ? ` (giornata ${cfg.championshipDay + 1})` : ""}` : ""}` }),
     el("p", { class: "small", text: n ? `${n} ${n === 1 ? "minigioco" : "minigiochi"}: ${categoryBreakdown(cfg.games)}` : "" }),
     el("button", { text: "Vedi i minigiochi", class: "link", onclick: () => showSelectionList(cfg.games) }),
   ]);
@@ -306,6 +343,8 @@ export function showLobby() {
   }
 
   if (net.isHost) {
+    const snap = championshipSnapshot();
+    if (snap?.day) parts.push(championshipCard(snap));
     parts.push(...configPanel());
     const startBtn = el("button", { text: solo ? "Inizia!" : "Inizia la sfida!", onclick: () => startChallenge() });
     startBtn.disabled = state.config.games.length === 0;

@@ -525,3 +525,8 @@ input.code { letter-spacing: 8px; text-transform: uppercase; font-weight: 700; f
 .badge-text { display: flex; flex-direction: column; min-width: 0; }
 .badge-title { font-weight: 800; font-size: 14px; }
 .badge-desc { font-size: 11px; color: var(--muted); line-height: 1.25; }
+
+/* Campionato */
+.card.champ { border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+.champ-table li { grid-template-columns: 36px 1fr auto auto; animation: award-in 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; animation-delay: calc(0.2s + var(--i, 0) * 0.08s); }
+.champ-table .score { font-size: 13px; }

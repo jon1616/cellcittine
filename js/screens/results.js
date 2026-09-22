@@ -10,7 +10,8 @@ import { show, gameIcon, gameHeading, confetti, colorDot, playerColor } from "..
 import { getEntry, loadGame, getLoaded } from "../games/catalog.js";
 import { getRecord, addHistoryEntry } from "../storage.js";
 import { leaveRoom, exitButton } from "../room.js";
-import { nextRound, finishChallenge, replayChallenge } from "../challenge.js";
+import { nextRound, finishChallenge, replayChallenge, closeChampionship } from "../challenge.js";
+import { showLobby as showLobbyScreen, championshipTable } from "./lobby.js";
 import { showHome } from "./home.js";
 import { showLobby } from "./lobby.js";
 import { teamInfo, formatAvg } from "../teams.js";
@@ -337,6 +338,7 @@ function rememberChallenge(msg) {
     code: net.code,
     solo,
     daily: ch.daily?.key || null,
+    championshipDay: msg.championship?.day || null,
     rounds: ch.history.length,
     difficulty: ch.difficulty,
     games: ch.history.map((h) => h.gameId),
@@ -352,6 +354,37 @@ function rememberChallenge(msg) {
 function announceAchievements() {
   const fresh = checkAchievements();
   fresh.forEach((a, i) => setTimeout(() => { toast(`🏅 Traguardo: ${a.icon} ${a.title}!`); sfx.play("cheer"); }, 1800 + i * 2600));
+}
+
+// Chiusura del campionato: il campione e la tabella finale
+export function showChampion(msg) {
+  setScreen("champion");
+  sfx.play("fanfare");
+  confetti(140);
+  const net = state.net;
+  const meId = net.me.id;
+  const win = msg.table[0];
+  const tied = msg.table.filter((r) => win && r.points === win.points && r.wins === win.wins);
+  addHistoryEntry({
+    at: Date.now(), code: net.code, solo: false, championship: true, days: msg.day, rounds: 0, difficulty: null, games: [],
+    players: msg.table.map((r) => ({ id: r.id, name: r.name, color: r.color, points: r.points })),
+    winnerId: tied.length === 1 ? win.id : null, awards: [], teams: null, meId,
+  });
+  const actions = net.isHost
+    ? [el("button", { text: "Torna in stanza", onclick: () => { state.challenge = null; state.round = null; net.broadcast({ type: "lobby" }); showLobbyScreen(); } })]
+    : [el("p", { text: "Aspetta che l'host prepari una nuova sfida…" })];
+  show(
+    el("h2", { text: `Fine del campionato · ${msg.day} ${msg.day === 1 ? "giornata" : "giornate"}` }),
+    el("div", { class: "podium" }, [
+      el("div", { class: "podium-trophy", text: tied.length > 1 ? "🤝" : "🏆" }),
+      el("div", { class: "podium-name", text: tied.length > 1 ? "Pareggio!" : `${win?.name || ""}`, style: `--c: ${playerColor(win?.color)}` }),
+      el("div", { class: "hint", text: tied.length > 1 ? `${tied.map((r) => r.name).join(" e ")} a ${win.points} punti` : win ? `Campione con ${win.points} punti${win.id === meId ? " · sei tu!" : ""}` : "" }),
+    ]),
+    el("div", { class: "card champ" }, [championshipTable(msg.table, meId)]),
+    ...actions,
+    el("div", { class: "spacer" }),
+    exitButton()
+  );
 }
 
 export function showFinal(msg) {
@@ -428,12 +461,21 @@ export function showFinal(msg) {
     parts.push(el("div", { class: "card" }, [standingsList(msg.standings, meId)]));
     if (msg.awards?.length) parts.push(awardsCard(msg.awards, meId));
   }
+  if (msg.championship) {
+    const c = msg.championship;
+    parts.push(el("div", { class: "card champ" }, [
+      el("h2", { text: `🏆 Campionato · giornata ${c.day}` }),
+      championshipTable(c.table, meId),
+      el("p", { class: "small", text: c.table[0] ? `In testa ${c.table[0].name} con ${c.table[0].points} punti.` : "" }),
+    ]));
+  }
 
   const actions = net.isHost
     ? [
         el("button", { text: ch.daily ? "🔁 Rigioca per allenarti" : "🔁 Rivincita (stessa sfida)", class: ch.daily ? "secondary" : "", onclick: () => replayChallenge() }),
+        msg.championship ? el("button", { text: "🏆 Chiudi il campionato", class: "link", onclick: () => closeChampionship() }) : el("span"),
         ch.daily ? el("span") : el("button", {
-          text: solo ? "Cambia impostazioni" : "Nuova sfida",
+          text: solo ? "Cambia impostazioni" : msg.championship ? `Prossima giornata (${msg.championship.day + 1})` : "Nuova sfida",
           class: "secondary",
           onclick: () => {
             state.challenge = null;
