@@ -39,6 +39,7 @@ js/challenge.js      sfida e manche: startChallenge, nextRound, conto alla roves
 js/rating.js         prestazione in percentuale (0–100) per ogni minigioco: maxScore o riferimento in REFS
 js/daily.js          Sfida del giorno: piano dalla data (5 minigiochi, semi), primo tentativo, serie, testo da condividere
 js/specials.js       manche speciali (punti doppi, tutto o niente, rimonta, difficile/facile, finale doppia) e difficoltà "crescente"
+js/stats.js          statistiche per minigioco (recordRound a ogni manche), totali, punti forti, titolo, traguardi (ACHIEVEMENTS, checkAchievements a fine sfida)
 js/commentary.js     il commentatore: frasi dopo ogni manche (commentRound) e in allenamento (commentSolo), calcolate da tutti senza rete
 js/awards.js         premi di fine sfida (computeAwards dallo storico delle manche; inviati nel messaggio "final")
 js/teams.js          squadre: TEAMS, assegnazione bilanciata, classifica di squadra per manche (media dei membri)
@@ -49,6 +50,7 @@ js/screens/picker.js scelta dei minigiochi (ricerca, filtri, categorie)
 js/screens/catalog.js  catalogo, scheda di un minigioco, elenco dei minigiochi della sfida
 js/screens/records.js  i miei record
 js/screens/history.js  storico delle sfide giocate (storage.getHistory)
+js/screens/stats.js  statistiche personali e traguardi (stats.js)
 js/screens/results.js  risultati di manche e podio finale
 js/relay.js          server STUN + ponte TURN (Open Relay/metered.ca) se RELAY.app/apiKey sono impostati; iceServers() con credenziali temporanee
 js/net.js            P2P (PeerJS): host(), join(), broadcast(), sendToHost(), now() sincronizzato; id stabile per telefono, ricollegamento automatico degli ospiti (30 s), ultimo messaggio di fase rimandato a chi rientra; server ICE da relay.js, ?rete=ponte per forzare il ponte

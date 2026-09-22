@@ -506,3 +506,22 @@ input.code { letter-spacing: 8px; text-transform: uppercase; font-weight: 700; f
 .ranking .score.bumped { animation: bump 0.3s; color: var(--text); }
 @keyframes bump { 50% { transform: scale(1.18); } }
 @media (prefers-reduced-motion: reduce) { .comment, .ranking.animated li { animation: none !important; } }
+
+/* Statistiche personali */
+.stats-head { align-items: stretch; }
+.stats-title { font-size: 30px; font-weight: 800; text-align: center; background: linear-gradient(180deg, #fff2c2, var(--accent) 60%); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 2px 10px var(--accent-glow)); }
+.bars { display: flex; flex-direction: column; gap: 8px; }
+.bar-row { display: grid; grid-template-columns: 120px 1fr 44px; align-items: center; gap: 8px; font-size: 14px; }
+.bar { height: 12px; border-radius: 999px; background: rgba(0,0,0,0.25); overflow: hidden; border: 1px solid var(--line); }
+.bar i { display: block; height: 100%; border-radius: 999px; background: var(--c, var(--accent)); box-shadow: 0 0 10px var(--c, var(--accent)); animation: bar-grow 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.bar-val { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+@keyframes bar-grow { from { width: 0; } }
+.ranking.compact li { padding: 8px 12px; font-size: 15px; }
+.ranking.compact .pos { font-size: 16px; }
+.badges { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.badge-card { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 12px; background: rgba(0,0,0,0.18); border: 1px solid var(--line); opacity: 0.55; }
+.badge-card.on { opacity: 1; border-color: color-mix(in srgb, var(--accent) 55%, transparent); background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 16%, transparent), rgba(0,0,0,0.18)); }
+.badge-icon { font-size: 24px; line-height: 1; width: 30px; text-align: center; flex: 0 0 auto; }
+.badge-text { display: flex; flex-direction: column; min-width: 0; }
+.badge-title { font-weight: 800; font-size: 14px; }
+.badge-desc { font-size: 11px; color: var(--muted); line-height: 1.25; }

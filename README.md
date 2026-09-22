@@ -22,7 +22,7 @@ js/ui.js                mattoni dell'interfaccia (schermate, stato, toast, icone
 js/nav.js               tasto indietro di Android
 js/room.js              stanza: crea / entra / allenamento / esci
 js/challenge.js         sfida e manche: avvio, conto alla rovescia, punteggi, classifiche, messaggi
-js/screens/*.js         una schermata per file: home, join, lobby, picker, catalog, records, results
+js/screens/*.js         una schermata per file: home, join, lobby, picker, catalog, records, history, stats, results
 js/net.js               collegamento P2P (PeerJS), modello host-arbitro
 js/packs.js             pacchetti di minigiochi (integrati + personali)
 js/storage.js           salvataggi: configurazione, record, pacchetti personali
@@ -33,6 +33,7 @@ js/rating.js            prestazione in percentuale per ogni minigioco (Sfida del
 js/daily.js             Sfida del giorno: stessi 5 minigiochi per tutti, primo tentativo, serie, condivisione
 js/specials.js          manche speciali (punti doppi, tutto o niente, rimonta…) e difficoltà crescente
 js/commentary.js        il commentatore (frasi dopo ogni manche)
+js/stats.js             statistiche personali e traguardi
 js/awards.js            premi di fine sfida · js/teams.js squadre
 js/audio.js             suoni sintetizzati (WebAudio) + musica di sottofondo, interruttori 🔊 e 🎵
 js/theme.js             temi: sfondo illustrato dei menu, stagionali per data o a scelta

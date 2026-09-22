@@ -54,6 +54,7 @@ function goBack() {
   switch (state.screen) {
     case "records":
     case "history":
+    case "stats":
     case "catalog":
     case "join":
       showHome();

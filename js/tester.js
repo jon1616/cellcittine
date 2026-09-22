@@ -552,6 +552,14 @@ async function testAllenamento(gameId, difficulty) {
     finalBtn.click();
     await waitFor("la schermata finale", () => /completat/i.test(doc.querySelector("#app")?.textContent || ""), 3000);
     steps.push("fine");
+    // Statistiche: la manche appena giocata deve risultare
+    button("Cambia impostazioni")?.click();
+    (await waitFor("il pulsante Esci", () => button("Esci"), 3000)).click();
+    (await waitFor("la home", () => button("📊 Statistiche"), 3000)).click();
+    await waitFor("le statistiche", () => /Le mie statistiche/.test(doc.querySelector("#app")?.textContent || ""), 3000);
+    const stats = JSON.parse(win.localStorage.getItem("stats") || "{}");
+    if (!stats[gameId] || stats[gameId].n < 1) errors.push(`le statistiche non registrano la manche di ${gameId}: ${JSON.stringify(stats)}`);
+    else steps.push("statistiche");
   } catch (e) {
     errors.push(e.message);
   }

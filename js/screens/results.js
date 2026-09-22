@@ -17,6 +17,8 @@ import { teamInfo, formatAvg } from "../teams.js";
 import { ratingOf, ratingBar, ratingLabel } from "../rating.js";
 import { SPECIALS } from "../specials.js";
 import { positionsAfter } from "../awards.js";
+import { recordRound, checkAchievements } from "../stats.js";
+import { toast } from "../ui.js";
 import { commentRound, commentSolo } from "../commentary.js";
 import { DAILY_ROUNDS, DAILY_ROUND_MAX, dailyLabel, formatPoints, todayResult, recordDaily, dailyStreak, shareText } from "../daily.js";
 
@@ -170,6 +172,12 @@ export async function showResults(msg) {
   const meId = net.me.id;
   sfx.play(round?.isRecord ? "record" : "roundEnd");
   const ch = state.challenge;
+  // Statistiche personali: questa manche
+  if (round && round.myScore !== undefined) {
+    const best = msg.ranking.find((r) => r.score !== null && r.score !== undefined);
+    const mine = msg.ranking.find((r) => r.id === meId);
+    recordRound(msg.gameId, { pct: ratingOf(game, round.myScore, round.params), won: !solo && !!mine && !!best && mine.score === best.score, solo, seconds: getEntry(msg.gameId)?.duration || 0 });
+  }
   const prev = solo ? null : previousStandings(ch.history, msg.standings);
   const cfg0 = net.isHost ? state.config : state.hostConfig;
   const lines = solo
@@ -340,10 +348,17 @@ function rememberChallenge(msg) {
   });
 }
 
+// Traguardi appena sbloccati: un avviso alla volta, dopo il podio
+function announceAchievements() {
+  const fresh = checkAchievements();
+  fresh.forEach((a, i) => setTimeout(() => { toast(`🏅 Traguardo: ${a.icon} ${a.title}!`); sfx.play("cheer"); }, 1800 + i * 2600));
+}
+
 export function showFinal(msg) {
   setScreen("final");
   sfx.play("fanfare");
   rememberChallenge(msg);
+  announceAchievements();
   if (!isSolo() || (state.challenge?.history.length || 0) > 0) confetti();
   const net = state.net;
   const ch = state.challenge;

@@ -2,7 +2,7 @@
   Stato condiviso dell'app: un solo oggetto, importato da tutti i moduli.
   Chi cambia schermata chiama setScreen(); chi vuole sapere dove siamo legge state.screen.
 
-  Schermate: "home" | "records" | "history" | "catalog" | "info" | "join" | "lobby" | "list" |
+  Schermate: "home" | "records" | "history" | "stats" | "catalog" | "info" | "join" | "lobby" | "list" |
              "picker" | "countdown" | "game" | "results" | "final"
 */
 

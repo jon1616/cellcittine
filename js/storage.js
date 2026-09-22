@@ -9,7 +9,9 @@ const KEY_HISTORY = "history";
 const KEY_FAVORITES = "favorites"; // minigiochi preferiti (stellina nella scelta)
 const KEY_SEEN = "seen";
 const KEY_DAILY = "daily"; // risultati della Sfida del giorno: { "AAAA-MM-GG": { total, rounds, at } }
-const DAILY_MAX = 120; // giorni ricordati // minigiochi già giocati su questo telefono (per la presentazione lunga la prima volta)
+const DAILY_MAX = 120; // giorni ricordati
+const KEY_STATS = "stats"; // statistiche per minigioco (vedi stats.js)
+const KEY_ACHIEVEMENTS = "achievements"; // traguardi sbloccati: { id: data } // minigiochi già giocati su questo telefono (per la presentazione lunga la prima volta)
 const HISTORY_MAX = 60; // sfide ricordate sul telefono
 
 export const DIFFICULTIES = [
@@ -181,6 +183,28 @@ export function saveDailyResult(key, result) {
   const keys = Object.keys(all).sort();
   while (keys.length > DAILY_MAX) delete all[keys.shift()];
   write(KEY_DAILY, all);
+}
+
+// ---------------------------------------------------------------
+// Statistiche per minigioco e traguardi (la logica sta in stats.js)
+// ---------------------------------------------------------------
+
+export function getStats() {
+  const obj = read(KEY_STATS, {});
+  return obj && typeof obj === "object" && !Array.isArray(obj) ? obj : {};
+}
+
+export function saveStats(stats) {
+  write(KEY_STATS, stats);
+}
+
+export function getAchievements() {
+  const obj = read(KEY_ACHIEVEMENTS, {});
+  return obj && typeof obj === "object" && !Array.isArray(obj) ? obj : {};
+}
+
+export function saveAchievements(obj) {
+  write(KEY_ACHIEVEMENTS, obj);
 }
 
 // ---------------------------------------------------------------
