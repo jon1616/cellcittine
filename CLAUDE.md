@@ -46,7 +46,7 @@ js/championship.js   campionato: giornate (addDay dalla classifica finale), tabe
 js/teams.js          squadre: TEAMS, assegnazione bilanciata, classifica di squadra per manche (media dei membri)
 js/screens/home.js   home (nome, pulsanti, collegamenti, temi)
 js/screens/join.js   entra con un codice
-js/screens/lobby.js  stanza + configurazione della sfida (pacchetti, manche, difficoltà, updateConfig/broadcastConfig)
+js/screens/lobby.js  stanza + configurazione della sfida (pacchetti, manche, difficoltà; riquadro "In più": squadre, modalità, manche speciali, campionato; updateConfig/broadcastConfig)
 js/screens/picker.js scelta dei minigiochi (ricerca, filtri, categorie)
 js/screens/catalog.js  catalogo, scheda di un minigioco, elenco dei minigiochi della sfida
 js/screens/records.js  i miei record

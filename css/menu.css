@@ -545,3 +545,8 @@ input.code { letter-spacing: 8px; text-transform: uppercase; font-weight: 700; f
 .step-rank { font-size: 26px; font-weight: 800; line-height: 1; }
 .step-pts { font-size: 12px; font-weight: 700; opacity: 0.85; }
 .screen .title-chip { align-self: center; margin-top: -4px; }
+
+/* Stanza: opzioni "in più" richiudibili */
+.extras-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.screen .extras-toggle { flex: 0 0 auto; }
+.extras-summary { font-size: 13px; color: var(--muted); text-align: right; }

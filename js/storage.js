@@ -221,7 +221,7 @@ export function getUserPacks() {
   return Array.isArray(packs) ? packs : [];
 }
 
-// rules (facoltativo): { rounds, difficulty, auto, autoDelay, special } salvate insieme ai minigiochi
+// rules (facoltativo): { rounds, difficulty, auto, autoDelay, special, mode } salvate insieme ai minigiochi
 export function saveUserPack(name, games, rules = null) {
   const packs = getUserPacks();
   const clean = name.trim().slice(0, 24) || "Il mio pacchetto";

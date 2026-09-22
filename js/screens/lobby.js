@@ -129,7 +129,7 @@ function savePackForm() {
     rulesChip.addEventListener("click", () => { withRules = !withRules; rulesChip.classList.toggle("on", withRules); });
     save.addEventListener("click", () => {
       const cfg = state.config;
-      const rules = withRules ? { rounds: cfg.rounds, difficulty: cfg.difficulty, auto: cfg.auto, autoDelay: cfg.autoDelay, special: cfg.special } : null;
+      const rules = withRules ? { rounds: cfg.rounds, difficulty: cfg.difficulty, auto: cfg.auto, autoDelay: cfg.autoDelay, special: cfg.special, mode: cfg.mode } : null;
       const pack = saveUserPack(input.value, cfg.games, rules);
       updateConfig({ pack: { type: "user", id: pack.id } });
     });
@@ -186,7 +186,28 @@ function configPanel() {
       (auto) => updateConfig({ auto })
     ),
     cfg.auto ? autoDelayRow() : el("p", { class: "small", text: "Chi ha creato la stanza tocca “Prossima manche”" }),
-    ...(isSolo() ? [] : [
+  ]);
+
+  return isSolo() ? [selectionCard, rulesCard] : [selectionCard, rulesCard, extrasCard(cfg, net)];
+}
+
+// Le opzioni "in più" (squadre, modalità, manche speciali, campionato): chiuse per
+// default con un riassunto, aperte al tocco.
+let extrasOpen = false;
+function extrasSummary(cfg) {
+  const parts = [];
+  if (cfg.teams) parts.push(`${cfg.teams} squadre`);
+  if (!cfg.teams && cfg.mode === "eliminazione") parts.push("a eliminazione");
+  if (cfg.special) parts.push("manche speciali");
+  if (cfg.championship) parts.push("campionato");
+  return parts.length ? parts.join(" · ") : "Niente di attivo: classica sfida a punti";
+}
+function extrasCard(cfg, net) {
+  const toggle = el("button", { class: "cat-toggle extras-toggle", text: `${extrasOpen ? "▾" : "▸"} In più`, onclick: () => { extrasOpen = !extrasOpen; showLobby(); } });
+  const head = el("div", { class: "extras-head" }, [toggle, el("span", { class: "extras-summary", text: extrasSummary(cfg) })]);
+  if (!extrasOpen) return el("div", { class: "card extras" }, [head]);
+  return el("div", { class: "card extras" }, [
+    head,
       el("div", { class: "label", text: "Squadre" }),
       segmented(TEAM_OPTIONS, cfg.teams, (teams) => setTeams(teams)),
       cfg.teams ? el("p", { class: "small", text: "Tocca la squadra accanto a un nome per cambiarla. Conta la media dei punti dei membri." }) : el("span"),
@@ -201,10 +222,7 @@ function configPanel() {
       el("div", { class: "label", text: "Campionato" }),
       segmented([{ id: false, label: "No" }, { id: true, label: "Sì" }], cfg.championship, (championship) => updateConfig({ championship })),
       el("p", { class: "small", text: cfg.championship ? "Ogni sfida è una giornata: i punti per posizione si sommano in una classifica di campionato, finché non lo chiudi." : "Ogni sfida fa storia a sé." }),
-    ]),
   ]);
-
-  return [selectionCard, rulesCard];
 }
 
 // Attesa tra le manche (manche automatiche): cursore da AUTO_MIN a AUTO_MAX secondi.
