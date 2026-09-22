@@ -327,7 +327,7 @@ function playersList(players, meId, { teams = 0, canEdit = false } = {}) {
     { class: "players" },
     players.map((p) =>
       el("li", { class: p.id === meId ? "me" : "" }, [
-        el("span", { class: "who" }, [colorDot(p.color), el("span", { text: p.name })]),
+        el("span", { class: "who" }, [colorDot(p.color), el("span", { text: p.name }), p.away ? el("span", { class: "away", title: "App in secondo piano", text: "💤" }) : el("span")]),
         el("span", { class: "player-right" }, [
           teams ? teamPill(p, canEdit) : el("span"),
           el("span", { class: "tag", text: p.isHost ? "host" : "" }),
@@ -372,6 +372,8 @@ export function showLobby() {
     parts.push(...configPanel());
     const startBtn = el("button", { text: solo ? "Inizia!" : "Inizia la sfida!", onclick: () => startChallenge() });
     startBtn.disabled = state.config.games.length === 0;
+    const away = net.players.filter((p) => p.away).map((p) => p.name);
+    if (away.length) parts.push(el("p", { class: "small", text: `💤 ${away.join(", ")} ${away.length === 1 ? "è altrove" : "sono altrove"} (app in secondo piano): aspetta o inizia comunque.` }));
     parts.push(startBtn);
     if (state.config.games.length === 0) parts.push(el("p", { class: "small", text: "Scegli almeno un minigioco" }));
   } else {

@@ -140,6 +140,7 @@ export class Net {
             this.players.push(player);
           }
           if (Array.isArray(msg.seen)) this.seenBy.set(id, new Set(msg.seen.map(String)));
+          delete player.away; // chi (ri)entra è presente
           conn.send({ type: "welcome", you: player, players: this.players, hostTime: Date.now() });
           // Chi rientra riceve il punto in cui siamo; chi è nuovo a sfida iniziata vede
           // i risultati correnti (giocherà dalla prossima manche), ma non una manche già partita.

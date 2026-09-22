@@ -177,8 +177,11 @@ async function beginRound(msg) {
   if (Array.isArray(msg.out)) { state.challenge.eliminated = new Map(msg.out.map((id) => [id, true])); }
 
   // Segnaposto subito (così i messaggi di questa manche non vengono scartati)…
-  state.round = { index: msg.index, game: null, params: null, startAt: msg.startAt, difficulty: msg.difficulty, special: msg.special || null, scores: new Map(), records: new Set(), participants: net.players.map((p) => p.id), deadline: null };
+  state.round = { index: msg.index, game: null, params: null, startAt: msg.startAt, difficulty: msg.difficulty, special: msg.special || null, scores: new Map(), records: new Set(), participants: net.players.map((p) => p.id), deadline: null, ready: new Set() };
   showCountdown(getEntry(msg.gameId), msg);
+  // "Sono pronto": l'host raccoglie e rimanda a tutti la lista di chi ha il conto alla rovescia a schermo
+  if (net.isHost) markReady(net.me.id, msg.index);
+  else net.sendToHost({ type: "ready", index: msg.index });
 
   // …poi il codice del minigioco, caricato a richiesta.
   let game;
@@ -196,6 +199,26 @@ async function beginRound(msg) {
   if (state.round?.index !== msg.index) return; // nel frattempo è cambiato qualcosa
   state.round.game = game;
   state.round.params = game.createParams(seededRandom(msg.seed), msg.difficulty);
+}
+
+// Host: una persona è pronta per la manche `index`; tutti ricevono la lista aggiornata
+function markReady(id, index) {
+  const round = state.round;
+  const net = state.net;
+  if (!round || round.index !== index || !net?.isHost) return;
+  round.ready.add(id);
+  const ids = [...round.ready];
+  net.broadcast({ type: "ready", index, ids });
+  renderReady(ids);
+}
+
+// Lista dei nomi nel conto alla rovescia: ✓ a chi è pronto
+function renderReady(ids) {
+  const list = document.querySelector(".ready-list");
+  const net = state.net;
+  if (!list || !net) return;
+  const ready = new Set(ids);
+  list.replaceChildren(...net.players.map((p) => el("span", { class: `ready-name${ready.has(p.id) ? " on" : ""}`, text: `${ready.has(p.id) ? "✓ " : ""}${p.name}` })));
 }
 
 function showCountdown(entry, msg) {
@@ -218,12 +241,14 @@ function showCountdown(entry, msg) {
       ? el("div", { class: "howto-intro" }, [el("div", { class: "howto-label", text: "Come si gioca" }), el("div", { text: entry?.howTo || entry?.description || "" })])
       : el("div", { class: "hint", text: entry?.description || "" }),
     number,
+    isSolo() ? el("span") : el("div", { class: "ready-list" }),
   ]);
   const cat = getCategory(entry?.category);
   if (cat) area.style.setProperty("--cat", cat.color);
   area.classList.add("countdown");
   appRoot().replaceChildren(area);
   syncBackGuard();
+  if (!isSolo()) renderReady(net.isHost ? [net.me.id] : []);
 
   const tick = () => {
     if (state.round?.index !== msg.index || !state.net) return; // manche annullata
@@ -386,6 +411,16 @@ function publishResults() {
   showResults(msg);
 }
 
+// Host: chi ha l'app in secondo piano (💤 in stanza)
+export function setPresence(id, away) {
+  const net = state.net;
+  const p = net?.players.find((x) => x.id === id);
+  if (!p || !!p.away === away) return;
+  if (away) p.away = true; else delete p.away;
+  net.broadcastPlayers();
+  net.handlers.onPlayers?.(net.players);
+}
+
 export function teamStandingsArray() {
   const ch = state.challenge;
   if (!ch?.teams) return null;
@@ -415,8 +450,11 @@ export function handleMessage(msg, fromId) {
 
   if (net.isHost) {
     if (msg.type === "result" && msg.index === state.round?.index) recordScore(fromId, msg.score, msg.record === true);
+    else if (msg.type === "ready") markReady(fromId, msg.index);
+    else if (msg.type === "presence") setPresence(fromId, msg.away === true);
     return;
   }
+  if (msg.type === "ready") { if (state.round?.index === msg.index && state.screen === "countdown") renderReady(msg.ids || []); return; }
 
   // Dopo un rientro l'host rimanda l'ultimo messaggio di fase: se lo abbiamo già, niente doppioni.
   switch (msg.type) {

@@ -81,6 +81,7 @@ Regole di dipendenza tra i moduli: le schermate importano `state`, `ui`, i dati 
 packs) e le altre schermate a cui portano; nessun modulo esegue codice al caricamento che usi
 un'altra schermata (i cicli di import sono ammessi solo tra funzioni). Nuova schermata = nuovo file in
 `js/screens/`, una voce in `state.screen`, un caso in `goBack()` di `nav.js`, riga in PRECACHE.
+Messaggi "leggeri" (non di fase, non rimandati a chi rientra): `ready` (ospite → host → tutti, chi ha il conto alla rovescia a schermo), `presence` (ospite → host, app in secondo piano → campo `away` nei partecipanti).
 Nuovo messaggio di fase (host → tutti, da rimandare a chi rientra): aggiungerlo a PHASE_MESSAGES in `net.js` e un caso con guardia in `handleMessage`.
 
 ## Contratto di un minigioco (`js/games/<id>.js`)

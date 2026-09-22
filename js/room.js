@@ -37,6 +37,9 @@ function letScreenSleep() {
 
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden && state.net) keepScreenOn();
+  // Presenza: l'host mostra 💤 accanto a chi ha l'app in secondo piano
+  const net = state.net;
+  if (net && !net.isHost && net.code) net.sendToHost({ type: "presence", away: document.hidden });
 });
 
 function makeNet() {

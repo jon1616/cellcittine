@@ -550,3 +550,11 @@ input.code { letter-spacing: 8px; text-transform: uppercase; font-weight: 700; f
 .extras-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .screen .extras-toggle { flex: 0 0 auto; }
 .extras-summary { font-size: 13px; color: var(--muted); text-align: right; }
+
+/* Presenza in stanza */
+.away { font-size: 14px; opacity: 0.8; }
+/* Classifica di manche: righe che entrano, punteggio che si svela */
+.ranking.reveal li { animation: award-in 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; animation-delay: calc(var(--i, 0) * 0.16s); }
+.ranking.reveal li .score, .ranking.reveal li .pts { animation: fade-in 0.3s both; animation-delay: calc(0.25s + var(--i, 0) * 0.16s); }
+@keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .ranking.reveal li, .ranking.reveal li .score, .ranking.reveal li .pts { animation: none !important; } }

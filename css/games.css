@@ -638,3 +638,8 @@
 .game-area.countdown img.countdown-icon { box-shadow: 0 0 0 4px var(--cat, transparent), 0 10px 30px rgba(0,0,0,0.4); }
 .game-area.countdown .big { color: var(--cat, var(--accent)); text-shadow: 0 0 24px var(--cat, var(--accent)); }
 @media (prefers-reduced-motion: reduce) { .game-shell, .game-area, .game-shell.hurry .game-timer { animation: none !important; } }
+
+/* Chi è pronto, nel conto alla rovescia */
+.ready-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; max-width: 360px; }
+.ready-name { font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.12); transition: background 0.2s, color 0.2s; }
+.ready-name.on { background: color-mix(in srgb, var(--ok) 25%, transparent); color: #fff; border-color: var(--ok); }

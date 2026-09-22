@@ -189,9 +189,9 @@ export async function showResults(msg) {
 
   const roundList = el(
     "ol",
-    { class: "ranking" },
+    { class: `ranking${solo ? "" : " reveal"}` },
     msg.ranking.map((r, i) =>
-      el("li", { class: `${r.id === meId ? "me" : ""}${r.out ? " out" : ""}${r.eliminatedNow ? " eliminated" : ""}` }, [
+      el("li", { class: `${r.id === meId ? "me" : ""}${r.out ? " out" : ""}${r.eliminatedNow ? " eliminated" : ""}`, style: `--i: ${i}` }, [
         el("span", { class: "pos", text: solo ? "" : r.out ? "💀" : r.eliminatedNow ? "❌" : i === 0 ? "🏆" : String(i + 1) }),
         el("span", { class: "who" }, [
           solo ? el("span") : colorDot(r.color),
