@@ -18,6 +18,11 @@ import { showHistory } from "./history.js";
 import { showStats } from "./stats.js";
 import { playerTitle, summary } from "../stats.js";
 import { AVATARS, getAvatar, setAvatar, getLastRoom, forgetLastRoom } from "../storage.js";
+import { missionStatus, weekLabel } from "../missions.js";
+import { dailyGame } from "../daily.js";
+import { getEntry } from "../games/catalog.js";
+import { gameIcon } from "../ui.js";
+import { playQuick } from "../room.js";
 
 // message: riga di stato (per default in rosso: è quasi sempre un errore)
 export function showHome(message = "", isError = !!message) {
@@ -61,6 +66,7 @@ export function showHome(message = "", isError = !!message) {
       el("button", { text: "Allenamento", class: "secondary", onclick: () => requireName() && playSolo() }),
     ]),
     dailyCard(requireName),
+    missionsCard(),
     el("div", { class: "links" }, [
       el("button", { text: "I miei record", class: "link", onclick: showRecords }),
       el("button", { text: "Storico", class: "link", onclick: showHistory }),
@@ -166,6 +172,26 @@ function inviteCard(requireName) {
     el("p", { text: state.name ? "Ti hanno invitato a giocare!" : "Ti hanno invitato a giocare! Scrivi il tuo nome qui sotto, poi entra." }),
     enter,
     el("button", { text: "Ignora l'invito", class: "link", onclick: () => { state.pendingCode = null; showHome(); } }),
+  ]);
+}
+
+// Missioni della settimana + minigioco del giorno
+function missionsCard() {
+  const st = missionStatus();
+  const g = getEntry(dailyGame());
+  const rows = st.list.map((m) => el("div", { class: `mission${m.done ? " done" : ""}` }, [
+    el("span", { class: "mission-icon", text: m.done ? "✅" : m.icon }),
+    el("span", { class: "mission-text" }, [el("span", { text: m.text(m.target) }), el("span", { class: "bar" }, [el("i", { style: `width: ${Math.round((m.progress / m.target) * 100)}%` })])]),
+    el("span", { class: "mission-num", text: `${m.progress}/${m.target}` }),
+  ]));
+  return el("div", { class: "card missions" }, [
+    el("div", { class: "daily-head" }, [el("span", { class: "daily-title", text: st.complete ? "🗓️ Settimana piena!" : "🎯 Missioni della settimana" }), el("span", { class: "daily-date", text: weekLabel(st.key) })]),
+    ...rows,
+    g ? el("div", { class: "mission today" }, [
+      gameIcon(g, "list-icon"),
+      el("span", { class: "mission-text" }, [el("span", { text: `Minigioco del giorno: ${g.title}` }), el("span", { class: "small", text: "In allenamento conta doppio per le missioni" })]),
+      el("button", { class: "chip small", text: "▶ Prova", onclick: () => playQuick(g.id) }),
+    ]) : el("span"),
   ]);
 }
 

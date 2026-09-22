@@ -16,6 +16,13 @@ const KEY_AVATAR = "avatar"; // simbolo personale (emoji tra AVATARS)
 
 // Ultima stanza in cui si è entrati come ospiti (per "Rientra nella stanza" in home, entro 10 minuti)
 const KEY_LAST_ROOM = "lastRoom";
+// Missioni della settimana: contatori { key, counters } e settimane completate { key: data }
+const KEY_WEEKLY = "weekly";
+const KEY_WEEKS_DONE = "weeksDone";
+export function getWeekly() { return read(KEY_WEEKLY, null); }
+export function saveWeekly(w) { write(KEY_WEEKLY, w); }
+export function getWeeksDone() { const o = read(KEY_WEEKS_DONE, {}); return o && typeof o === "object" ? o : {}; }
+export function saveWeeksDone(o) { write(KEY_WEEKS_DONE, o); }
 // Record del gruppo (host): { "<nome stanza>": { <gameId>: { score, text, name, at } } }
 const KEY_GROUP_RECORDS = "groupRecords";
 export function getGroupRecord(roomName, gameId) {

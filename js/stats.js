@@ -12,13 +12,23 @@
 import { CATALOG, CATEGORIES, getEntry } from "./games/catalog.js";
 import { getStats, saveStats, getAchievements, saveAchievements, getHistory, getRecord, DIFFICULTIES } from "./storage.js";
 import { getDailyResults } from "./storage.js";
-import { dailyStreak } from "./daily.js";
+import { dailyStreak, dailyGame } from "./daily.js";
+import { bumpWeekly, weeksDoneCount } from "./missions.js";
 
 // Registra una manche giocata da chi guarda.
 //   pct: percentuale di prestazione (0-100) · won: ha vinto la manche (in gruppo) · solo: allenamento/giorno
 export function recordRound(gameId, { pct = 0, won = false, solo = true, seconds = 0 } = {}) {
   const stats = getStats();
+  const isNew = !stats[gameId];
   const g = stats[gameId] || { n: 0, sum: 0, best: 0, wins: 0, solo: 0, sec: 0, perfect: 0 };
+  // Missioni della settimana (il minigioco del giorno conta doppio)
+  const w = gameId === dailyGame() ? 2 : 1;
+  bumpWeekly("rounds", w);
+  if (won && !solo) bumpWeekly("wins", w);
+  if (isNew) bumpWeekly("newGames", 1);
+  if (pct >= 100) bumpWeekly("perfect", 1);
+  const cat = getEntry(gameId)?.category;
+  if (cat) bumpWeekly(`cat_${cat}`, w);
   g.n++;
   g.sum += pct;
   g.best = Math.max(g.best, pct);
@@ -54,6 +64,7 @@ export function summary() {
     dailyBest: daily.reduce((b, r) => Math.max(b, r.total || 0), 0),
     streak: dailyStreak(),
     records,
+    weeks: weeksDoneCount(),
   };
 }
 
@@ -109,6 +120,8 @@ export const ACHIEVEMENTS = [
   { id: "serie3", icon: "🔥", title: "Tre di fila", desc: "Sfida del giorno per 3 giorni di fila", test: (s) => s.streak >= 3 },
   { id: "serie7", icon: "☄️", title: "Una settimana", desc: "Sfida del giorno per 7 giorni di fila", test: (s) => s.streak >= 7 },
   { id: "giorno4000", icon: "🎯", title: "Giornata top", desc: "4000 punti in una Sfida del giorno", test: (s) => s.dailyBest >= 4000 },
+  { id: "settimana", icon: "🗓️", title: "Settimana piena", desc: "Completa le 3 missioni di una settimana", test: (s) => s.weeks >= 1 },
+  { id: "mese", icon: "📆", title: "Un mese di missioni", desc: "Completa le missioni di 4 settimane", test: (s) => s.weeks >= 4 },
 ];
 
 export function unlockedAchievements() {

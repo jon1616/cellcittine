@@ -14,6 +14,7 @@ import { CATALOG, CATEGORIES } from "./games/catalog.js";
 import { shuffle } from "./games/shell.js";
 import { getDailyResults, saveDailyResult } from "./storage.js";
 import { ratingBar } from "./rating.js";
+import { bumpWeekly } from "./missions.js";
 
 export const DAILY_ROUNDS = 5;
 export const DAILY_DIFFICULTY = "normale";
@@ -46,6 +47,14 @@ export function dailyPlan(key = dailyKey()) {
   return { key, games, seeds, difficulty: DAILY_DIFFICULTY };
 }
 
+// Il minigioco del giorno (in allenamento conta doppio): fuori dal piano della sfida del giorno
+export function dailyGame(key = dailyKey()) {
+  const plan = dailyPlan(key);
+  const rng = seededRandom(hashKey("gioco-" + key));
+  const pool = CATALOG.filter((g) => !plan.games.includes(g.id));
+  return pool[Math.floor(rng() * pool.length)]?.id || CATALOG[0].id;
+}
+
 // Data leggibile: "lun 22 set"
 export function dailyLabel(key = dailyKey()) {
   const [y, m, d] = key.split("-").map(Number);
@@ -66,6 +75,7 @@ export function recordDaily(key, rounds) {
   if (todayResult(key)) return false;
   const total = rounds.reduce((s, r) => s + r.points, 0);
   saveDailyResult(key, { total, rounds, at: Date.now() });
+  bumpWeekly("dailies");
   return true;
 }
 

@@ -584,3 +584,15 @@ input.code { letter-spacing: 8px; text-transform: uppercase; font-weight: 700; f
 input.room-name-input { font-size: 18px; padding: 10px 12px; }
 .group-record { text-align: center; font-size: 14px; color: var(--muted); padding: 6px 10px; border-radius: 10px; background: rgba(255,255,255,0.05); }
 .group-record.new { color: var(--ink); background: var(--gradient-accent); font-weight: 700; box-shadow: 0 0 16px var(--accent-glow); animation: bump 0.5s; }
+
+/* Missioni della settimana */
+.card.missions { gap: 8px; }
+.mission { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; background: rgba(0,0,0,0.18); border: 1px solid var(--line); }
+.mission.done { border-color: color-mix(in srgb, var(--ok) 55%, transparent); background: color-mix(in srgb, var(--ok) 12%, transparent); }
+.mission.today { border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+.mission-icon { font-size: 22px; width: 28px; text-align: center; flex: 0 0 auto; }
+.mission-text { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; font-size: 14px; font-weight: 600; }
+.mission-text .small { font-weight: 400; font-size: 12px; color: var(--muted); }
+.mission-text .bar { height: 6px; }
+.mission-num { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.mission button.chip { flex: 0 0 auto; }

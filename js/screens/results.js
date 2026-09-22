@@ -20,6 +20,7 @@ import { ratingOf, ratingBar, ratingLabel } from "../rating.js";
 import { SPECIALS } from "../specials.js";
 import { positionsAfter } from "../awards.js";
 import { recordRound, checkAchievements } from "../stats.js";
+import { checkMissions, bumpWeekly } from "../missions.js";
 import { toast } from "../ui.js";
 import { commentRound, commentSolo } from "../commentary.js";
 import { DAILY_ROUNDS, DAILY_ROUND_MAX, dailyLabel, formatPoints, todayResult, recordDaily, dailyStreak, shareText } from "../daily.js";
@@ -416,6 +417,7 @@ function rememberChallenge(msg) {
   const players = solo
     ? [{ id: meId, name: net.me.name, color: 0, points: 0 }]
     : msg.standings.map((s) => ({ id: s.id, name: s.name, color: s.color, points: s.points }));
+  bumpWeekly(solo ? "trainings" : "challenges");
   addHistoryEntry({
     at: Date.now(),
     code: net.code,
@@ -436,8 +438,14 @@ function rememberChallenge(msg) {
 
 // Traguardi appena sbloccati: un avviso alla volta, dopo il podio
 function announceAchievements() {
+  const ms = checkMissions();
   const fresh = checkAchievements();
-  fresh.forEach((a, i) => setTimeout(() => { toast(`🏅 Traguardo: ${a.icon} ${a.title}!`); sfx.play("cheer"); }, 1800 + i * 2600));
+  const lines = [
+    ...ms.fresh.map((m) => `🎯 Missione completata: ${m.icon} ${m.text(m.target)}!`),
+    ...(ms.weekDone ? ["🗓️ Settimana piena: tutte le missioni fatte!"] : []),
+    ...fresh.map((a) => `🏅 Traguardo: ${a.icon} ${a.title}!`),
+  ];
+  lines.forEach((t, i) => setTimeout(() => { toast(t); sfx.play("cheer"); }, 1800 + i * 2600));
 }
 
 // Chiusura del campionato: il campione e la tabella finale

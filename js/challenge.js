@@ -20,6 +20,7 @@ import { getEntry, getCategory, loadGame, preloadGames } from "./games/catalog.j
 import { shuffle } from "./games/shell.js";
 import { updateRecord, markSeen, getGroupRecord, saveGroupRecord } from "./storage.js";
 import { ratingOf } from "./rating.js";
+import { bumpWeekly } from "./missions.js";
 import { showLobby } from "./screens/lobby.js";
 import { showResults, showFinal } from "./screens/results.js";
 import { computeAwards } from "./awards.js";
@@ -353,6 +354,7 @@ function submitScore(score, detail = null) {
   round.myDetail = detail;
   round.myMax = typeof round.game.maxScore === "function" ? round.game.maxScore(round.params) : null;
   round.isRecord = updateRecord(round.game, round.difficulty, score);
+  if (round.isRecord) bumpWeekly("records");
 
   if (net.isHost) {
     recordScore(net.me.id, score, round.isRecord);

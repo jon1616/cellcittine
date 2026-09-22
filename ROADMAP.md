@@ -11,11 +11,11 @@ QR code, inglese.
 
 ## 1. Per chi gioca spesso
 
-- [ ] **Nome della stanza**: l'host può dare un nome alla stanza ("Casa Rossi", "Compleanno Anna"), mostrato in stanza, nell'invito, nello storico e nei testi condivisi. — S
-- [ ] **Record di stanza**: per ogni minigioco il miglior punteggio mai fatto dal gruppo (l'host li conserva per stanza/nome e li manda a tutti); nei risultati "🏆 record del gruppo: Anna, 41 tocchi" e festa quando lo si batte. — M
-- [ ] **Premi nuovi**: Sangue freddo (mai un punteggio non valido), Maratoneta (miglior media nelle ultime 3 manche), Specialista (100% in un minigioco), Gentile (più reazioni mandate). — S
-- [ ] **Missioni della settimana**: 3 obiettivi rinnovati ogni lunedì (dal seme della settimana), con progresso in home e medaglia della settimana nelle statistiche. — M
-- [ ] **Minigioco del giorno in allenamento**: un minigioco in evidenza ogni giorno (dalla data), "Prova subito" dalla home, conta doppio nelle statistiche. — S
+- [x] **Nome della stanza**: l'host può dare un nome alla stanza ("Casa Rossi", "Compleanno Anna"), mostrato in stanza, nell'invito, nello storico e nei testi condivisi. (v0.44.0)
+- [x] **Record di stanza**: per ogni minigioco il miglior punteggio mai fatto dal gruppo (l'host li conserva per stanza/nome e li manda a tutti); nei risultati "🏆 record del gruppo: Anna, 41 tocchi" e festa quando lo si batte. (v0.44.0)
+- [x] **Premi nuovi**: Sangue freddo (mai un punteggio non valido), Maratoneta (miglior media nelle ultime 3 manche), Specialista (100% in un minigioco), Gentile (più reazioni mandate). (v0.44.0)
+- [x] **Missioni della settimana**: 3 obiettivi rinnovati ogni lunedì (dal seme della settimana), con progresso in home e medaglia della settimana nelle statistiche. (v0.45.0)
+- [x] **Minigioco del giorno in allenamento**: un minigioco in evidenza ogni giorno (dalla data), "Prova subito" dalla home, conta doppio nelle statistiche. (v0.45.0)
 - [ ] **Rivali**: dallo storico, con chi hai giocato di più e il bilancio testa a testa; sul podio "Ti sei preso la rivincita su Anna" (linguaggio neutro: "Rivincita su Anna"). — M
 
 ## 2. Sfide più raccontate
