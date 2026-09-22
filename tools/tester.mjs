@@ -6,6 +6,7 @@
       node tools/tester.mjs                 tutte le prove
       node tools/tester.mjs --solo=tocchi   un solo minigioco
       node tools/tester.mjs --no-giochi     salta le partite simulate
+      node tools/tester.mjs --verbose       stampa tutte le righe del rapporto
       node tools/tester.mjs --url=http://localhost:8765/test.html
 
   Esce con codice 1 se il tester segnala errori. Usa il protocollo DevTools
@@ -95,7 +96,9 @@ const report = await evaluate(`({
   summary: document.getElementById('summary').innerText.replace(/\\s+/g, ' '),
   bad: [...document.querySelectorAll('.row.fail, .row.warn')].map(r => ((r.closest('.section')?.querySelector('h2 span')?.textContent || '') + ' — ' + r.innerText.replace(/\\s+/g, ' ')).slice(0, 400)),
   fails: document.querySelectorAll('.row.fail').length,
+  all: [...document.querySelectorAll('.row')].map(r => r.innerText.replace(/\\s+/g, ' ').slice(0, 300)),
 })`);
+if (args.verbose) for (const r of report.all) console.log(`  ${r}`);
 console.log(`\n${report.summary}`);
 for (const b of report.bad) console.log(`  ${b}`);
 ws.close();

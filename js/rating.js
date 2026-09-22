@@ -15,7 +15,7 @@ const REFS = {
   // vince il più alto: valore = 100%
   anagrammi: 8, bilancia: 12, calcoli: 15, capitali: 15, colori: 14, contrari: 16, dieci: 12, dipiu: 14,
   frecce: 20, gemelli: 10, intruso: 10, ordina: 40, orologio: 10, ortografia: 14, parola: 8, prossimo: 12,
-  rime: 16, serpente: 15, sfuggente: 15, tocchi: 70, tris: 8,
+  rime: 16, serpente: 15, sfuggente: 15, tocchi: 70, tris: 8, maggiore: 16, sillabe: 10, percorso: 7,
   // vince il più basso: best = 100%, worst = 0%
   semaforo: { best: 180, worst: 700 },
   labirinto: { best: 12, worst: 40 },

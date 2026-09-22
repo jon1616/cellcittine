@@ -542,3 +542,45 @@
 .special-title { font-size: 24px; font-weight: 800; color: var(--accent); }
 .special-desc { font-size: 15px; font-weight: 500; color: rgba(255,255,255,0.9); line-height: 1.3; }
 @keyframes special-in { from { opacity: 0; transform: scale(0.6) rotate(-3deg); } to { opacity: 1; transform: none; } }
+
+/* ---------------------------------------------------------------
+   Specchio (specchio.js)
+   --------------------------------------------------------------- */
+.mirror-wrap { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; }
+.mirror-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; flex: 1; max-width: 160px; }
+.mirror-cell { aspect-ratio: 1; border-radius: 10px; background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.12); transition: background 0.1s, transform 0.1s; }
+.mirror-cell.on { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
+.mirror-grid.right .mirror-cell { cursor: pointer; }
+.mirror-grid.right .mirror-cell.on { background: #36cfc9; border-color: #36cfc9; box-shadow: 0 0 12px rgba(54,207,201,0.5); }
+.mirror-axis { width: 4px; align-self: stretch; border-radius: 2px; background: repeating-linear-gradient(180deg, rgba(255,255,255,0.6) 0 10px, transparent 10px 18px); }
+
+/* ---------------------------------------------------------------
+   Maggiore (maggiore.js)
+   --------------------------------------------------------------- */
+.vs-row { display: flex; align-items: center; gap: 10px; width: 100%; }
+.vs-card { flex: 1; font-size: 30px; font-weight: 800; padding: 28px 6px; border-radius: 18px; background: var(--bg-2); color: var(--text); border: 2px solid rgba(255,255,255,0.12); transition: background 0.1s; min-height: 120px; }
+.vs-card.ok { background: var(--ok); color: var(--ink); }
+.vs-card.ko { background: var(--danger); color: white; }
+.vs-mid { color: var(--muted); font-size: 18px; font-weight: 600; }
+
+/* ---------------------------------------------------------------
+   Sillabe (sillabe.js)
+   --------------------------------------------------------------- */
+.syll-target { letter-spacing: 3px; min-height: 44px; }
+.syll-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.syll-chip { font-size: 24px; font-weight: 800; padding: 14px 18px; border-radius: 14px; background: var(--bg-2); color: var(--text); border: 2px solid rgba(255,255,255,0.14); min-width: 76px; }
+.syll-chip.used { opacity: 0.2; }
+
+/* ---------------------------------------------------------------
+   Manopola (manopola.js) e Al volo (alvolo.js): canvas (usano .run-canvas)
+   --------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------
+   Percorso (percorso.js)
+   --------------------------------------------------------------- */
+.path-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; width: 100%; max-width: 340px; margin: 0 auto; }
+.path-cell { aspect-ratio: 1; border-radius: 12px; background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; color: var(--ink); transition: background 0.12s, transform 0.12s; }
+.path-cell.start { border-color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent-glow); }
+.path-cell.lit { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 14px var(--accent-glow); transform: scale(1.05); }
+.path-cell.ok { background: var(--ok); border-color: var(--ok); }
+.path-cell.ko { background: var(--danger); border-color: var(--danger); color: white; }

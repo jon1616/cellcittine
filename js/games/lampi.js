@@ -1,6 +1,7 @@
 /*
   Lampi: sullo schermo appaiono in rapida successione alcuni lampi di luce.
-  Quanti erano? Rispondi col tastierino. Otto giri, sempre più veloci.
+  Quanti erano? Rispondi col tastierino (entro 5 secondi, altrimenti conta
+  come sbagliata). Otto giri, sempre più veloci.
 */
 
 import { el, vibrate } from "../utils.js";
@@ -8,6 +9,7 @@ import { sfx } from "../audio.js";
 import { createShell } from "./shell.js";
 
 const ROUNDS = 8;
+const ANSWER_MS = 5000; // tempo per rispondere
 const RANGE = { facile: [3, 7], normale: [4, 9], difficile: [5, 12] };
 const FLASH = { facile: 260, normale: 200, difficile: 150 }; // ms per lampo
 const COLORS = ["#ffca3a", "#36cfc9", "#f15bb5", "#8ac926", "#ff924c"];
@@ -18,7 +20,7 @@ let timers = [];
 export default {
   id: "lampi",
   order: "desc",
-  maxSeconds: 60,
+  maxSeconds: 75,
 
   createParams(rng, difficulty) {
     const [lo, hi] = RANGE[difficulty] || RANGE.normale;
@@ -93,27 +95,27 @@ export default {
       if (done) return;
       shell.setHint("Quanti erano?");
       const r = rounds[index];
+      const answer = (n) => {
+        if (done || keypad.dataset.locked) return;
+        keypad.dataset.locked = "1";
+        const ok = n === r.count;
+        if (ok) { correct++; sfx.play("good"); vibrate(10); }
+        else { sfx.play("bad"); vibrate([60, 30, 60]); }
+        shell.setHint(ok ? "Giusto!" : n === null ? `Tempo scaduto: erano ${r.count}` : `Erano ${r.count}`);
+        [...keypad.children].forEach((k) => { if (k.textContent === String(n)) k.classList.add(ok ? "ok" : "ko"); if (k.textContent === String(r.count)) k.classList.add("ok"); });
+        index++;
+        timers.push(setTimeout(() => {
+          delete keypad.dataset.locked;
+          if (index >= ROUNDS) finish();
+          else playRound();
+        }, 900));
+      };
+      timers.push(setTimeout(() => answer(null), ANSWER_MS)); // nessuna risposta: sbagliata
       keypad.replaceChildren(
         ...Array.from({ length: maxAnswer }, (_, i) => {
           const n = i + 1;
           const key = el("button", { class: "key", text: String(n) });
-          key.addEventListener("pointerdown", (ev) => {
-            ev.preventDefault();
-            if (done || keypad.dataset.locked) return;
-            keypad.dataset.locked = "1";
-            const ok = n === r.count;
-            if (ok) { correct++; sfx.play("good"); vibrate(10); key.classList.add("ok"); }
-            else { sfx.play("bad"); vibrate([60, 30, 60]); key.classList.add("ko"); }
-            shell.setHint(ok ? "Giusto!" : `Erano ${r.count}`);
-            // Mostra la risposta giusta
-            [...keypad.children].find((k) => k.textContent === String(r.count))?.classList.add("ok");
-            index++;
-            timers.push(setTimeout(() => {
-              delete keypad.dataset.locked;
-              if (index >= ROUNDS) finish();
-              else playRound();
-            }, 900));
-          });
+          key.addEventListener("pointerdown", (ev) => { ev.preventDefault(); answer(n); });
           return key;
         })
       );
