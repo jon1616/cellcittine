@@ -41,7 +41,7 @@ js/theme.js             temi: sfondo illustrato dei menu, stagionali per data o 
 js/version.js           numero di versione mostrato nell'angolo
 icons/                  icone dell'app (any + maskable, generate da assets/icon-source.png)
 assets/music/           sottofondo.mp3 (brano generato con IA dall'autore del progetto, vedi LICENSE.txt); gli originali restano fuori da Git
-assets/                 immagini: originali (PNG), versioni usate dall app (JPEG/WebP), icone dei minigiochi (assets/icons/<id>.webp)
+assets/                 sfondi stagionali (PNG originali + WebP), fogli delle icone, icone dei minigiochi (assets/icons/<id>.webp); il tema Classico e la home sono disegnati da codice
 fonts/                  carattere Fredoka (SIL OFL, licenza in fonts/OFL.txt)
 vendor/                 PeerJS 1.5.4 (MIT, licenza in vendor/peerjs-LICENSE.txt): unica libreria esterna, copiata qui
 test.html + js/tester.js  tester nel browser: struttura, ogni minigioco, allenamento, sfida del giorno, multiplayer

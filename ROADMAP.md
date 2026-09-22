@@ -47,8 +47,8 @@ QR code, inglese.
 
 ## 7. Restyling grafico e sonoro (richiesta dell'utente, in coda)
 
-- [ ] **Restyling grafico**: nuova palette più colorata e leggibile, scala tipografica, gerarchia delle schermate (home per compiti, stanza a schede, risultati a colpo d'occhio), icone coerenti per categorie e azioni, temi rivisti, animazioni misurate. — L
-- [ ] **Restyling sonoro**: set di suoni rifatto (interfaccia, esiti, momenti della sfida), volume bilanciato, stinger per manche speciali e traguardi, musica con varianti (menu, stanza, podio). — M
+- [x] **Restyling grafico**: nuova palette più colorata e leggibile, scala tipografica, gerarchia delle schermate (home per compiti, stanza a schede, risultati a colpo d'occhio), icone coerenti per categorie e azioni, temi rivisti, animazioni misurate. (v1.0.0: base.css e menu.css riscritti, sfondo da codice, home per compiti, stanza a schede, suoni rifatti)
+- [x] **Restyling sonoro**: set di suoni rifatto (interfaccia, esiti, momenti della sfida), volume bilanciato, stinger per manche speciali e traguardi, musica con varianti (menu, stanza, podio). (v1.0.0)
 
 ## Idee parcheggiate
 

@@ -26,8 +26,8 @@ Online: https://jon1616.github.io/cellcittine/ — Repo: jon1616/cellcittine (br
 ```
 index.html · manifest.webmanifest · sw.js (service worker: PRECACHE + CACHE_VERSION)
 
-css/base.css         carattere, colori (--accent segue il tema), pagina, pulsanti/campi di base, icone, toast, coriandoli
-css/menu.css         schermate dei menu: card in vetro, pulsanti con luce, chip, stanza, scelta, scheda, record, classifiche, podio
+css/base.css         carattere, colori (--accent segue il tema), sfondo disegnato da codice (macchie di colore), pulsanti/campi di base, icone, toast, coriandoli, preferenze (meno movimento, contrasto alto, una mano)
+css/menu.css         schermate dei menu (restyling v1.0: card piene e colorate, home per compiti, stanza a schede Persone/Sfida/In più, classifiche, podio)
 css/games.css        area di gioco, cornice comune e UNA sezione per minigioco (in ordine di catalogo)
 
 js/app.js            avvio: versione, tema, service worker, suono click, showHome()
@@ -60,7 +60,7 @@ js/net.js            P2P (PeerJS): host(), join(), broadcast(), sendToHost(), no
 js/audio.js          effetti sintetizzati (sfx.play/pad/step/inflate*) + musica (sfx.setScene("menu"|"game"))
 js/storage.js        localStorage: config sfida, record {score,text}, pacchetti personali, getClientId() (id stabile), storico, minigiochi già visti, risultati della Sfida del giorno
 js/packs.js          pacchetti integrati (alcuni calcolati dal catalogo) + utilità
-js/theme.js          temi: sfondo dei menu (assets/bg-<id>.webp), stagionali per data, scelta manuale
+js/theme.js          temi: Classico = sfondo da codice; stagionali con immagine (assets/bg-<id>.webp) per data o a scelta
 js/games/catalog.js  CATALOGO: scheda di ogni minigioco + loadGame(id) con import() a richiesta
 js/games/shell.js    cornice comune: createShell, runTimer, runStopwatch, shuffle, fitCanvas, canvasPoint
 js/games/<id>.js     logica di un minigioco (vedi contratto in semaforo.js)

@@ -2,6 +2,10 @@
    BASE — carattere, colori, pagina, tipografia, elementi comuni
    a menu e minigiochi. Le schermate dei menu stanno in menu.css,
    i minigiochi in games.css.
+
+   Restyling v1.0 (22/09/2026): palette più colorata e leggibile,
+   card piene (niente vetro sfocato), scala tipografica chiara,
+   sfondo disegnato da codice (macchie di colore), pulsanti grandi.
    =============================================================== */
 
 /* Carattere del gioco: Fredoka (SIL Open Font License, vedi fonts/OFL.txt) */
@@ -27,27 +31,34 @@
    (--accent-dark/-light/-glow) seguono da soli.
    --------------------------------------------------------------- */
 :root {
-  --bg: #1e1f34;
-  --bg-2: #26254a;
-  --card: #2f2e5c;
-  --text: #f6f3ff;
-  --muted: #b3aed6;
+  --bg: #141a38;
+  --bg-2: #1f2650;
+  --card: #232b5a;
+  --card-2: #2b3470;
+  --text: #ffffff;
+  --muted: #c7cbef;
   --accent: #ffb703;
   --accent-2: #fb5607;
-  --ok: #43d17a;
-  --danger: #ff4d6d;
-  --ink: #1b1a2e;                 /* testo scuro sui pulsanti chiari */
-  --radius: 18px;
+  --ok: #3ddc84;
+  --danger: #ff5d7a;
+  --info: #4cc9f0;
+  --violet: #8f6bff;
+  --pink: #f15bb5;
+  --teal: #36cfc9;
+  --ink: #161233;                 /* testo scuro sui pulsanti chiari */
+  --radius: 20px;
+  --radius-s: 14px;
 
-  --accent-dark: color-mix(in srgb, var(--accent) 70%, #000);
-  --accent-light: color-mix(in srgb, var(--accent) 85%, #fff);
+  --accent-dark: color-mix(in srgb, var(--accent) 72%, #000);
+  --accent-light: color-mix(in srgb, var(--accent) 80%, #fff);
   --accent-glow: color-mix(in srgb, var(--accent) 45%, transparent);
-  --glass: rgba(52, 50, 96, 0.55);     /* card in vetro */
-  --glass-2: rgba(38, 37, 74, 0.6);    /* pulsanti secondari */
-  --solid: rgba(30, 31, 52, 0.85);     /* elementi coprenti sullo sfondo illustrato */
-  --line: rgba(255, 255, 255, 0.1);
-  --line-strong: rgba(255, 255, 255, 0.18);
-  --gradient-accent: linear-gradient(180deg, var(--accent-light) 0%, var(--accent) 45%, var(--accent-dark) 100%);
+  --line: rgba(255, 255, 255, 0.12);
+  --line-strong: rgba(255, 255, 255, 0.22);
+  --solid: rgba(20, 26, 56, 0.96);         /* elementi coprenti (barra fissa della scelta) */
+  --glass: var(--card);                    /* (nome storico) card piena */
+  --glass-2: var(--card-2);
+  --gradient-accent: linear-gradient(180deg, var(--accent-light) 0%, var(--accent) 50%, var(--accent-dark) 100%);
+  --shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
 }
 
 /* ---------------------------------------------------------------
@@ -61,6 +72,7 @@ html, body {
   background: var(--bg);
   color: var(--text);
   font-family: "Fredoka", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 17px;
   overscroll-behavior: none;
   user-select: none;
   -webkit-user-select: none;
@@ -71,13 +83,19 @@ html, body {
   inset: 0;
 }
 
-/* Sfondo del tema (menu), grande quanto lo schermo. I minigiochi lo coprono con la loro area. */
+/* Sfondo disegnato da codice: macchie di colore morbide sul blu profondo; un tema stagionale
+   può metterci sopra la sua immagine (--bg-image). I minigiochi lo coprono con la loro area. */
 body {
   background-color: var(--bg);
-  background-image: linear-gradient(rgba(30, 31, 52, 0.25), rgba(30, 31, 52, 0.25)), var(--bg-image, none);
-  background-size: cover, cover;
-  background-position: center top, center top;
-  background-repeat: no-repeat, no-repeat;
+  background-image:
+    var(--bg-image, none),
+    radial-gradient(60% 40% at 15% 10%, color-mix(in srgb, var(--violet) 55%, transparent), transparent 70%),
+    radial-gradient(50% 35% at 90% 20%, color-mix(in srgb, var(--teal) 40%, transparent), transparent 70%),
+    radial-gradient(55% 40% at 70% 95%, color-mix(in srgb, var(--pink) 35%, transparent), transparent 70%),
+    radial-gradient(45% 35% at 10% 80%, color-mix(in srgb, var(--accent) 28%, transparent), transparent 70%);
+  background-size: cover, auto, auto, auto, auto;
+  background-position: center top, 0 0, 0 0, 0 0, 0 0;
+  background-repeat: no-repeat;
 }
 
 #app {
@@ -90,7 +108,7 @@ body {
   -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
-  padding: calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
+  padding: calc(14px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
 }
 
 #version {
@@ -99,7 +117,7 @@ body {
   bottom: calc(4px + env(safe-area-inset-bottom));
   font-size: 11px;
   color: var(--muted);
-  opacity: 0.7;
+  opacity: 0.65;
   pointer-events: none;
 }
 
@@ -107,20 +125,21 @@ body {
    Tipografia e testi comuni
    --------------------------------------------------------------- */
 h1 {
-  margin: 24px 0 4px;
-  font-size: 40px;
+  margin: 12px 0 2px;
+  font-size: 46px;
+  line-height: 1;
   text-align: center;
-  letter-spacing: 2px;
-  background: linear-gradient(180deg, #fff2c2 0%, var(--accent) 55%, var(--accent-dark) 100%);
+  letter-spacing: 1px;
+  background: linear-gradient(180deg, #fff6d5 0%, var(--accent) 50%, var(--accent-2) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   filter: drop-shadow(0 4px 14px var(--accent-glow));
 }
-h2 { margin: 0; font-size: 22px; text-align: center; }
+h2 { margin: 0; font-size: 22px; line-height: 1.2; text-align: center; font-weight: 700; }
 p { margin: 0; color: var(--muted); text-align: center; line-height: 1.4; }
-p.small { font-size: 14px; }
-.label { font-size: 13px; color: color-mix(in srgb, var(--accent) 70%, var(--muted)); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+p.small, .small { font-size: 14px; }
+.label { font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1.2px; margin-top: 4px; }
 .status { font-size: 14px; color: var(--muted); text-align: center; min-height: 1.4em; }
 .error { color: var(--danger); }
 .spacer { flex: 1; }
@@ -131,11 +150,11 @@ p.small { font-size: 14px; }
    --------------------------------------------------------------- */
 button {
   font: inherit;
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 700;
-  padding: 16px;
+  padding: 15px 16px;
   border: none;
-  border-radius: 14px;
+  border-radius: var(--radius-s);
   background: var(--accent);
   color: var(--ink);
   cursor: pointer;
@@ -146,31 +165,31 @@ button:disabled { opacity: 0.45; cursor: default; }
 
 input[type="text"] {
   width: 100%;
-  font-size: 20px;
-  padding: 14px 16px;
-  border-radius: 12px;
-  border: 1px solid var(--line-strong);
-  background: rgba(20, 20, 40, 0.75);
+  font-size: 19px;
+  padding: 13px 16px;
+  border-radius: var(--radius-s);
+  border: 2px solid var(--line-strong);
+  background: rgba(10, 14, 36, 0.7);
   color: var(--text);
   text-align: center;
   outline: none;
-  box-shadow: inset 0 2px 6px rgba(0,0,0,0.25);
   transition: border-color 0.15s, box-shadow 0.15s;
 }
-input[type="text"]:focus { border-color: var(--accent); box-shadow: inset 0 2px 6px rgba(0,0,0,0.25), 0 0 0 3px var(--accent-glow); }
+input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow); }
+input[type="range"] { accent-color: var(--accent); }
 
 /* ---------------------------------------------------------------
    Icone dei minigiochi (immagine disegnata o emoji di riserva)
    --------------------------------------------------------------- */
-img.game-icon { width: 44px; height: 44px; border-radius: 10px; display: block; }
-.game-icon.emoji { font-size: 26px; text-align: center; }
-img.heading-icon { width: 34px; height: 34px; border-radius: 8px; }
+img.game-icon { width: 46px; height: 46px; border-radius: 12px; display: block; }
+.game-icon.emoji { font-size: 27px; text-align: center; }
+img.heading-icon { width: 36px; height: 36px; border-radius: 9px; }
 .heading-icon.emoji { font-size: 22px; }
 img.list-icon { width: 28px; height: 28px; border-radius: 7px; flex: 0 0 auto; }
 .list-icon.emoji { font-size: 18px; }
-img.info-icon { width: 120px; height: 120px; border-radius: 26px; box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
+img.info-icon { width: 124px; height: 124px; border-radius: 28px; box-shadow: var(--shadow); }
 .info-icon.emoji { font-size: 64px; }
-img.countdown-icon { width: 128px; height: 128px; border-radius: 28px; margin: 8px 0 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+img.countdown-icon { width: 128px; height: 128px; border-radius: 30px; margin: 8px 0 4px; box-shadow: var(--shadow); }
 .countdown-icon.emoji { font-size: 72px; }
 img.game-icon, img.list-icon, img.heading-icon { box-shadow: 0 2px 8px rgba(0,0,0,0.35); }
 .with-icon { display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
@@ -185,14 +204,15 @@ h2.with-icon { width: 100%; }
   bottom: calc(28px + env(safe-area-inset-bottom));
   transform: translate(-50%, 12px);
   max-width: calc(100% - 48px);
-  padding: 10px 16px;
+  padding: 12px 18px;
   border-radius: 999px;
-  background: rgba(30, 31, 52, 0.92);
+  background: var(--card-2);
   border: 1px solid var(--line-strong);
   color: var(--text);
   font-size: 15px;
+  font-weight: 600;
   text-align: center;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  box-shadow: var(--shadow);
   opacity: 0;
   pointer-events: none;
   z-index: 30;
@@ -221,16 +241,17 @@ h2.with-icon { width: 100%; }
   75% { transform: translateX(8px); }
 }
 .shake { animation: shake 0.25s; }
+@keyframes pop-in { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes bump { 50% { transform: scale(1.18); } }
+@keyframes award-in { from { opacity: 0; transform: translateX(-16px) scale(0.96); } to { opacity: 1; transform: none; } }
 
-/* Meno movimento per chi lo chiede nelle impostazioni del telefono */
+/* Meno movimento per chi lo chiede nelle impostazioni del telefono o in home */
 @media (prefers-reduced-motion: reduce) {
   .screen, .code-big, .podium-trophy, .confetti i, .award { animation: none !important; }
   button, .chip { transition: none; }
 }
-
-/* Preferenze di lettura (interruttori in home) */
 html.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after { animation: none !important; transition: none !important; }
-html.high-contrast { --text: #ffffff; --muted: #e6e2ff; --line: rgba(255,255,255,0.28); --line-strong: rgba(255,255,255,0.4); --glass: rgba(30, 31, 52, 0.92); --glass-2: rgba(30, 31, 52, 0.95); }
+html.high-contrast { --text: #ffffff; --muted: #eef0ff; --line: rgba(255,255,255,0.3); --line-strong: rgba(255,255,255,0.45); --card: #1a2048; --card-2: #232b5a; }
 html.high-contrast body { background-image: none; }
-html.high-contrast .card, html.high-contrast .players li, html.high-contrast .ranking li { backdrop-filter: none; -webkit-backdrop-filter: none; }
 html.onehand .game-body { justify-content: flex-end; padding-bottom: 8px; }

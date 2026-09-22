@@ -49,47 +49,38 @@ export function showHome(message = "", isError = !!message) {
   };
 
   const status = statusLine(message, isError);
-  const hero = el("div", { class: "hero" }, [el("img", { src: "assets/home-hero.jpg", alt: "", width: "1000", height: "521" })]);
+  const big = (icon, text, sub, cls, onclick) => el("button", { class: `big-btn${cls ? " " + cls : ""}`, onclick }, [el("span", { class: "bi", text: icon }), el("span", { class: "bt" }, [el("span", { text }), el("span", { class: "bs", text: sub })])]);
+  const setting = (on, icon, text, onclick) => el("button", { class: `setting${on ? " on" : ""}`, text: `${icon} ${text}`, onclick });
 
   show(
-    hero,
-    el("h1", { class: "home-title", text: "CELLCITTINE" }),
-    el("p", { text: "Sfide a minigiochi, da soli o in gruppo" }),
+    el("div", { class: "home-title-wrap" }, [el("h1", { class: "home-title", text: "CELLCITTINE" }), el("p", { class: "home-sub", text: `${CATALOG.length} minigiochi, da soli o in gruppo` })]),
     inviteCard(requireName),
     rejoinCard(requireName),
-    el("div", { class: "card" }, [
+    el("div", { class: "card tone", style: "--c: var(--accent)" }, [
       nameInput,
       avatarRow(),
       titleRow(),
-      el("button", { text: "Crea una stanza", onclick: () => requireName() && createRoom() }),
-      el("button", { text: "Entra con un codice", class: "secondary", onclick: () => requireName() && showJoin() }),
-      el("button", { text: "Allenamento", class: "secondary", onclick: () => requireName() && playSolo() }),
+      el("div", { class: "play-grid" }, [
+        big("🎮", "Crea una stanza", "Invita gli altri con il codice o il link", "", () => requireName() && createRoom()),
+        big("🔑", "Entra con un codice", "Quattro lettere da chi ha creato la stanza", "secondary", () => requireName() && showJoin()),
+        big("🏋️", "Allenamento", "Da soli, contro i tuoi record", "secondary", () => requireName() && playSolo()),
+      ]),
     ]),
     dailyCard(requireName),
     missionsCard(),
-    el("div", { class: "links" }, [
-      el("button", { text: "I miei record", class: "link", onclick: showRecords }),
-      el("button", { text: "Storico", class: "link", onclick: showHistory }),
-      el("button", { text: "📊 Statistiche", class: "link", onclick: showStats }),
-      el("button", { text: `${CATALOG.length} minigiochi`, class: "link", onclick: () => showCatalog() }),
-      el("button", {
-        text: sfx.isEnabled() ? "🔊 Suoni" : "🔇 Suoni",
-        class: "link",
-        onclick: () => { sfx.setEnabled(!sfx.isEnabled()); showHome(); },
-      }),
-      el("button", {
-        text: sfx.isMusicEnabled() ? "🎵 Musica" : "🎵 Musica (off)",
-        class: "link",
-        onclick: () => { sfx.setMusicEnabled(!sfx.isMusicEnabled()); showHome(); },
-      }),
-      el("button", {
-        text: isVibrationEnabled() ? "📳 Vibrazione" : "📳 Vibrazione (off)",
-        class: "link",
-        onclick: () => { setVibrationEnabled(!isVibrationEnabled()); vibrate(30); showHome(); },
-      }),
-      el("button", { text: getPref("onehand") ? "🖐️ Una mano" : "🖐️ Una mano (off)", class: "link", title: "Comandi in basso nei minigiochi a tastierino", onclick: () => { setPref("onehand", !getPref("onehand")); showHome(); } }),
-      el("button", { text: getPref("motion") ? "🐢 Meno movimento" : "🐢 Meno movimento (off)", class: "link", onclick: () => { setPref("motion", !getPref("motion")); showHome(); } }),
-      el("button", { text: getPref("contrast") ? "🔆 Contrasto alto" : "🔆 Contrasto alto (off)", class: "link", onclick: () => { setPref("contrast", !getPref("contrast")); showHome(); } }),
+    el("div", { class: "tiles" }, [
+      el("button", { class: "tile", onclick: showStats }, [el("span", { class: "ti", text: "📊" }), el("span", { text: "Statistiche" })]),
+      el("button", { class: "tile", onclick: showRecords }, [el("span", { class: "ti", text: "★" }), el("span", { text: "Record" })]),
+      el("button", { class: "tile", onclick: showHistory }, [el("span", { class: "ti", text: "📜" }), el("span", { text: "Storico" })]),
+    ]),
+    el("button", { text: `🧩 Tutti i ${CATALOG.length} minigiochi`, class: "secondary", onclick: () => showCatalog() }),
+    el("div", { class: "settings" }, [
+      setting(sfx.isEnabled(), sfx.isEnabled() ? "🔊" : "🔇", "Suoni", () => { sfx.setEnabled(!sfx.isEnabled()); showHome(); }),
+      setting(sfx.isMusicEnabled(), "🎵", "Musica", () => { sfx.setMusicEnabled(!sfx.isMusicEnabled()); showHome(); }),
+      setting(isVibrationEnabled(), "📳", "Vibrazione", () => { setVibrationEnabled(!isVibrationEnabled()); vibrate(30); showHome(); }),
+      setting(getPref("onehand"), "🖐️", "Una mano", () => { setPref("onehand", !getPref("onehand")); showHome(); }),
+      setting(getPref("motion"), "🐢", "Meno movimento", () => { setPref("motion", !getPref("motion")); showHome(); }),
+      setting(getPref("contrast"), "🔆", "Contrasto alto", () => { setPref("contrast", !getPref("contrast")); showHome(); }),
     ]),
     themeRow(),
     installRow(),

@@ -231,7 +231,7 @@ function configPanel() {
     }),
   ]);
 
-  return isSolo() ? [selectionCard, rulesCard] : [selectionCard, rulesCard, extrasCard(cfg, net)];
+  return [selectionCard, rulesCard];
 }
 
 // Le opzioni "in più" (squadre, modalità, manche speciali, campionato): chiuse per
@@ -246,10 +246,9 @@ function extrasSummary(cfg) {
   if (cfg.championship) parts.push("campionato");
   return parts.length ? parts.join(" · ") : "Niente di attivo: classica sfida a punti";
 }
-function extrasCard(cfg, net) {
-  const toggle = el("button", { class: "cat-toggle extras-toggle", text: `${extrasOpen ? "▾" : "▸"} In più`, onclick: () => { extrasOpen = !extrasOpen; showLobby(); } });
-  const head = el("div", { class: "extras-head" }, [toggle, el("span", { class: "extras-summary", text: extrasSummary(cfg) })]);
-  if (!extrasOpen) return el("div", { class: "card extras" }, [head]);
+function extrasCard(cfg, net, open = false) {
+  const head = el("div", { class: "extras-head" }, [el("h2", { text: "✨ In più" }), el("span", { class: "extras-summary", text: extrasSummary(cfg) })]);
+  if (!open && !extrasOpen) return el("div", { class: "card extras" }, [head]);
   return el("div", { class: "card extras" }, [
     head,
       el("div", { class: "label", text: "Squadre" }),
@@ -427,49 +426,59 @@ function playersList(players, meId, { teams = 0, canEdit = false } = {}) {
   );
 }
 
+// La stanza è a schede: 👥 Persone (codice, invito, chi c'è) · 🎮 Sfida (minigiochi e regole) · ✨ In più
+let lobbyTab = "persone";
+
 export function showLobby() {
   setScreen("lobby");
   const net = state.net;
   if (!net) return showHome();
   const solo = isSolo();
   const status = statusLine();
+  const parts = [];
 
-  const header = solo
-    ? [el("h2", { text: "Allenamento" }), el("p", { text: "Da soli, contro i tuoi record" })]
-    : [
-        roomTitle(net),
-        el("p", { text: "Codice della stanza" }),
-        el("div", { class: "code-big", text: net.code }),
-        el("p", { text: "Chi vuole entrare tocca “Entra con un codice”, oppure mandagli il link" }),
-        el("button", { text: "📨 Invita", class: "secondary small-btn invite-btn", onclick: () => shareInvite(net.code) }),
-      ];
-
-  const parts = [...header];
-
-  if (!solo) {
+  if (solo) {
+    parts.push(el("h2", { text: "Allenamento" }), el("p", { text: "Da soli, contro i tuoi record" }));
+    parts.push(...configPanel());
+  } else {
+    const tabs = [["persone", `👥 Persone (${net.players.length})`], ["sfida", "🎮 Sfida"], ...(net.isHost ? [["extra", "✨ In più"]] : [])];
+    if (!tabs.some((t) => t[0] === lobbyTab)) lobbyTab = "persone";
+    parts.push(el("div", { class: "tabs" }, tabs.map(([id, label]) => el("button", { class: `tab${lobbyTab === id ? " on" : ""}`, text: label, onclick: () => { lobbyTab = id; showLobby(); } }))));
     const teams = net.isHost ? state.config.teams : state.hostConfig?.teams || 0;
-    parts.push(
-      el("div", { class: "card" }, [
-        el("h2", { text: `In stanza (${net.players.length})` }),
-        playersList(net.players, net.me.id, { teams, canEdit: net.isHost }),
-        net.isHost ? el("p", { class: "small", text: "Tocca “Auto” accanto a un nome per dare una difficoltà personale (handicap): chi ha la stessa difficoltà gioca gli stessi parametri." }) : el("span"),
-        net.isHost && teams ? el("button", { text: teams === "coppie" ? "🎲 Mescola le coppie" : "🎲 Mescola le squadre", class: "secondary small-btn", onclick: shuffleTeams }) : el("span"),
-      ])
-    );
+    if (lobbyTab === "persone") {
+      parts.push(
+        el("div", { class: "card tone", style: "--c: var(--accent)" }, [
+          roomTitle(net),
+          el("p", { class: "small", text: "Codice della stanza" }),
+          el("div", { class: "code-big", text: net.code }),
+          el("button", { text: "📨 Invita con un link", class: "secondary small-btn invite-btn", onclick: () => shareInvite(net.code) }),
+        ]),
+        el("div", { class: "card" }, [
+          el("h2", { text: `In stanza (${net.players.length})` }),
+          playersList(net.players, net.me.id, { teams, canEdit: net.isHost }),
+          net.isHost ? el("p", { class: "small", text: "Tocca “Auto” accanto a un nome per una difficoltà personale (handicap)." }) : el("span"),
+          net.isHost && teams ? el("button", { text: teams === "coppie" ? "🎲 Mescola le coppie" : "🎲 Mescola le squadre", class: "secondary small-btn", onclick: shuffleTeams }) : el("span"),
+        ])
+      );
+      if (net.isHost) { const snap = championshipSnapshot(); if (snap?.day) parts.push(championshipCard(snap)); }
+    } else if (lobbyTab === "sfida") {
+      if (net.isHost) { const [sel, rules] = configPanel(); parts.push(sel, rules); }
+      else if (state.hostConfig) parts.push(configSummary(state.hostConfig));
+    } else if (lobbyTab === "extra" && net.isHost) {
+      parts.push(extrasCard(state.config, net, true));
+    }
   }
 
   if (net.isHost) {
-    const snap = championshipSnapshot();
-    if (snap?.day) parts.push(championshipCard(snap));
-    parts.push(...configPanel());
     const startBtn = el("button", { text: solo ? "Inizia!" : "Inizia la sfida!", onclick: () => startChallenge(dailyStartOptions()) });
     startBtn.disabled = state.config.games.length === 0;
     const away = net.players.filter((p) => p.away).map((p) => p.name);
-    if (away.length) parts.push(el("p", { class: "small", text: `💤 ${away.join(", ")} ${away.length === 1 ? "è altrove" : "sono altrove"} (app in secondo piano): aspetta o inizia comunque.` }));
-    parts.push(startBtn);
-    if (state.config.games.length === 0) parts.push(el("p", { class: "small", text: "Scegli almeno un minigioco" }));
+    const notes = [];
+    if (!solo) notes.push(el("p", { class: "tab-note", text: `${roundsLabel(state.config)} · ${difficultyLabel(state.config.difficulty)}${extrasSummary(state.config) === "Niente di attivo: classica sfida a punti" ? "" : " · " + extrasSummary(state.config)}` }));
+    if (away.length) notes.push(el("p", { class: "small", text: `💤 ${away.join(", ")} ${away.length === 1 ? "è altrove" : "sono altrove"}: aspetta o inizia comunque.` }));
+    if (state.config.games.length === 0) notes.push(el("p", { class: "small", text: "Scegli almeno un minigioco (scheda Sfida)" }));
+    parts.push(el("div", { class: "start-bar" }, [...notes, startBtn]));
   } else {
-    if (state.hostConfig) parts.push(configSummary(state.hostConfig));
     parts.push(el("p", { text: "Aspetta che l'host faccia partire la sfida…" }));
   }
 

@@ -20,7 +20,7 @@ let inflateOsc = null;
 // Musica di sottofondo (file MP3, in loop): suona nei menu, si ferma nei minigiochi
 // ---------------------------------------------------------------
 const MUSIC_SRC = "assets/music/sottofondo.mp3";
-const MUSIC_VOLUME = 0.32;
+const MUSIC_VOLUME = 0.28;
 let musicEnabled = localStorage.getItem(KEY_MUSIC) !== "off";
 let musicEl = null;
 let musicScene = "menu"; // "menu" | "game"
@@ -66,7 +66,7 @@ function ensure() {
     if (!AC) return null;
     ctx = new AC();
     master = ctx.createGain();
-    master.gain.value = 0.5;
+    master.gain.value = 0.45;
     master.connect(ctx.destination);
   }
   if (ctx.state === "suspended") ctx.resume().catch(() => {});
@@ -129,22 +129,22 @@ function noise({ dur = 0.1, gain = 0.2, delay = 0, lowpass = 4000 }) {
 // ---------------------------------------------------------------
 
 const SOUNDS = {
-  // interfaccia
-  click: () => tone({ freq: 600, dur: 0.035, type: "sine", gain: 0.08 }),
-  tick: () => tone({ freq: 880, dur: 0.07, type: "square", gain: 0.12 }),
-  go: () => tone({ freq: 1320, dur: 0.22, type: "square", gain: 0.14 }),
-  tock: () => tone({ freq: 660, dur: 0.05, type: "square", gain: 0.1 }),
+  // interfaccia: morbidi e corti
+  click: () => tone({ freq: 520, dur: 0.045, type: "sine", gain: 0.07, slideTo: 440 }),
+  tick: () => { tone({ freq: 740, dur: 0.05, type: "triangle", gain: 0.12 }); noise({ dur: 0.02, gain: 0.05, lowpass: 3000 }); },
+  go: () => { tone({ freq: 880, dur: 0.1, type: "triangle", gain: 0.14 }); tone({ freq: 1320, dur: 0.26, type: "triangle", gain: 0.14, delay: 0.09 }); },
+  tock: () => tone({ freq: 620, dur: 0.05, type: "triangle", gain: 0.1 }),
 
-  // esito di un'azione nei minigiochi
-  good: () => { tone({ freq: 880, dur: 0.06, gain: 0.15 }); tone({ freq: 1320, dur: 0.09, gain: 0.15, delay: 0.06 }); },
-  bad: () => tone({ freq: 170, dur: 0.22, type: "sawtooth", gain: 0.12, slideTo: 110 }),
+  // esito di un'azione nei minigiochi: "giusto" brillante, "sbagliato" caldo e breve
+  good: () => { tone({ freq: 988, dur: 0.07, type: "triangle", gain: 0.14 }); tone({ freq: 1319, dur: 0.11, type: "triangle", gain: 0.13, delay: 0.06 }); },
+  bad: () => { tone({ freq: 196, dur: 0.18, type: "sawtooth", gain: 0.09, slideTo: 140 }); noise({ dur: 0.08, gain: 0.05, lowpass: 900 }); },
   blip: () => tone({ freq: 1000, dur: 0.03, gain: 0.07 }),
   flip: () => tone({ freq: 520, dur: 0.045, type: "triangle", gain: 0.12 }),
-  hit: () => { tone({ freq: 720, dur: 0.05, type: "square", gain: 0.12 }); noise({ dur: 0.05, gain: 0.08 }); },
+  hit: () => { tone({ freq: 720, dur: 0.05, type: "square", gain: 0.1 }); noise({ dur: 0.05, gain: 0.08 }); },
   jump: () => tone({ freq: 320, dur: 0.13, gain: 0.12, slideTo: 720 }),
   crash: () => { noise({ dur: 0.28, gain: 0.25, lowpass: 1500 }); tone({ freq: 140, dur: 0.3, type: "sawtooth", gain: 0.12, slideTo: 60 }); },
   pop: () => { noise({ dur: 0.08, gain: 0.3, lowpass: 3000 }); tone({ freq: 420, dur: 0.1, gain: 0.15, slideTo: 90 }); },
-  perfect: () => [880, 1109, 1319, 1760].forEach((f, i) => tone({ freq: f, dur: 0.09, gain: 0.13, delay: i * 0.055 })),
+  perfect: () => [880, 1109, 1319, 1760].forEach((f, i) => { tone({ freq: f, dur: 0.1, type: "triangle", gain: 0.13, delay: i * 0.055 }); tone({ freq: f * 2, dur: 0.06, type: "sine", gain: 0.04, delay: i * 0.055 }); }),
 
   // suoni "di ambiente" per i minigiochi che li meritano
   coin: () => { tone({ freq: 1568, dur: 0.07, type: "square", gain: 0.08 }); tone({ freq: 2093, dur: 0.18, type: "square", gain: 0.08, delay: 0.06 }); },
@@ -160,12 +160,15 @@ const SOUNDS = {
   // momenti della sfida
   cheer: () => [659, 784, 988, 1319].forEach((f, i) => tone({ freq: f, dur: 0.12, type: "triangle", gain: 0.13, delay: i * 0.06 })),
   special: () => [440, 554, 659, 880, 1109].forEach((f, i) => { tone({ freq: f, dur: 0.16, type: "square", gain: 0.09, delay: i * 0.07 }); tone({ freq: f * 1.5, dur: 0.16, type: "triangle", gain: 0.06, delay: i * 0.07 }); }),
-  roundEnd: () => { tone({ freq: 660, dur: 0.14, type: "triangle", gain: 0.15 }); tone({ freq: 880, dur: 0.24, type: "triangle", gain: 0.15, delay: 0.14 }); },
-  record: () => [523, 659, 784, 1047].forEach((f, i) => tone({ freq: f, dur: 0.12, type: "triangle", gain: 0.15, delay: i * 0.085 })),
+  roundEnd: () => [523, 659, 784].forEach((f, i) => tone({ freq: f, dur: i === 2 ? 0.3 : 0.12, type: "triangle", gain: 0.14, delay: i * 0.1 })),
+  record: () => { [523, 659, 784, 1047, 1319].forEach((f, i) => tone({ freq: f, dur: 0.13, type: "triangle", gain: 0.14, delay: i * 0.08 })); tone({ freq: 1568, dur: 0.5, type: "sine", gain: 0.08, delay: 0.42 }); },
   fanfare: () => {
-    const seq = [[523, 0.12], [523, 0.12], [523, 0.12], [659, 0.3], [784, 0.14], [1047, 0.5]];
-    let t = 0;
-    for (const [f, d] of seq) { tone({ freq: f, dur: d, type: "square", gain: 0.1, delay: t }); tone({ freq: f / 2, dur: d, type: "triangle", gain: 0.08, delay: t }); t += d + 0.03; }
+    // tre accordi che salgono, poi la nota lunga
+    const chords = [[523, 659, 784], [587, 740, 880], [659, 831, 988]];
+    chords.forEach((c, i) => c.forEach((f) => tone({ freq: f, dur: 0.22, type: "triangle", gain: 0.07, delay: i * 0.24 })));
+    [784, 988, 1175, 1568].forEach((f) => tone({ freq: f, dur: 0.9, type: "triangle", gain: 0.06, delay: 0.76 }));
+    tone({ freq: 1568, dur: 0.9, type: "sine", gain: 0.05, delay: 0.76 });
+    noise({ dur: 0.5, gain: 0.05, lowpass: 2500, delay: 0.76 });
   },
 };
 

@@ -15,7 +15,7 @@ export const THEMES = [
     id: "base",
     name: "Classico",
     icon: "✨",
-    bg: "assets/bg-base.webp",
+    bg: null, // sfondo disegnato da codice (base.css)
     accent: null, // null = colori standard dell'app
   },
   // Stagionali: attivi da soli nel periodo indicato (mese-giorno, estremi inclusi).
@@ -75,7 +75,8 @@ export function applyTheme() {
   const t = currentTheme();
   const root = document.documentElement;
   // Indirizzo assoluto: dentro il CSS, un url() relativo verrebbe risolto rispetto al foglio di stile
-  root.style.setProperty("--bg-image", `url("${new URL(t.bg, document.baseURI).href}")`);
+  if (t.bg) root.style.setProperty("--bg-image", `url("${new URL(t.bg, document.baseURI).href}")`);
+  else root.style.removeProperty("--bg-image");
   if (t.accent) root.style.setProperty("--accent", t.accent);
   else root.style.removeProperty("--accent");
   root.dataset.theme = t.id;

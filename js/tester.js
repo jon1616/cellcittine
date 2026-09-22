@@ -505,7 +505,7 @@ async function testAllenamento(gameId, difficulty) {
     }
     throw new Error(`aspettando: ${what}`);
   };
-  const button = (text) => [...doc.querySelectorAll("button")].find((b) => b.textContent.trim().startsWith(text));
+  const button = (text) => [...doc.querySelectorAll("button")].find((b) => b.textContent.replace(/^[^\p{L}\p{N}]+/u, "").trim().startsWith(text));
 
   try {
     await new Promise((res, rej) => { iframe.onload = res; iframe.onerror = rej; });
@@ -555,7 +555,7 @@ async function testAllenamento(gameId, difficulty) {
     // Statistiche: la manche appena giocata deve risultare
     button("Cambia impostazioni")?.click();
     (await waitFor("il pulsante Esci", () => button("Esci"), 3000)).click();
-    (await waitFor("la home", () => button("📊 Statistiche"), 3000)).click();
+    (await waitFor("la home", () => button("Statistiche"), 3000)).click();
     await waitFor("le statistiche", () => /Le mie statistiche/.test(doc.querySelector("#app")?.textContent || ""), 3000);
     const stats = JSON.parse(win.localStorage.getItem("stats") || "{}");
     if (!stats[gameId] || stats[gameId].n < 1) errors.push(`le statistiche non registrano la manche di ${gameId}: ${JSON.stringify(stats)}`);
@@ -601,7 +601,7 @@ async function testSfidaDelGiorno() {
     }
     throw new Error(`aspettando: ${what}`);
   };
-  const button = (text) => [...doc.querySelectorAll("button")].find((b) => b.textContent.trim().startsWith(text));
+  const button = (text) => [...doc.querySelectorAll("button")].find((b) => b.textContent.replace(/^[^\p{L}\p{N}]+/u, "").trim().startsWith(text));
   const plan = dailyPlan();
   try {
     await new Promise((res, rej) => { iframe.onload = res; iframe.onerror = rej; });
@@ -644,7 +644,7 @@ async function testSfidaDelGiorno() {
     await waitFor("il podio della sfida del giorno", () => /Sfida del giorno/.test(doc.querySelector("#app h2")?.textContent || ""), 4000);
     const txt = doc.getElementById("app").textContent;
     if (!/punti/.test(txt)) errors.push("nel podio non compare il totale in punti");
-    if (!button("📤 Condividi")) errors.push("manca il pulsante Condividi");
+    if (!button("Condividi")) errors.push("manca il pulsante Condividi");
     const saved = JSON.parse(win.localStorage.getItem("daily") || "{}");
     const today = saved[dailyKey()];
     if (!today || !Number.isFinite(today.total) || today.rounds?.length !== plan.games.length) errors.push(`risultato del giorno non salvato: ${JSON.stringify(today)}`);
@@ -697,7 +697,7 @@ async function testMultiplayer() {
     }
     throw new Error(`aspettando: ${what}`);
   };
-  const button = (doc, text) => [...doc.querySelectorAll("button")].find((b) => b.textContent.trim().startsWith(text));
+  const button = (doc, text) => [...doc.querySelectorAll("button")].find((b) => b.textContent.replace(/^[^\p{L}\p{N}]+/u, "").trim().startsWith(text));
   const monkeys = [];
   try {
     await Promise.all([load(A), load(B)]);
