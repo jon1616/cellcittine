@@ -42,6 +42,7 @@ js/specials.js       manche speciali (punti doppi, tutto o niente, rimonta, diff
 js/stats.js          statistiche per minigioco (recordRound a ogni manche), totali, punti forti, titolo, traguardi (ACHIEVEMENTS, checkAchievements a fine sfida)
 js/commentary.js     il commentatore: frasi dopo ogni manche (commentRound) e in allenamento (commentSolo), calcolate da tutti senza rete
 js/missions.js       missioni della settimana (3 dal seme della settimana), contatori weekly (bumpWeekly), minigioco del giorno conta doppio
+js/story.js          la storia della sfida (frasi, posizioni manche per manche per il grafico, testo da condividere), rivali e rivincite dallo storico
 js/awards.js         premi di fine sfida (computeAwards dallo storico delle manche; inviati nel messaggio "final")
 js/championship.js   campionato: giornate (addDay dalla classifica finale), tabella (snapshot), chiusura (endChampionship); messaggi "final.championship" e "champion"
 js/teams.js          squadre: TEAMS, assegnazione bilanciata, classifica di squadra per manche (media dei membri)

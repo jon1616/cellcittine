@@ -21,6 +21,7 @@ import { SPECIALS } from "../specials.js";
 import { positionsAfter } from "../awards.js";
 import { recordRound, checkAchievements } from "../stats.js";
 import { checkMissions, bumpWeekly } from "../missions.js";
+import { challengeStory, storyText, revenge } from "../story.js";
 import { toast } from "../ui.js";
 import { commentRound, commentSolo } from "../commentary.js";
 import { DAILY_ROUNDS, DAILY_ROUND_MAX, dailyLabel, formatPoints, todayResult, recordDaily, dailyStreak, shareText } from "../daily.js";
@@ -295,6 +296,59 @@ export function showReaction(id, emoji) {
   setTimeout(() => fx.remove(), 1400);
 }
 
+// La storia della sfida: frasi, grafico delle posizioni, condivisione
+function storyCard(history, standings, meId) {
+  const story = challengeStory(history, standings, meId);
+  const share = el("button", { text: "📤 Condividi la storia", class: "secondary small-btn" });
+  share.addEventListener("click", async () => {
+    const text = storyText(story, standings, (state.net?.isHost ? state.config.roomName : state.hostConfig?.roomName) || "");
+    if (navigator.share) { try { await navigator.share({ text }); return; } catch (_) { /* copia */ } }
+    try { await navigator.clipboard.writeText(text); toast("Storia copiata: incollala in chat"); } catch (_) { toast("Non riesco a copiare"); }
+  });
+  return el("div", { class: "card story" }, [
+    el("h2", { text: "📖 La storia della sfida" }),
+    positionsChart(story.timeline, standings, meId),
+    el("div", { class: "story-lines" }, story.lines.map((l, i) => el("div", { class: "story-line", style: `--i: ${i}` }, [el("span", { class: "story-icon", text: l.icon }), el("span", { text: l.text })]))),
+    share,
+  ]);
+}
+
+// Grafico a linee delle posizioni manche per manche (SVG)
+function positionsChart(timeline, standings, meId) {
+  const ids = standings.map((s) => s.id);
+  const n = timeline.length, m = ids.length;
+  if (n < 2) return el("span");
+  const W = 320, L = 24, R = 84, T = 12, B = 20, rowH = 22;
+  const H = T + B + (m - 1) * rowH + 10;
+  const x = (k) => L + (k / (n - 1)) * (W - L - R);
+  const y = (pos) => T + (pos - 1) * rowH + 5;
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgNS, "svg");
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.setAttribute("class", "pos-chart");
+  const mk = (tag, attrs, text) => { const e = document.createElementNS(svgNS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); if (text !== undefined) e.textContent = text; return e; };
+  for (let k = 0; k < n; k++) {
+    svg.append(mk("line", { x1: x(k), y1: T, x2: x(k), y2: H - B + 4, stroke: "rgba(255,255,255,0.12)", "stroke-width": 1 }));
+    svg.append(mk("text", { x: x(k), y: H - 4, "text-anchor": "middle", "font-size": 9, fill: "rgba(255,255,255,0.6)" }, String(k + 1)));
+  }
+  standings.forEach((s) => {
+    const pts = timeline.map((t, k) => `${x(k)},${y(t.pos.get(s.id) || m)}`).join(" ");
+    const color = playerColor(s.color);
+    svg.append(mk("polyline", { points: pts, fill: "none", stroke: color, "stroke-width": s.id === meId ? 4 : 2.5, "stroke-linejoin": "round", "stroke-linecap": "round", opacity: 0.95 }));
+    const lastPos = timeline[n - 1].pos.get(s.id) || m;
+    svg.append(mk("circle", { cx: x(n - 1), cy: y(lastPos), r: 4, fill: color }));
+    svg.append(mk("text", { x: x(n - 1) + 8, y: y(lastPos) + 4, "font-size": 11, "font-weight": 700, fill: color }, s.name.length > 10 ? s.name.slice(0, 9) + "…" : s.name));
+  });
+  return svg;
+}
+
+// Rivincite sul podio (dallo storico del telefono)
+function revengeCard(meId) {
+  const list = revenge(meId);
+  if (!list.length) return el("span");
+  return el("div", { class: "card revenge" }, list.map((r) => el("div", { class: "revenge-line", text: `🔁 Rivincita su ${r.name}!${r.balance ? ` Ora ${r.balance}.` : ""}` })));
+}
+
 // Tre gradini per i primi tre (2º a sinistra, 1º al centro, 3º a destra)
 function podiumSteps(standings, meId) {
   const top = standings.slice(0, 3);
@@ -554,6 +608,8 @@ export function showFinal(msg) {
     parts.push(el("div", { class: "card" }, [standingsList(msg.standings, meId)]));
     if (msg.awards?.length) parts.push(awardsCard(msg.awards, meId));
   }
+  if (!solo && ch?.history?.length >= 2 && msg.standings?.length >= 2) parts.push(storyCard(ch.history, msg.standings, meId));
+  if (!solo) parts.push(revengeCard(meId));
   if (msg.championship) {
     const c = msg.championship;
     parts.push(el("div", { class: "card champ" }, [

@@ -596,3 +596,11 @@ input.room-name-input { font-size: 18px; padding: 10px 12px; }
 .mission-text .bar { height: 6px; }
 .mission-num { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .mission button.chip { flex: 0 0 auto; }
+
+/* La storia della sfida */
+.pos-chart { width: 100%; height: auto; display: block; background: rgba(0,0,0,0.18); border-radius: 12px; padding: 4px; }
+.story-lines { display: flex; flex-direction: column; gap: 6px; }
+.story-line { display: flex; gap: 8px; align-items: flex-start; font-size: 15px; line-height: 1.3; animation: award-in 0.35s both; animation-delay: calc(0.3s + var(--i, 0) * 0.1s); }
+.story-icon { flex: 0 0 auto; }
+.card.revenge { border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
+.revenge-line { font-weight: 700; text-align: center; }

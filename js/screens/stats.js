@@ -11,6 +11,8 @@ import { summary, categoryStrengths, mostPlayed, neverPlayed, playerTitle, ACHIE
 import { formatPoints } from "../daily.js";
 import { showHome } from "./home.js";
 import { toast } from "../ui.js";
+import { rivals } from "../story.js";
+import { getClientId } from "../storage.js";
 
 function stat(num, label) {
   return el("div", { class: "hist-stat" }, [el("div", { class: "hist-num", text: String(num) }), el("div", { class: "hist-lbl", text: label })]);
@@ -69,6 +71,18 @@ export function showStats() {
       : el("p", { class: "small", text: "Hai provato tutti i minigiochi!" }),
   ]);
 
+  const riv = rivals(getClientId()).slice(0, 5);
+  const rivalsCard = el("div", { class: "card" }, [
+    el("h2", { text: "Rivali" }),
+    riv.length
+      ? el("ol", { class: "ranking compact" }, riv.map((r, i) => el("li", {}, [
+          el("span", { class: "pos", text: String(i + 1) }),
+          el("span", { class: "who" }, [el("span", { text: r.name })]),
+          el("span", { class: "score", text: `${r.together} ${r.together === 1 ? "sfida" : "sfide"} · ${r.myWins} – ${r.theirWins}` }),
+        ])))
+      : el("p", { class: "small", text: "Gioca in gruppo: qui vedrai con chi giochi di più e il bilancio testa a testa." }),
+    riv.length ? el("p", { class: "small", text: "Bilancio: le volte che sei arrivato davanti a quella persona contro le volte che è arrivata davanti lei." }) : el("span"),
+  ]);
   const unlocked = ACHIEVEMENTS.filter((a) => done[a.id]);
   const locked = ACHIEVEMENTS.filter((a) => !done[a.id]);
   const badges = el("div", { class: "card" }, [
@@ -100,6 +114,7 @@ export function showStats() {
     head,
     strengths,
     games,
+    rivalsCard,
     badges,
     share,
     el("div", { class: "spacer" }),

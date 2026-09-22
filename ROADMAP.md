@@ -16,12 +16,12 @@ QR code, inglese.
 - [x] **Premi nuovi**: Sangue freddo (mai un punteggio non valido), Maratoneta (miglior media nelle ultime 3 manche), Specialista (100% in un minigioco), Gentile (più reazioni mandate). (v0.44.0)
 - [x] **Missioni della settimana**: 3 obiettivi rinnovati ogni lunedì (dal seme della settimana), con progresso in home e medaglia della settimana nelle statistiche. (v0.45.0)
 - [x] **Minigioco del giorno in allenamento**: un minigioco in evidenza ogni giorno (dalla data), "Prova subito" dalla home, conta doppio nelle statistiche. (v0.45.0)
-- [ ] **Rivali**: dallo storico, con chi hai giocato di più e il bilancio testa a testa; sul podio "Ti sei preso la rivincita su Anna" (linguaggio neutro: "Rivincita su Anna"). — M
+- [x] **Rivali**: dallo storico, con chi hai giocato di più e il bilancio testa a testa; sul podio "Ti sei preso la rivincita su Anna" (linguaggio neutro: "Rivincita su Anna"). (v0.46.0)
 
 ## 2. Sfide più raccontate
 
-- [ ] **Riassunto della serata**: a fine sfida una schermata "la storia della sfida" (chi ha guidato quando, sorpassi, manche decisiva, record), condivisibile come testo. — M
-- [ ] **Cronologia della classifica**: grafico a linee, manche per manche, delle posizioni (i sorpassi si vedono), nel podio e nel riassunto. — M
+- [x] **Riassunto della serata**: a fine sfida una schermata "la storia della sfida" (chi ha guidato quando, sorpassi, manche decisiva, record), condivisibile come testo. (v0.46.0)
+- [x] **Cronologia della classifica**: grafico a linee, manche per manche, delle posizioni (i sorpassi si vedono), nel podio e nel riassunto. (v0.46.0)
 
 ## 3. Modi di giocare nuovi
 
