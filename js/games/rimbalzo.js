@@ -94,7 +94,7 @@ export default {
           ball.y = PY - 6 - R;
           score++;
           vibrate(8);
-          sfx.play("hit");
+          sfx.play("bounce");
           shell.setHint(`Rimbalzi: ${score} · palline ${ballsLeft}`);
         }
         if (ball.y > H + R) { // persa

@@ -40,6 +40,7 @@ const GRACE_SECONDS = 8;   // margine oltre maxSeconds prima di chiudere la manc
 //   seeds     semi per manche (Sfida del giorno: uguali per tutti); altrimenti nuovi
 //   difficulty  al posto di quella configurata
 //   daily     { key } se è la Sfida del giorno
+//   quick     true = "Prova subito" di un solo minigioco (podio con Riprova e ritorno al catalogo)
 export async function startChallenge(opts = {}) {
   if (!opts || typeof opts !== "object" || opts instanceof Event) opts = {}; // (un evento del click non è un'opzione)
   const cfg = state.config;
@@ -82,6 +83,7 @@ export async function startChallenge(opts = {}) {
     teams: isSolo() ? 0 : cfg.teams,
     history: [],
     daily: opts.daily || null, // { key } nella Sfida del giorno
+    quick: opts.quick === true,
     mode: isSolo() || cfg.teams || opts.daily ? "punti" : cfg.mode, // "eliminazione": ogni manche l'ultimo esce
     eliminated: new Map(),     // id -> manche in cui è uscito
   };
@@ -149,7 +151,7 @@ export function replayChallenge() {
   if (!games?.length) return;
   state.round = null;
   // La Sfida del giorno si rigioca identica (stessi semi): vale come allenamento
-  startChallenge(ch.daily ? { games, seeds: ch.rounds.map((r) => r.seed), difficulty: ch.difficulty, daily: ch.daily } : { games });
+  startChallenge(ch.daily ? { games, seeds: ch.rounds.map((r) => r.seed), difficulty: ch.difficulty, daily: ch.daily } : { games, quick: ch.quick });
 }
 
 export function finishChallenge() {

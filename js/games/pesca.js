@@ -94,7 +94,7 @@ export default {
         if (done || phase !== "wait") return;
         phase = "bite";
         biteAt = performance.now();
-        sfx.play("pop");
+        sfx.play("splash");
         vibrate(30);
         timer = setTimeout(() => { if (phase === "bite") escaped("Scappato, troppo tardi!"); }, win);
       }, f.delay);

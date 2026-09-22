@@ -103,7 +103,7 @@ export default {
         btn.addEventListener("pointerdown", (ev) => {
           ev.preventDefault();
           if (done) return;
-          if (opt === fmt(q.h, q.m)) { score++; ok++; vibrate(10); sfx.play("good"); }
+          if (opt === fmt(q.h, q.m)) { score++; ok++; vibrate(10); sfx.play("ding"); }
           else { score = Math.max(0, score - 1); ko++; vibrate([60, 30, 60]); sfx.play("bad"); }
           shell.setHint(`Punti: ${score}`);
           index++;

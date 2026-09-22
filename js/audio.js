@@ -146,6 +146,17 @@ const SOUNDS = {
   pop: () => { noise({ dur: 0.08, gain: 0.3, lowpass: 3000 }); tone({ freq: 420, dur: 0.1, gain: 0.15, slideTo: 90 }); },
   perfect: () => [880, 1109, 1319, 1760].forEach((f, i) => tone({ freq: f, dur: 0.09, gain: 0.13, delay: i * 0.055 })),
 
+  // suoni "di ambiente" per i minigiochi che li meritano
+  coin: () => { tone({ freq: 1568, dur: 0.07, type: "square", gain: 0.08 }); tone({ freq: 2093, dur: 0.18, type: "square", gain: 0.08, delay: 0.06 }); },
+  splash: () => { noise({ dur: 0.22, gain: 0.22, lowpass: 1200 }); tone({ freq: 300, dur: 0.18, gain: 0.08, slideTo: 120 }); },
+  bounce: () => tone({ freq: 240, dur: 0.09, type: "triangle", gain: 0.16, slideTo: 480 }),
+  bell: () => { tone({ freq: 1760, dur: 0.5, type: "sine", gain: 0.12 }); tone({ freq: 2637, dur: 0.35, type: "sine", gain: 0.05, delay: 0.01 }); },
+  bonk: () => { tone({ freq: 160, dur: 0.12, type: "square", gain: 0.14, slideTo: 90 }); noise({ dur: 0.06, gain: 0.12, lowpass: 900 }); },
+  gong: () => { tone({ freq: 196, dur: 0.9, type: "triangle", gain: 0.14 }); tone({ freq: 294, dur: 0.7, type: "sine", gain: 0.06, delay: 0.02 }); },
+  swoosh: () => noise({ dur: 0.16, gain: 0.14, lowpass: 2500 }),
+  ding: () => tone({ freq: 1319, dur: 0.22, type: "sine", gain: 0.12 }),
+  whistle: () => tone({ freq: 1800, dur: 0.25, type: "sine", gain: 0.1, slideTo: 2400 }),
+
   // momenti della sfida
   cheer: () => [659, 784, 988, 1319].forEach((f, i) => tone({ freq: f, dur: 0.12, type: "triangle", gain: 0.13, delay: i * 0.06 })),
   special: () => [440, 554, 659, 880, 1109].forEach((f, i) => { tone({ freq: f, dur: 0.16, type: "square", gain: 0.09, delay: i * 0.07 }); tone({ freq: f * 1.5, dur: 0.16, type: "triangle", gain: 0.06, delay: i * 0.07 }); }),

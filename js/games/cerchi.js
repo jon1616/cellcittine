@@ -79,7 +79,7 @@ export default {
       score += pts;
       if (pts > 0) hits++;
       flash = 1; flashText = pts === 100 ? "Perfetto!" : pts === 0 ? "Mancato" : `${pts}`; flashColor = pts === 100 ? "#43d17a" : pts === 0 ? "#ff4d6d" : "#f6f3ff";
-      if (pts === 100) { vibrate(30); sfx.play("perfect"); } else if (pts > 0) { vibrate(15); sfx.play("good"); } else { vibrate([50, 30, 50]); sfx.play("bad"); }
+      if (pts === 100) { vibrate(30); sfx.play("bell"); } else if (pts > 0) { vibrate(15); sfx.play("good"); } else { vibrate([50, 30, 50]); sfx.play("bad"); }
       next();
     };
     canvas.addEventListener("pointerdown", (ev) => { ev.preventDefault(); tap(); });

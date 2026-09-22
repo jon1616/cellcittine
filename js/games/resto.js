@@ -71,7 +71,7 @@ export default {
         btn.addEventListener("pointerdown", (ev) => {
           ev.preventDefault();
           if (done) return;
-          if (opt === q.answer) { score++; ok++; vibrate(10); sfx.play("good"); }
+          if (opt === q.answer) { score++; ok++; vibrate(10); sfx.play("coin"); }
           else { score = Math.max(0, score - 1); ko++; vibrate([60, 30, 60]); sfx.play("bad"); }
           shell.setHint(`Punti: ${score}`);
           index++;

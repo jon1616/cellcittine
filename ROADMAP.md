@@ -26,8 +26,8 @@ mani, tema Compleanno, QR code, inglese.
 
 ## C. Minigiochi
 
-- [ ] **Prova subito**: dalla scheda di un minigioco, "▶ Prova subito" lo fa giocare da soli senza passare dalla stanza dell'allenamento, con record e "Riprova". — S
-- [ ] **Suoni caratterizzati per minigioco**: nuovi effetti sintetizzati (moneta, tuffo, rimbalzo, campanella, fischio, gong…) usati dai minigiochi a cui appartengono, sempre e solo da `audio.js`. — M
+- [x] **Prova subito**: dalla scheda di un minigioco, "▶ Prova subito" lo fa giocare da soli senza passare dalla stanza dell'allenamento, con record e "Riprova". (v0.40.0)
+- [x] **Suoni caratterizzati per minigioco**: nuovi effetti sintetizzati (moneta, tuffo, rimbalzo, campanella, fischio, gong…) usati dai minigiochi a cui appartengono, sempre e solo da `audio.js`. (v0.40.0)
 
 ## D. Rifiniture visive
 

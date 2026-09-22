@@ -12,6 +12,7 @@ import { getRecord, addHistoryEntry } from "../storage.js";
 import { leaveRoom, exitButton } from "../room.js";
 import { nextRound, finishChallenge, replayChallenge, closeChampionship, react, REACTIONS } from "../challenge.js";
 import { showLobby as showLobbyScreen, championshipTable } from "./lobby.js";
+import { showCatalog, showGameInfo } from "./catalog.js";
 import { showHome } from "./home.js";
 import { showLobby } from "./lobby.js";
 import { teamInfo, formatAvg } from "../teams.js";
@@ -476,7 +477,7 @@ export function showFinal(msg) {
   if (solo && ch.daily) {
     parts.push(...dailyFinal(ch));
   } else if (solo) {
-    parts.push(el("h2", { text: "Allenamento completato!" }));
+    parts.push(el("h2", { text: ch.quick ? "Prova finita!" : "Allenamento completato!" }));
     parts.push(
       el("div", { class: "card" }, [
         el("ol", { class: "ranking" }, ch.history.map((h, i) => {
@@ -549,9 +550,10 @@ export function showFinal(msg) {
 
   const actions = net.isHost
     ? [
-        el("button", { text: ch.daily ? "🔁 Rigioca per allenarti" : "🔁 Rivincita (stessa sfida)", class: ch.daily ? "secondary" : "", onclick: () => replayChallenge() }),
+        el("button", { text: ch.daily ? "🔁 Rigioca per allenarti" : ch.quick ? "🔁 Riprova" : "🔁 Rivincita (stessa sfida)", class: ch.daily ? "secondary" : "", onclick: () => replayChallenge() }),
+        ch.quick ? el("button", { text: "Scheda del minigioco", class: "secondary", onclick: () => { const id = ch.rounds?.[0]?.gameId; leaveRoom(); const g = getEntry(id); g ? showGameInfo(g, showCatalog) : showCatalog(); } }) : el("span"),
         msg.championship ? el("button", { text: "🏆 Chiudi il campionato", class: "link", onclick: () => closeChampionship() }) : el("span"),
-        ch.daily ? el("span") : el("button", {
+        ch.daily || ch.quick ? el("span") : el("button", {
           text: solo ? "Cambia impostazioni" : msg.championship ? `Prossima giornata (${msg.championship.day + 1})` : "Nuova sfida",
           class: "secondary",
           onclick: () => {

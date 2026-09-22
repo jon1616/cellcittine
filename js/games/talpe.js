@@ -71,7 +71,7 @@ export default {
         if (h.kind === "mole") {
           score++; hits++;
           vibrate(15);
-          sfx.play("hit");
+          sfx.play("bonk");
           h.thing.classList.add("hit");
         } else {
           score = Math.max(0, score - 1); bombs++;

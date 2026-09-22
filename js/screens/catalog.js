@@ -10,6 +10,7 @@ import { CATALOG, CATEGORIES, getCategory, getEntry, isNew, PACES } from "../gam
 import { DIFFICULTIES, getRecord } from "../storage.js";
 import { showHome } from "./home.js";
 import { showLobby } from "./lobby.js";
+import { playQuick } from "../room.js";
 
 export function showCatalog() {
   setScreen("catalog");
@@ -64,6 +65,7 @@ export function showGameInfo(g, back) {
       el("div", { class: "info-row" }, [el("span", { class: "info-k", text: k }), el("span", { class: "info-v", text: v })])
     )),
     el("div", { class: "card" }, [el("div", { class: "label", text: "I tuoi record" }), el("p", { class: "small", text: records })]),
+    state.net ? el("span") : el("button", { text: "▶ Prova subito", onclick: () => playQuick(g.id) }),
     el("div", { class: "spacer" }),
     el("button", { text: "Indietro", class: "secondary", onclick: back })
   );

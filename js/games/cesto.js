@@ -150,7 +150,7 @@ export default {
           active.splice(i, 1);
           caught++;
           shell.setHint(`Presi: ${caught}`);
-          sfx.play("good");
+          sfx.play("swoosh");
           vibrate(8);
         } else if (f.y > H - 20) {
           active.splice(i, 1);

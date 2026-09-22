@@ -165,6 +165,14 @@ export function playSolo() {
   showLobby();
 }
 
+// Prova subito: un solo minigioco da soli, dalla sua scheda (senza passare dalla stanza)
+export function playQuick(gameId) {
+  state.net = makeNet();
+  state.net.solo(state.name || "Tu");
+  keepScreenOn();
+  startChallenge({ games: [gameId], quick: true });
+}
+
 // Sfida del giorno: da soli, subito, con il piano di oggi (uguale per tutti)
 export function playDaily() {
   const plan = dailyPlan();
