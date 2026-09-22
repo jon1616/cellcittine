@@ -31,8 +31,8 @@ mani, tema Compleanno, QR code, inglese.
 
 ## D. Rifiniture visive
 
-- [ ] **Colore della categoria durante il gioco**: cornice sottile con il colore della categoria anche nel minigioco, non solo al conto alla rovescia. — S
-- [ ] **Simbolo personale**: ognuno sceglie in home un simbolo (⭐🔥⚡🌙🍀🎈🐱🐶🦊🐸🦄🐼) che compare accanto al nome in stanza, nelle classifiche e sul podio. Come: `localStorage.avatar`, campo `avatar` nel `join` e nei partecipanti. — M
+- [x] **Colore della categoria durante il gioco**: cornice sottile con il colore della categoria anche nel minigioco, non solo al conto alla rovescia. (v0.41.0)
+- [x] **Simbolo personale**: ognuno sceglie in home un simbolo (⭐🔥⚡🌙🍀🎈🐱🐶🦊🐸🦄🐼) che compare accanto al nome in stanza, nelle classifiche e sul podio. Come: `localStorage.avatar`, campo `avatar` nel `join` e nei partecipanti. (v0.41.0)
 
 ## E. Piccole cose pratiche
 

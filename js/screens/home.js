@@ -17,6 +17,7 @@ import { showCatalog } from "./catalog.js";
 import { showHistory } from "./history.js";
 import { showStats } from "./stats.js";
 import { playerTitle, summary } from "../stats.js";
+import { AVATARS, getAvatar, setAvatar } from "../storage.js";
 
 // message: riga di stato (per default in rosso: è quasi sempre un errore)
 export function showHome(message = "", isError = !!message) {
@@ -52,6 +53,7 @@ export function showHome(message = "", isError = !!message) {
     inviteCard(requireName),
     el("div", { class: "card" }, [
       nameInput,
+      avatarRow(),
       titleRow(),
       el("button", { text: "Crea una stanza", onclick: () => requireName() && createRoom() }),
       el("button", { text: "Entra con un codice", class: "secondary", onclick: () => requireName() && showJoin() }),
@@ -140,6 +142,17 @@ function inviteCard(requireName) {
     enter,
     el("button", { text: "Ignora l'invito", class: "link", onclick: () => { state.pendingCode = null; showHome(); } }),
   ]);
+}
+
+// Simbolo personale: compare accanto al nome in stanza e nelle classifiche
+function avatarRow() {
+  const current = getAvatar();
+  return el("div", { class: "avatar-row" }, AVATARS.map((a) => el("button", {
+    class: `avatar-pick${a === current ? " on" : ""}`,
+    text: a,
+    title: "Il tuo simbolo",
+    onclick: () => { setAvatar(a === current ? "" : a); showHome(); },
+  })));
 }
 
 // Il titolo di chi gioca (dalle statistiche), sotto il nome: tocca per le statistiche

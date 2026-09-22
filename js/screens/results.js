@@ -87,7 +87,7 @@ function standingsList(standings, meId, prev = null) {
       const out = s.out !== null && s.out !== undefined;
       return el("li", { class: `${s.id === meId ? "me" : ""}${out ? " out" : ""}`, style: `--i: ${i}`, "data-id": s.id }, [
         el("span", { class: "pos", text: out ? "💀" : String(i + 1) }),
-        el("span", { class: "who" }, [colorDot(s.color), el("span", { text: s.name }), out ? el("span", { class: "out-tag", text: `fuori alla ${s.out + 1}ª` }) : arrow]),
+        el("span", { class: "who" }, [colorDot(s.color, s.id), el("span", { text: s.name }), out ? el("span", { class: "out-tag", text: `fuori alla ${s.out + 1}ª` }) : arrow]),
         score,
       ]);
     })
@@ -195,7 +195,7 @@ export async function showResults(msg) {
       el("li", { class: `${r.id === meId ? "me" : ""}${r.out ? " out" : ""}${r.eliminatedNow ? " eliminated" : ""}`, style: `--i: ${i}`, "data-id": r.id }, [
         el("span", { class: "pos", text: solo ? "" : r.out ? "💀" : r.eliminatedNow ? "❌" : i === 0 ? "🏆" : String(i + 1) }),
         el("span", { class: "who" }, [
-          solo ? el("span") : colorDot(r.color),
+          solo ? el("span") : colorDot(r.color, r.id),
           el("span", { text: r.name }),
           r.id === meId && round?.isRecord ? el("span", { class: "badge", text: "★ record" }) : el("span"),
           r.eliminatedNow ? el("span", { class: "out-tag", text: "eliminato" }) : el("span"),
@@ -309,7 +309,7 @@ function awardsCard(awards, meId) {
         el("span", { class: "award-icon", text: a.icon }),
         el("span", { class: "award-text" }, [
           el("span", { class: "award-title", text: a.title }),
-          el("span", { class: "award-who" }, [colorDot(a.color), el("span", { text: a.name })]),
+          el("span", { class: "award-who" }, [colorDot(a.color, a.id), el("span", { text: a.name })]),
           el("span", { class: "award-why", text: a.text }),
         ]),
       ])

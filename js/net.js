@@ -18,7 +18,7 @@
   chiama handlers.onDisconnected.
 */
 
-import { getClientId, getSeenGames } from "./storage.js";
+import { getClientId, getSeenGames, getAvatar, isAvatar } from "./storage.js";
 import { iceServers } from "./relay.js";
 
 const PREFIX = "cellcittine-";
@@ -74,7 +74,7 @@ export class Net {
   // ---------------------------------------------------------------
   solo(name) {
     this.isHost = true;
-    this.me = { id: getClientId(), name, isHost: true, color: 0 };
+    this.me = { id: getClientId(), name, isHost: true, color: 0, avatar: getAvatar() };
     this.players = [this.me];
     return Promise.resolve(null);
   }
@@ -92,7 +92,7 @@ export class Net {
         this.peer = peer;
         this.isHost = true;
         this.code = code;
-        this.me = { id: getClientId(), name, isHost: true, color: 0 };
+        this.me = { id: getClientId(), name, isHost: true, color: 0, avatar: getAvatar() };
         this.players = [this.me];
         this._status(`Stanza ${code} aperta`);
         resolve(code);
@@ -136,11 +136,12 @@ export class Net {
           if (!player) {
             // Nome unico in stanza ("Giulia", "Giulia 2"…) e prima tinta libera
             const name = this._uniqueName(String(msg.name || "Ospite").trim().slice(0, 16) || "Ospite");
-            player = { id, name, isHost: false, color: this._freeColor() };
+            player = { id, name, isHost: false, color: this._freeColor(), avatar: isAvatar(msg.avatar) ? msg.avatar : "" };
             this.players.push(player);
           }
           if (Array.isArray(msg.seen)) this.seenBy.set(id, new Set(msg.seen.map(String)));
           delete player.away; // chi (ri)entra è presente
+          if (isAvatar(msg.avatar)) player.avatar = msg.avatar;
           conn.send({ type: "welcome", you: player, players: this.players, hostTime: Date.now() });
           // Chi rientra riceve il punto in cui siamo; chi è nuovo a sfida iniziata vede
           // i risultati correnti (giocherà dalla prossima manche), ma non una manche già partita.
@@ -284,7 +285,7 @@ export class Net {
 
       conn.on("open", () => {
         this._status(again ? "Rientro nella stanza…" : "Entro nella stanza…");
-        conn.send({ type: "join", name: this._name, cid: getClientId(), again, seen: getSeenGames() });
+        conn.send({ type: "join", name: this._name, cid: getClientId(), again, seen: getSeenGames(), avatar: getAvatar() });
       });
 
       conn.on("data", async (msg) => {

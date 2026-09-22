@@ -14,7 +14,7 @@
 import { el, seededRandom } from "./utils.js";
 import { sfx } from "./audio.js";
 import { state, setScreen, isSolo } from "./state.js";
-import { setStatus, gameIcon, difficultyLabel, appRoot, playerColor } from "./ui.js";
+import { setStatus, gameIcon, difficultyLabel, appRoot, colorDot } from "./ui.js";
 import { syncBackGuard } from "./nav.js";
 import { getEntry, getCategory, loadGame, preloadGames } from "./games/catalog.js";
 import { shuffle } from "./games/shell.js";
@@ -315,6 +315,10 @@ function mountGame() {
     now: () => net.now(),
     onFinish: (score, detail) => submitScore(score, detail),
   });
+  // Cornice con il colore della categoria (come al conto alla rovescia)
+  const cat = getCategory(getEntry(round.game.id)?.category);
+  const area = appRoot().querySelector(".game-area");
+  if (cat && area) area.style.setProperty("--cat", cat.color);
 }
 
 function submitScore(score, detail = null) {
@@ -365,7 +369,7 @@ export function renderLive() {
   for (const d of round.live) {
     if (known.has(d.id)) continue;
     const row = el("div", { class: `live-row${d.id === state.net.me.id ? " me" : ""}`, "data-id": d.id }, [
-      el("span", { class: "dot-color", style: `--c: ${playerColor(d.color)}` }),
+      colorDot(d.color, d.id),
       el("span", { text: d.name }),
       el("span", { class: "live-score", text: d.score === null || d.score === undefined ? "—" : round.game.formatScore(d.score) }),
     ]);

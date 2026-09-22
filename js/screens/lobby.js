@@ -331,7 +331,7 @@ export function championshipTable(table, meId) {
   return el("ol", { class: "ranking champ-table" }, table.map((r, i) =>
     el("li", { class: r.id === meId ? "me" : "", style: `--i: ${i}` }, [
       el("span", { class: "pos", text: i === 0 ? "🏆" : String(i + 1) }),
-      el("span", { class: "who" }, [colorDot(r.color), el("span", { text: r.name })]),
+      el("span", { class: "who" }, [colorDot(r.color, r.id), el("span", { text: r.name })]),
       el("span", { class: "score", text: `${r.wins} ${r.wins === 1 ? "vinta" : "vinte"}` }),
       el("span", { class: "pts", text: `${r.points} pt` }),
     ])
@@ -368,7 +368,7 @@ function playersList(players, meId, { teams = 0, canEdit = false } = {}) {
     { class: "players" },
     players.map((p) =>
       el("li", { class: p.id === meId ? "me" : "" }, [
-        el("span", { class: "who" }, [colorDot(p.color), el("span", { text: p.name }), p.away ? el("span", { class: "away", title: "App in secondo piano", text: "💤" }) : el("span")]),
+        el("span", { class: "who" }, [colorDot(p.color, p.id), el("span", { text: p.name }), p.away ? el("span", { class: "away", title: "App in secondo piano", text: "💤" }) : el("span")]),
         el("span", { class: "player-right" }, [
           handicapPill(p, canEdit),
           teams ? teamPill(p, canEdit) : el("span"),

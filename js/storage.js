@@ -11,7 +11,17 @@ const KEY_SEEN = "seen";
 const KEY_DAILY = "daily"; // risultati della Sfida del giorno: { "AAAA-MM-GG": { total, rounds, at } }
 const DAILY_MAX = 120; // giorni ricordati
 const KEY_STATS = "stats"; // statistiche per minigioco (vedi stats.js)
-const KEY_ACHIEVEMENTS = "achievements"; // traguardi sbloccati: { id: data } // minigiochi già giocati su questo telefono (per la presentazione lunga la prima volta)
+const KEY_ACHIEVEMENTS = "achievements"; // traguardi sbloccati: { id: data }
+const KEY_AVATAR = "avatar"; // simbolo personale (emoji tra AVATARS)
+
+export const AVATARS = ["⭐", "🔥", "⚡", "🌙", "🍀", "🎈", "🐱", "🐶", "🦊", "🐸", "🦄", "🐼"];
+export function getAvatar() {
+  try { const a = localStorage.getItem(KEY_AVATAR); return AVATARS.includes(a) ? a : ""; } catch (_) { return ""; }
+}
+export function setAvatar(a) {
+  try { if (AVATARS.includes(a)) localStorage.setItem(KEY_AVATAR, a); else localStorage.removeItem(KEY_AVATAR); } catch (_) { /* privato */ }
+}
+export function isAvatar(a) { return AVATARS.includes(a); } // minigiochi già giocati su questo telefono (per la presentazione lunga la prima volta)
 const HISTORY_MAX = 60; // sfide ricordate sul telefono
 
 export const DIFFICULTIES = [

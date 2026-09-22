@@ -75,6 +75,8 @@ Difficoltà: `config.difficulty` può essere anche "crescente"; la difficoltà V
 
 Modalità: `config.mode` = "punti" | "eliminazione" (challenge.mode; `ch.eliminated` Map id → manche di uscita; nei messaggi "start" viaggiano `mode` e `out`, in "results" `eliminated`/`alive`; `standingsArray` mette in fondo chi è fuori con il campo `out`).
 
+Simbolo personale: `storage.getAvatar()` (emoji tra AVATARS), inviato nel `join`, campo `avatar` nei partecipanti; `colorDot(color, id)` di ui.js lo mostra al posto del pallino quando c'è.
+
 Rete: i partecipanti sono identificati dall'id stabile del telefono (`getClientId`), mai dall'id PeerJS; i messaggi di fase (start/results/final/lobby) devono poter arrivare due volte senza effetti (guardie in `handleMessage`). In locale `window.cellcittine.state` espone lo stato per le prove.
 
 Regole di dipendenza tra i moduli: le schermate importano `state`, `ui`, i dati (catalog, storage,

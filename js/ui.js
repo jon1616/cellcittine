@@ -101,8 +101,10 @@ export function playerColor(index) {
   return PLAYER_COLORS[(Number.isInteger(index) ? index : 0) % PLAYER_COLORS.length];
 }
 
-// Pallino colorato davanti al nome
-export function colorDot(index) {
+// Pallino colorato davanti al nome; se la persona (id) ha un simbolo, il simbolo nel suo colore
+export function colorDot(index, id = null) {
+  const avatar = id ? state.net?.players.find((p) => p.id === id)?.avatar : "";
+  if (avatar) return el("span", { class: "avatar-dot", style: `--c: ${playerColor(index)}`, text: avatar });
   return el("span", { class: "dot-color", style: `--c: ${playerColor(index)}` });
 }
 
