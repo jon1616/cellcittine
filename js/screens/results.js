@@ -10,7 +10,7 @@ import { show, gameIcon, gameHeading, confetti, colorDot, playerColor } from "..
 import { getEntry, loadGame, getLoaded } from "../games/catalog.js";
 import { getRecord, addHistoryEntry } from "../storage.js";
 import { leaveRoom, exitButton } from "../room.js";
-import { nextRound, finishChallenge, replayChallenge, closeChampionship } from "../challenge.js";
+import { nextRound, finishChallenge, replayChallenge, closeChampionship, react, REACTIONS } from "../challenge.js";
 import { showLobby as showLobbyScreen, championshipTable } from "./lobby.js";
 import { showHome } from "./home.js";
 import { showLobby } from "./lobby.js";
@@ -84,7 +84,7 @@ function standingsList(standings, meId, prev = null) {
       const score = el("span", { class: "score", text: `${p ? p.points : s.points} pt` });
       if (p && p.points !== s.points) countUp(score, p.points, s.points);
       const out = s.out !== null && s.out !== undefined;
-      return el("li", { class: `${s.id === meId ? "me" : ""}${out ? " out" : ""}`, style: `--i: ${i}` }, [
+      return el("li", { class: `${s.id === meId ? "me" : ""}${out ? " out" : ""}`, style: `--i: ${i}`, "data-id": s.id }, [
         el("span", { class: "pos", text: out ? "💀" : String(i + 1) }),
         el("span", { class: "who" }, [colorDot(s.color), el("span", { text: s.name }), out ? el("span", { class: "out-tag", text: `fuori alla ${s.out + 1}ª` }) : arrow]),
         score,
@@ -191,7 +191,7 @@ export async function showResults(msg) {
     "ol",
     { class: `ranking${solo ? "" : " reveal"}` },
     msg.ranking.map((r, i) =>
-      el("li", { class: `${r.id === meId ? "me" : ""}${r.out ? " out" : ""}${r.eliminatedNow ? " eliminated" : ""}`, style: `--i: ${i}` }, [
+      el("li", { class: `${r.id === meId ? "me" : ""}${r.out ? " out" : ""}${r.eliminatedNow ? " eliminated" : ""}`, style: `--i: ${i}`, "data-id": r.id }, [
         el("span", { class: "pos", text: solo ? "" : r.out ? "💀" : r.eliminatedNow ? "❌" : i === 0 ? "🏆" : String(i + 1) }),
         el("span", { class: "who" }, [
           solo ? el("span") : colorDot(r.color),
@@ -245,9 +245,34 @@ export async function showResults(msg) {
     special ? el("div", { class: "special-chip", text: `${special.icon} ${special.label}` }) : el("span"),
     ...cards,
     ...actions,
+    solo ? el("span") : reactionBar(),
     el("div", { class: "spacer" }),
     el("button", { text: "Abbandona", class: "link", onclick: () => { leaveRoom(); showHome(); } })
   );
+}
+
+// Barra delle faccine (solo in gruppo)
+function reactionBar() {
+  let last = 0;
+  return el("div", { class: "reactions" }, REACTIONS.map((e) => el("button", { class: "reaction", text: e, onclick: () => {
+    const now = Date.now();
+    if (now - last < 900) return;
+    last = now;
+    react(e);
+  } })));
+}
+
+// Una faccina vola sul nome di chi l'ha mandata (riga con data-id), o in basso se non c'è
+export function showReaction(id, emoji) {
+  const rows = [...document.querySelectorAll(`[data-id="${CSS.escape(String(id))}"]`)];
+  const target = rows.find((r) => r.closest(".ranking, .steps, .champ-table")) || rows[0];
+  const host = target || document.querySelector(".reactions") || document.getElementById("app");
+  if (!host) return;
+  const fx = el("span", { class: "reaction-fly", text: emoji });
+  fx.style.left = `${20 + Math.random() * 50}%`;
+  host.style.position = host.style.position || "relative";
+  host.append(fx);
+  setTimeout(() => fx.remove(), 1400);
 }
 
 // Tre gradini per i primi tre (2º a sinistra, 1º al centro, 3º a destra)
@@ -504,5 +529,5 @@ export function showFinal(msg) {
       ]
     : [el("p", { text: "Aspetta che l'host prepari una nuova sfida…" })];
 
-  show(...parts, ...actions, el("div", { class: "spacer" }), exitButton());
+  show(...parts, ...actions, solo ? el("span") : reactionBar(), el("div", { class: "spacer" }), exitButton());
 }

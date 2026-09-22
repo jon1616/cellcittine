@@ -14,7 +14,7 @@
 import { el, seededRandom } from "./utils.js";
 import { sfx } from "./audio.js";
 import { state, setScreen, isSolo } from "./state.js";
-import { setStatus, gameIcon, difficultyLabel, appRoot } from "./ui.js";
+import { setStatus, gameIcon, difficultyLabel, appRoot, playerColor } from "./ui.js";
 import { syncBackGuard } from "./nav.js";
 import { getEntry, getCategory, loadGame, preloadGames } from "./games/catalog.js";
 import { shuffle } from "./games/shell.js";
@@ -25,7 +25,7 @@ import { computeAwards } from "./awards.js";
 import { teamRound } from "./teams.js";
 import { SPECIALS, roundDifficulty, assignSpecials, applySpecial } from "./specials.js";
 import { addDay, endChampionship, isChampionship, startChampionship } from "./championship.js";
-import { showChampion } from "./screens/results.js";
+import { showChampion, showReaction } from "./screens/results.js";
 
 const COUNTDOWN_MS = 3500; // dal messaggio "start" al via
 const INTRO_MS = 7000;     // …quando per qualcuno è la prima volta: si legge come si gioca
@@ -306,6 +306,7 @@ function submitScore(score, detail = null) {
   } else {
     net.sendToHost({ type: "result", index: round.index, score, record: round.isRecord });
   }
+  setTimeout(renderLive, 0); // la schermata di attesa del minigioco è appena comparsa
 }
 
 // ---------------------------------------------------------------
@@ -317,7 +318,37 @@ function recordScore(playerId, score, record = false) {
   if (!round || round.scores.has(playerId)) return;
   round.scores.set(playerId, score);
   if (record) round.records.add(playerId);
+  // Risultati in diretta: chi ha già finito, in ordine di arrivo
+  if (!isSolo()) {
+    const net = state.net;
+    const done = [...round.scores.entries()].map(([id, s]) => { const p = net.players.find((x) => x.id === id); return { id, name: p?.name || "?", color: p?.color || 0, score: s }; });
+    round.live = done;
+    net.broadcast({ type: "progress", index: round.index, done });
+    renderLive();
+  }
   checkRoundComplete();
+}
+
+// Lista di chi ha finito, dentro la schermata "In attesa degli altri…" del minigioco
+export function renderLive() {
+  const round = state.round;
+  const box = document.querySelector(".game-done");
+  if (!round?.live?.length || !box || !round.game) return;
+  let list = box.querySelector(".live-list");
+  if (!list) { list = el("div", { class: "live-list" }); box.append(list); }
+  const known = new Set([...list.children].map((c) => c.dataset.id));
+  for (const d of round.live) {
+    if (known.has(d.id)) continue;
+    const row = el("div", { class: `live-row${d.id === state.net.me.id ? " me" : ""}`, "data-id": d.id }, [
+      el("span", { class: "dot-color", style: `--c: ${playerColor(d.color)}` }),
+      el("span", { text: d.name }),
+      el("span", { class: "live-score", text: d.score === null || d.score === undefined ? "—" : round.game.formatScore(d.score) }),
+    ]);
+    list.append(row);
+    if (d.id !== state.net.me.id) sfx.play("blip");
+  }
+  const total = round.participants.length;
+  box.querySelector(".hint").textContent = round.live.length >= total ? "Tutti hanno finito!" : `In attesa degli altri… (${round.live.length} su ${total})`;
 }
 
 export function checkRoundComplete() {
@@ -411,6 +442,26 @@ function publishResults() {
   showResults(msg);
 }
 
+// Reazioni con le faccine: chi guarda tocca, l'host rilancia a tutti (una al secondo a persona)
+const REACTIONS = ["👏", "😂", "😱", "🔥", "❤️"];
+const lastReaction = new Map();
+export function sendReaction(id, emoji) {
+  const net = state.net;
+  if (!net?.isHost || !REACTIONS.includes(emoji)) return;
+  const now = Date.now();
+  if (now - (lastReaction.get(id) || 0) < 900) return;
+  lastReaction.set(id, now);
+  net.broadcast({ type: "react", id, emoji });
+  showReaction(id, emoji);
+}
+export function react(emoji) {
+  const net = state.net;
+  if (!net || isSolo()) return;
+  if (net.isHost) sendReaction(net.me.id, emoji);
+  else net.sendToHost({ type: "react", emoji });
+}
+export { REACTIONS };
+
 // Host: chi ha l'app in secondo piano (💤 in stanza)
 export function setPresence(id, away) {
   const net = state.net;
@@ -452,9 +503,12 @@ export function handleMessage(msg, fromId) {
     if (msg.type === "result" && msg.index === state.round?.index) recordScore(fromId, msg.score, msg.record === true);
     else if (msg.type === "ready") markReady(fromId, msg.index);
     else if (msg.type === "presence") setPresence(fromId, msg.away === true);
+    else if (msg.type === "react") sendReaction(fromId, msg.emoji);
     return;
   }
   if (msg.type === "ready") { if (state.round?.index === msg.index && state.screen === "countdown") renderReady(msg.ids || []); return; }
+  if (msg.type === "progress") { if (state.round?.index === msg.index) { state.round.live = msg.done || []; renderLive(); } return; }
+  if (msg.type === "react") { showReaction(msg.id, msg.emoji); return; }
 
   // Dopo un rientro l'host rimanda l'ultimo messaggio di fase: se lo abbiamo già, niente doppioni.
   switch (msg.type) {

@@ -12,9 +12,9 @@ mani, tema Compleanno, QR code, inglese.
 
 - [x] **Pronti al conto alla rovescia**: durante il conto alla rovescia i nomi di chi è in stanza si accendono man mano che il loro telefono è pronto ("Giulia ✓"). Come: messaggio `ready` ospite → host, `ready` host → tutti; lista nel countdown. (v0.35.0)
 - [x] **Presenza in stanza**: chi ha l'app in secondo piano compare con 💤 nella lista, e l'host vede "X è altrove" prima di iniziare. Come: `visibilitychange` → messaggio `presence`, campo `away` nei partecipanti. (v0.35.0)
-- [ ] **Risultati in diretta**: chi ha finito vede, nella schermata "In attesa degli altri…", chi ha già finito e con che punteggio, uno alla volta. Come: messaggio `progress` dall'host a ogni punteggio ricevuto; lista nella schermata di fine minigioco. — S
+- [x] **Risultati in diretta**: chi ha finito vede, nella schermata "In attesa degli altri…", chi ha già finito e con che punteggio, uno alla volta. Come: messaggio `progress` dall'host a ogni punteggio ricevuto; lista nella schermata di fine minigioco. (v0.36.0)
 - [x] **Classifica di manche animata**: righe che entrano una alla volta con il punteggio che si svela, come la classifica generale. (v0.35.0)
-- [ ] **Reazioni con le faccine**: nei risultati e sul podio, un tocco su 👏 😂 😱 🔥 ❤️ e tutti vedono la faccina volare sul nome di chi l'ha mandata (una al secondo a persona). Come: `react` ospite → host → tutti. — S
+- [x] **Reazioni con le faccine**: nei risultati e sul podio, un tocco su 👏 😂 😱 🔥 ❤️ e tutti vedono la faccina volare sul nome di chi l'ha mandata (una al secondo a persona). Come: `react` ospite → host → tutti. (v0.36.0)
 - [ ] **Handicap per persona**: l'host può dare Facile/Normale/Difficile a ognuno dalla stanza (pillola accanto al nome); i parametri restano uguali tra chi ha la stessa difficoltà; i record si salvano con la difficoltà vera. Come: `config.handicaps`, campo `difficulties` nel messaggio `start`. — M
 
 ## B. Più varietà nelle sfide

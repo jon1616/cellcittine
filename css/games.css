@@ -643,3 +643,9 @@
 .ready-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; max-width: 360px; }
 .ready-name { font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.12); transition: background 0.2s, color 0.2s; }
 .ready-name.on { background: color-mix(in srgb, var(--ok) 25%, transparent); color: #fff; border-color: var(--ok); }
+
+/* Risultati in diretta nella schermata di attesa */
+.live-list { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; width: min(320px, 90vw); }
+.live-row { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; padding: 6px 12px; border-radius: 10px; background: rgba(255,255,255,0.08); animation: award-in 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+.live-row.me { border: 1px solid var(--accent); }
+.live-score { margin-left: auto; color: var(--accent); font-variant-numeric: tabular-nums; }

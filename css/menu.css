@@ -558,3 +558,11 @@ input.code { letter-spacing: 8px; text-transform: uppercase; font-weight: 700; f
 .ranking.reveal li .score, .ranking.reveal li .pts { animation: fade-in 0.3s both; animation-delay: calc(0.25s + var(--i, 0) * 0.16s); }
 @keyframes fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .ranking.reveal li, .ranking.reveal li .score, .ranking.reveal li .pts { animation: none !important; } }
+
+/* Reazioni con le faccine */
+.reactions { display: flex; justify-content: center; gap: 8px; position: relative; }
+.screen button.reaction { font-size: 24px; padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,0.08); border: 1px solid var(--line); box-shadow: none; text-shadow: none; line-height: 1; }
+.screen button.reaction:active { transform: scale(1.2); }
+.reaction-fly { position: absolute; bottom: 60%; font-size: 28px; pointer-events: none; animation: reaction-fly 1.3s ease-out forwards; z-index: 5; }
+@keyframes reaction-fly { 0% { opacity: 0; transform: translateY(10px) scale(0.6); } 20% { opacity: 1; transform: translateY(-6px) scale(1.2); } 100% { opacity: 0; transform: translateY(-70px) scale(1); } }
+.ranking li { position: relative; }
