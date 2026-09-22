@@ -6,7 +6,7 @@
 
 import { el } from "../utils.js";
 import { state, setScreen, isSolo } from "../state.js";
-import { show, statusLine, segmented, difficultyLabel, colorDot } from "../ui.js";
+import { show, statusLine, segmented, difficultyLabel, colorDot, toast } from "../ui.js";
 import { CATALOG, CATEGORIES, getEntry } from "../games/catalog.js";
 import { BUILTIN_PACKS, getBuiltinPack, resolvePack, randomSelection, sameSelection } from "../packs.js";
 import { MODE_OPTIONS, DIFFICULTY_OPTIONS, ROUND_OPTIONS, AUTO_MIN, AUTO_MAX, saveConfig, getUserPacks, saveUserPack, deleteUserPack } from "../storage.js";
@@ -186,6 +186,12 @@ function configPanel() {
       (auto) => updateConfig({ auto })
     ),
     cfg.auto ? autoDelayRow() : el("p", { class: "small", text: "Chi ha creato la stanza tocca “Prossima manche”" }),
+    el("button", {
+      text: "🏃 Serata Maratona",
+      class: "secondary small-btn",
+      title: "15 manche, difficoltà crescente, manche speciali, manche automatiche",
+      onclick: () => { updateConfig({ rounds: 15, difficulty: "crescente", auto: true, autoDelay: 8, ...(isSolo() ? {} : { special: true }) }); toast("Maratona: 15 manche, crescente, speciali, automatiche"); },
+    }),
   ]);
 
   return isSolo() ? [selectionCard, rulesCard] : [selectionCard, rulesCard, extrasCard(cfg, net)];
@@ -218,7 +224,7 @@ function extrasCard(cfg, net) {
       !cfg.teams && cfg.mode === "eliminazione" ? el("p", { class: "small", text: `Ogni manche chi arriva ultimo è fuori (continua a giocare, ma senza punti). Vince chi resta. Con ${net.players.length} in stanza servono ${Math.max(1, net.players.length - 1)} manche.` }) : el("span"),
       el("div", { class: "label", text: "Manche speciali" }),
       segmented([{ id: false, label: "No" }, { id: true, label: "Sì" }], cfg.special, (special) => updateConfig({ special })),
-      el("p", { class: "small", text: cfg.special ? "A sorpresa: 🔥 punti doppi, 🎯 tutto o niente, 🚀 rimonta, ⚡ manche difficile, 🍃 manche facile; l'ultima vale doppio 🏁." : "Tutte le manche valgono uguale." }),
+      el("p", { class: "small", text: cfg.special ? `A sorpresa: 🔥 punti doppi, 🎯 tutto o niente, 🚀 rimonta, ⚡ manche difficile, 🍃 manche facile, ${cfg.teams ? "🤝 staffetta (somma di squadra)" : "⚔️ duello tra due"}; l'ultima vale doppio 🏁.` : "Tutte le manche valgono uguale." }),
       el("div", { class: "label", text: "Campionato" }),
       segmented([{ id: false, label: "No" }, { id: true, label: "Sì" }], cfg.championship, (championship) => updateConfig({ championship })),
       el("p", { class: "small", text: cfg.championship ? "Ogni sfida è una giornata: i punti per posizione si sommano in una classifica di campionato, finché non lo chiudi." : "Ogni sfida fa storia a sé." }),

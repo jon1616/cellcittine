@@ -23,7 +23,7 @@ export const DIFFICULTIES = [
 export const DIFFICULTY_OPTIONS = [...DIFFICULTIES, { id: "crescente", label: "Crescente" }];
 
 // "tutti" = una manche per ogni minigioco scelto
-export const ROUND_OPTIONS = [3, 5, 7, 10, "tutti"];
+export const ROUND_OPTIONS = [3, 5, 7, 10, 15, 20, "tutti"];
 
 // Manche automatiche: dopo i risultati si passa da soli alla manche successiva
 // dopo autoDelay secondi (tra AUTO_MIN e AUTO_MAX).

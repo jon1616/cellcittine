@@ -58,7 +58,7 @@ function teamsCard(teamRanking, teamStandings, myTeam) {
     return el("li", { class: t.team === myTeam ? "me" : "" }, [
       el("span", { class: "pos", text: pos === 1 ? "🏆" : String(pos) }),
       el("span", { class: "who" }, [teamLabel(t.team, true)]),
-      el("span", { class: "score", text: `media ${formatAvg(t.avg)}` }),
+      el("span", { class: "score", text: `${t.sum ? "somma" : "media"} ${formatAvg(t.avg)}` }),
       el("span", { class: "pts", text: `+${t.points}` }),
     ]);
   }));
@@ -242,13 +242,23 @@ export async function showResults(msg) {
   const special = msg.special ? SPECIALS[msg.special] : null;
   show(
     el("p", { text: `Manche ${msg.index + 1} di ${state.challenge.total}` }),
-    special ? el("div", { class: "special-chip", text: `${special.icon} ${special.label}` }) : el("span"),
+    special ? el("div", { class: "special-chip", text: specialText(special, msg) }) : el("span"),
     ...cards,
     ...actions,
     solo ? el("span") : reactionBar(),
     el("div", { class: "spacer" }),
     el("button", { text: "Abbandona", class: "link", onclick: () => { leaveRoom(); showHome(); } })
   );
+}
+
+// Testo della manche speciale nei risultati (il Duello dice chi ha vinto)
+function specialText(special, msg) {
+  if (special.id === "duello" && msg.specialOutcome) {
+    const o = msg.specialOutcome;
+    const name = (id) => msg.ranking.find((r) => r.id === id)?.name || "?";
+    return o.winner ? `⚔️ Duello: ${name(o.winner)} batte ${name(o.loser)} (+${o.bonus})` : "⚔️ Duello in parità: niente punti extra";
+  }
+  return `${special.icon} ${special.label}`;
 }
 
 // Barra delle faccine (solo in gruppo)

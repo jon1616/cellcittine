@@ -16,6 +16,8 @@ export const SPECIALS = {
   rimonta:     { id: "rimonta",     icon: "🚀", label: "Rimonta",         desc: "Chi è nella metà bassa della classifica prende punti doppi." },
   lampo:       { id: "lampo",       icon: "⚡", label: "Manche difficile", desc: "Per tutti a difficoltà Difficile, solo per questa manche.", difficulty: "difficile" },
   relax:       { id: "relax",       icon: "🍃", label: "Manche facile",   desc: "Per tutti a difficoltà Facile: riprendete fiato.", difficulty: "facile" },
+  duello:      { id: "duello",      icon: "⚔️", label: "Duello",          desc: "Due persone sorteggiate si sfidano: chi delle due fa meglio prende punti extra. Gli altri giocano normalmente." },
+  staffetta:   { id: "staffetta",   icon: "🤝", label: "Staffetta",       desc: "Per questa manche la squadra vale la SOMMA dei punti dei membri, non la media: contano tutti." },
 };
 
 const SPECIAL_CHANCE = 0.4; // probabilità che una manche (non la prima) sia speciale
@@ -31,12 +33,15 @@ export function roundDifficulty(configured, index, total) {
 // Assegna le manche speciali (host): ritorna un array di id (o null) lungo `total`.
 //   rng: generatore dal seme della sfida (deterministico ma diverso ogni sfida)
 //   difficulty: quella configurata (le manche Difficile/Facile hanno senso solo se cambiano qualcosa)
-export function assignSpecials(total, rng, difficulty) {
+//   opts.teams: squadre attive (→ Staffetta) · opts.players: quante persone (→ Duello da 3 in su, senza squadre)
+export function assignSpecials(total, rng, difficulty, opts = {}) {
   const out = Array.from({ length: total }, () => null);
   if (total >= 3) out[total - 1] = "finale";
   const pool = ["doppia", "tuttoniente", "rimonta"];
   if (difficulty !== "difficile" && difficulty !== "crescente") pool.push("lampo");
   if (difficulty !== "facile" && difficulty !== "crescente") pool.push("relax");
+  if (opts.teams) pool.push("staffetta", "staffetta");
+  else if ((opts.players || 0) >= 3) pool.push("duello", "duello");
   for (let i = 1; i < total - 1; i++) {
     if (out[i - 1]) continue; // mai due di fila
     if (rng() < SPECIAL_CHANCE) out[i] = pool[Math.floor(rng() * pool.length)];
@@ -44,12 +49,31 @@ export function assignSpecials(total, rng, difficulty) {
   return out;
 }
 
+// Duello (host, all'inizio della manche): due persone in gara sorteggiate dal seme della manche
+export function pickDuel(ids, rng) {
+  const pool = [...ids];
+  if (pool.length < 2) return null;
+  const a = pool.splice(Math.floor(rng() * pool.length), 1)[0];
+  const b = pool.splice(Math.floor(rng() * pool.length), 1)[0];
+  return [a, b];
+}
+
 // Applica la manche speciale ai punti della classifica di manche (host).
 //   ranking: [{ id, score, points }] già con i punti base per posizione
 //   standingsBefore: [{ id, points }] classifica generale PRIMA di questa manche
-export function applySpecial(specialId, ranking, standingsBefore) {
+//   extra.duel: [idA, idB] nella manche Duello
+// Ritorna un esito da mostrare (Duello: chi ha vinto) oppure null.
+export function applySpecial(specialId, ranking, standingsBefore, extra = {}) {
   const sp = SPECIALS[specialId];
-  if (!sp) return;
+  if (!sp) return null;
+  if (specialId === "duello" && Array.isArray(extra.duel)) {
+    const [a, b] = extra.duel.map((id) => ranking.find((r) => r.id === id));
+    if (!a || !b) return null;
+    const bonus = ranking.filter((r) => !r.out).length;
+    const better = a.score === b.score ? null : ranking.indexOf(a) < ranking.indexOf(b) ? a : b;
+    if (better) better.points += bonus;
+    return { winner: better?.id || null, loser: better ? (better === a ? b.id : a.id) : null, bonus };
+  }
   if (specialId === "doppia" || specialId === "finale") {
     for (const r of ranking) r.points *= 2;
   } else if (specialId === "tuttoniente") {
@@ -62,4 +86,5 @@ export function applySpecial(specialId, ranking, standingsBefore) {
       for (const r of ranking) if (low.has(r.id)) r.points *= 2;
     }
   }
+  return null;
 }

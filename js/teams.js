@@ -43,7 +43,8 @@ export function smallestTeam(players, count) {
 // Classifica delle squadre in una manche.
 //   ranking: [{ id, points }] della manche · teamOf(id) -> indice squadra o null
 // Ritorna [{ team, avg, members, points }] in ordine di classifica.
-export function teamRound(ranking, teamOf) {
+//   sum: true = Staffetta (somma dei punti invece della media)
+export function teamRound(ranking, teamOf, sum = false) {
   const byTeam = new Map();
   for (const r of ranking) {
     const t = teamOf(r.id);
@@ -52,7 +53,7 @@ export function teamRound(ranking, teamOf) {
     byTeam.get(t).push(r.points || 0);
   }
   const rows = [...byTeam.entries()]
-    .map(([team, pts]) => ({ team, members: pts.length, avg: Math.round((pts.reduce((a, b) => a + b, 0) / pts.length) * 10) / 10 }))
+    .map(([team, pts]) => ({ team, members: pts.length, sum, avg: sum ? pts.reduce((a, b) => a + b, 0) : Math.round((pts.reduce((a, b) => a + b, 0) / pts.length) * 10) / 10 }))
     .sort((a, b) => b.avg - a.avg);
   const n = rows.length;
   let pos = 0;

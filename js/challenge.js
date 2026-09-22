@@ -23,7 +23,7 @@ import { showLobby } from "./screens/lobby.js";
 import { showResults, showFinal } from "./screens/results.js";
 import { computeAwards } from "./awards.js";
 import { teamRound } from "./teams.js";
-import { SPECIALS, roundDifficulty, assignSpecials, applySpecial } from "./specials.js";
+import { SPECIALS, roundDifficulty, assignSpecials, applySpecial, pickDuel } from "./specials.js";
 import { addDay, endChampionship, isChampionship, startChampionship } from "./championship.js";
 import { showChampion, showReaction } from "./screens/results.js";
 
@@ -69,7 +69,7 @@ export async function startChallenge(opts = {}) {
 
   // Manche speciali (solo in gruppo, se attive): decise ora, annunciate manche per manche
   const difficulty = opts.difficulty || cfg.difficulty;
-  const specials = !isSolo() && cfg.special && !opts.daily ? assignSpecials(rounds.length, rng, difficulty) : [];
+  const specials = !isSolo() && cfg.special && !opts.daily ? assignSpecials(rounds.length, rng, difficulty, { teams: cfg.teams, players: state.net.players.length }) : [];
   rounds.forEach((r, i) => { r.special = specials[i] || null; });
 
   state.challenge = {
@@ -110,6 +110,13 @@ export function nextRound() {
   const r = ch.rounds[ch.index];
   // Se per qualcuno in stanza è la prima volta, presentazione più lunga per tutti
   const intro = net.players.some((p) => !net.hasSeen(p.id, r.gameId));
+  // Duello: due persone in gara sorteggiate ora (serve sapere chi c'è); se non si può, la manche è normale
+  if (r.special === "duello") {
+    const alive = net.players.map((p) => p.id).filter((id) => !(ch.mode === "eliminazione" && ch.eliminated.has(id)));
+    r.duel = pickDuel(alive, seededRandom(r.seed ^ 0x5eed));
+    if (!r.duel) r.special = null;
+  }
+  if (r.special === "staffetta" && !ch.teams) r.special = null;
   const special = r.special ? SPECIALS[r.special] : null;
   // Handicap: chi ha una difficoltà personale la usa (salvo le manche speciali Difficile/Facile, uguali per tutti)
   const difficulties = {};
@@ -124,6 +131,7 @@ export function nextRound() {
     difficulties,
     challengeDifficulty: ch.difficulty,
     special: special ? special.id : null,
+    duel: r.duel || null,
     mode: ch.mode,
     out: [...ch.eliminated.keys()],
     intro,
@@ -182,7 +190,7 @@ async function beginRound(msg) {
 
   // Segnaposto subito (così i messaggi di questa manche non vengono scartati)…
   const myDifficulty = msg.difficulties?.[net.me.id] || msg.difficulty; // handicap personale
-  state.round = { index: msg.index, game: null, params: null, startAt: msg.startAt, difficulty: myDifficulty, special: msg.special || null, scores: new Map(), records: new Set(), participants: net.players.map((p) => p.id), deadline: null, ready: new Set() };
+  state.round = { index: msg.index, game: null, params: null, startAt: msg.startAt, difficulty: myDifficulty, special: msg.special || null, duel: msg.duel || null, scores: new Map(), records: new Set(), participants: net.players.map((p) => p.id), deadline: null, ready: new Set() };
   showCountdown(getEntry(msg.gameId), msg);
   // "Sono pronto": l'host raccoglie e rimanda a tutti la lista di chi ha il conto alla rovescia a schermo
   if (net.isHost) markReady(net.me.id, msg.index);
@@ -204,6 +212,10 @@ async function beginRound(msg) {
   if (state.round?.index !== msg.index) return; // nel frattempo è cambiato qualcosa
   state.round.game = game;
   state.round.params = game.createParams(seededRandom(msg.seed), state.round.difficulty);
+}
+
+function duelName(id) {
+  return state.net?.players.find((p) => p.id === id)?.name || "?";
 }
 
 // Host: una persona è pronta per la manche `index`; tutti ricevono la lista aggiornata
@@ -237,7 +249,11 @@ function showCountdown(entry, msg) {
   const area = el("div", { class: `game-area${msg.intro ? " intro" : ""}` }, [
     el("div", { class: "hint", text: `Manche ${msg.index + 1} di ${msg.total} · ${difficultyLabel(state.round?.difficulty || msg.difficulty)}${msg.difficulties?.[net.me.id] ? " (la tua difficoltà)" : ""}` }),
     special
-      ? el("div", { class: "special-banner" }, [el("div", { class: "special-title", text: `${special.icon} ${special.label}` }), el("div", { class: "special-desc", text: special.desc })])
+      ? el("div", { class: "special-banner" }, [
+          el("div", { class: "special-title", text: `${special.icon} ${special.label}` }),
+          msg.duel ? el("div", { class: "special-duel", text: `${duelName(msg.duel[0])} contro ${duelName(msg.duel[1])}` }) : el("span"),
+          el("div", { class: "special-desc", text: msg.duel?.includes(net.me.id) ? "Sei in duello! Chi fa meglio tra voi due prende punti extra." : special.desc }),
+        ])
       : el("span"),
     amOut ? el("div", { class: "out-banner", text: "💀 Sei fuori: gioca per divertimento, senza punti" }) : el("span"),
     gameIcon(entry, "countdown-icon"),
@@ -405,8 +421,8 @@ function publishResults() {
       for (const l of losers) { ch.eliminated.set(l.id, round.index); l.eliminatedNow = true; }
     }
   }
-  // Manche speciale: punti doppi, tutto o niente, rimonta…
-  if (round.special) applySpecial(round.special, ranking, standingsArray());
+  // Manche speciale: punti doppi, tutto o niente, rimonta, duello…
+  const specialOutcome = round.special ? applySpecial(round.special, ranking, standingsArray(), { duel: round.duel }) : null;
 
   for (const r of ranking) {
     const entry = ch.standings.get(r.id) || { name: r.name, color: r.color, points: 0 };
@@ -422,7 +438,7 @@ function publishResults() {
   // Squadre: media dei punti dei membri, poi punti per posizione tra squadre
   let teamRanking = null;
   if (ch.teams) {
-    teamRanking = teamRound(ranking, (id) => ch.standings.get(id)?.team);
+    teamRanking = teamRound(ranking, (id) => ch.standings.get(id)?.team, round.special === "staffetta");
     for (const t of teamRanking) ch.teamStandings.set(t.team, (ch.teamStandings.get(t.team) || 0) + t.points);
   }
 
@@ -433,6 +449,8 @@ function publishResults() {
     difficulty: round.difficulty,
     challengeDifficulty: ch.difficulty,
     special: round.special || null,
+    duel: round.duel || null,
+    specialOutcome,
     gameId: round.game.id,
     ranking,
     standings: standingsArray(),

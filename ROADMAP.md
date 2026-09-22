@@ -19,9 +19,9 @@ mani, tema Compleanno, QR code, inglese.
 
 ## B. Più varietà nelle sfide
 
-- [ ] **Manche Duello** (manche speciale): due persone sorteggiate si sfidano; chi delle due fa meglio prende punti extra; gli altri giocano normalmente. Come: `specials.js` con dati per manche, sorteggio dell'host dal seme. — M
-- [ ] **Manche Staffetta** (manche speciale con le squadre): per una manche la squadra vale la somma dei punti dei membri invece della media. — S
-- [ ] **Sfida Maratona**: un pulsante in stanza imposta una serata intera: 15 manche, difficoltà Crescente, manche speciali, manche automatiche; opzioni 15 e 20 tra le manche. — S
+- [x] **Manche Duello** (manche speciale): due persone sorteggiate si sfidano; chi delle due fa meglio prende punti extra; gli altri giocano normalmente. Come: `specials.js` con dati per manche, sorteggio dell'host dal seme. (v0.38.0)
+- [x] **Manche Staffetta** (manche speciale con le squadre): per una manche la squadra vale la somma dei punti dei membri invece della media. (v0.38.0)
+- [x] **Sfida Maratona**: un pulsante in stanza imposta una serata intera: 15 manche, difficoltà Crescente, manche speciali, manche automatiche; opzioni 15 e 20 tra le manche. (v0.38.0)
 - [ ] **Sfida del giorno in gruppo**: dalla stanza si può giocare esattamente i 5 minigiochi del giorno con gli stessi semi; il totale di ognuno vale come Sfida del giorno personale (se è il primo tentativo). — M
 
 ## C. Minigiochi
