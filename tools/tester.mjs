@@ -6,6 +6,7 @@
       node tools/tester.mjs                 tutte le prove
       node tools/tester.mjs --solo=tocchi   un solo minigioco
       node tools/tester.mjs --no-giochi     salta le partite simulate
+      node tools/tester.mjs --no-multi      salta la prova host + ospite (usa il server pubblico di PeerJS)
       node tools/tester.mjs --verbose       stampa tutte le righe del rapporto
       node tools/tester.mjs --url=http://localhost:8765/test.html
 
@@ -79,6 +80,7 @@ await evaluate(`
   document.getElementById('optGiochi').checked = ${args["no-giochi"] ? "false" : "true"};
   document.getElementById('optApp').checked = ${args["no-app"] ? "false" : "true"};
   if (document.getElementById('optDaily')) document.getElementById('optDaily').checked = ${args["no-daily"] ? "false" : "true"};
+  if (document.getElementById('optMulti')) document.getElementById('optMulti').checked = ${args["no-multi"] ? "false" : "true"};
   document.getElementById('optGioco').value = ${JSON.stringify(args.solo || "*")};
   document.getElementById('optDifficolta').value = ${JSON.stringify(args.difficolta || "normale")};
   document.getElementById('btnAvvia').click(); true`);

@@ -75,6 +75,7 @@ function goBack() {
       else confirmBack("Premi ancora ◀ per uscire dalla stanza", exitToHome);
       break;
     case "countdown":
+    case "spectate":
     case "game":
     case "results":
     case "final":

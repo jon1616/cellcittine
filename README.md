@@ -44,7 +44,8 @@ assets/music/           sottofondo.mp3 (brano generato con IA dall'autore del pr
 assets/                 immagini: originali (PNG), versioni usate dall app (JPEG/WebP), icone dei minigiochi (assets/icons/<id>.webp)
 fonts/                  carattere Fredoka (SIL OFL, licenza in fonts/OFL.txt)
 vendor/                 PeerJS 1.5.4 (MIT, licenza in vendor/peerjs-LICENSE.txt): unica libreria esterna, copiata qui
-test.html + js/tester.js  tester nel browser: prova tutto il gioco in meno di un minuto
+test.html + js/tester.js  tester nel browser: struttura, ogni minigioco, allenamento, sfida del giorno, multiplayer
+tools/tester.mjs        esegue il tester in Chrome headless da riga di comando
 tools/check.mjs         controllo rapido da riga di comando (sintassi, catalogo, PRECACHE completa, versione)
 CLAUDE.md · ROADMAP.md  guida per chi lavora sul codice · elenco di fatto / da fare
 ```

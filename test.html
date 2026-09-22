@@ -41,6 +41,7 @@
     /* transform: così gli elementi "position: fixed" dei minigiochi restano dentro il telefono */
     .stage { width: 360px; height: 640px; background: #1b1a2e; border: 3px solid #3a3960; border-radius: 26px; overflow: hidden; position: relative; transform: translateZ(0); }
     .stage iframe { width: 100%; height: 100%; border: 0; display: block; }
+    .stage iframe.half { height: 50%; border-bottom: 2px solid #3a3960; }
     .stage .game-area { position: absolute; }
     .log { font-family: ui-monospace, Consolas, monospace; font-size: 12px; white-space: pre-wrap; color: rgba(255,255,255,0.7); background: #1b1a2e; border-radius: 10px; padding: 10px; max-height: 220px; overflow: auto; margin-top: 10px; }
     .tap { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; border: 2px solid #ffca3a; pointer-events: none; animation: tap 0.35s ease-out forwards; z-index: 99; }
@@ -58,6 +59,7 @@
         <label><input type="checkbox" id="optGiochi" checked> Minigiochi</label>
         <label><input type="checkbox" id="optApp" checked> Allenamento (app intera)</label>
         <label><input type="checkbox" id="optDaily" checked> Sfida del giorno (app intera)</label>
+        <label><input type="checkbox" id="optMulti" checked> Multiplayer (host + ospite)</label>
         <select id="optGioco" title="Quale minigioco provare"></select>
         <select id="optDifficolta" title="Difficoltà">
           <option value="facile">Facile</option>

@@ -3,7 +3,7 @@
   Chi cambia schermata chiama setScreen(); chi vuole sapere dove siamo legge state.screen.
 
   Schermate: "home" | "records" | "history" | "stats" | "catalog" | "info" | "join" | "lobby" | "list" |
-             "picker" | "countdown" | "game" | "results" | "final" | "champion"
+             "picker" | "countdown" | "spectate" | "game" | "results" | "final" | "champion"
 */
 
 import { loadConfig } from "./storage.js";

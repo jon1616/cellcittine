@@ -65,7 +65,7 @@ js/games/<id>.js     logica di un minigioco (vedi contratto in semaforo.js)
 js/utils.js          el(), seededRandom(), sleep(), vibrate()
 js/version.js        VERSION mostrata nell'angolo
 vendor/peerjs.min.js PeerJS 1.5.4 (MIT): unica libreria esterna, copiata nel progetto (niente CDN)
-js/tester.js + test.html   tester nel browser (struttura, ogni minigioco, allenamento completo)
+js/tester.js + test.html   tester nel browser (struttura, ogni minigioco, allenamento, sfida del giorno, multiplayer host+ospite in due riquadri)
 tools/check.mjs      controllo da riga di comando (sintassi, catalogo ↔ file ↔ sw.js, PRECACHE completa, versione)
 tools/tester.mjs     esegue test.html in Chrome headless e stampa il rapporto (node tools/tester.mjs, --solo=<id>, --no-giochi)
 .claude/serve.js + .claude/launch.json   server locale di sviluppo (porta 8765), fuori da Git
@@ -83,7 +83,7 @@ Regole di dipendenza tra i moduli: le schermate importano `state`, `ui`, i dati 
 packs) e le altre schermate a cui portano; nessun modulo esegue codice al caricamento che usi
 un'altra schermata (i cicli di import sono ammessi solo tra funzioni). Nuova schermata = nuovo file in
 `js/screens/`, una voce in `state.screen`, un caso in `goBack()` di `nav.js`, riga in PRECACHE.
-Messaggi "leggeri" (non di fase, non rimandati a chi rientra): `ready` (ospite → host → tutti, chi ha il conto alla rovescia a schermo), `presence` (ospite → host, app in secondo piano → campo `away` nei partecipanti), `progress` (host → tutti a ogni punteggio ricevuto: chi ha finito, mostrato nella schermata "In attesa degli altri…" dei minigiochi con createShell), `react` (ospite → host → tutti: faccina che vola sulla riga con `data-id`).
+Messaggi "leggeri" (non di fase, non rimandati a chi rientra): `ready` (ospite → host → tutti, chi ha il conto alla rovescia a schermo), `presence` (ospite → host, app in secondo piano → campo `away` nei partecipanti), `progress` (host → tutti a ogni punteggio ricevuto: chi ha finito, mostrato nella schermata "In attesa degli altri…" dei minigiochi con createShell), `react` (ospite → host → tutti: faccina che vola sulla riga con `data-id`). Chi entra a manche iniziata riceve lo `start` con `spectate: true` → schermata "spectate" (guarda, con i risultati in diretta) e gioca dalla manche dopo. `?cid=…` nell'indirizzo impone l'id del telefono (solo per il tester, che apre host e ospite nello stesso browser).
 Nuovo messaggio di fase (host → tutti, da rimandare a chi rientra): aggiungerlo a PHASE_MESSAGES in `net.js` e un caso con guardia in `handleMessage`.
 
 ## Contratto di un minigioco (`js/games/<id>.js`)

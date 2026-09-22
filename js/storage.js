@@ -76,6 +76,9 @@ function write(key, value) {
 // ---------------------------------------------------------------
 
 export function getClientId() {
+  // ?cid=… nell'indirizzo: id imposto (solo per il tester, che apre host e ospite nello stesso browser)
+  const forced = new URLSearchParams(location.search).get("cid");
+  if (forced) return String(forced).slice(0, 40);
   let id = null;
   try { id = localStorage.getItem(KEY_CLIENT); } catch (_) { /* privato */ }
   if (!id) {

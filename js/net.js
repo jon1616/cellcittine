@@ -147,6 +147,7 @@ export class Net {
           // i risultati correnti (giocherà dalla prossima manche), ma non una manche già partita.
           const last = this.lastBroadcast;
           if (last && (rejoin || last.type === "results" || last.type === "final")) conn.send(last);
+          else if (last && last.type === "start") conn.send({ ...last, spectate: true }); // manche in corso: la guarda, gioca dalla prossima
           this.broadcast({ type: "players", players: this.players });
           this.handlers.onPlayers?.(this.players);
           break;

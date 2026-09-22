@@ -662,6 +662,101 @@ async function testSfidaDelGiorno() {
 }
 
 // ---------------------------------------------------------------
+// MULTIPLAYER: host e ospite in due riquadri, una manche insieme (tempo reale:
+// il collegamento passa dal server pubblico di PeerJS e i suoi tempi non si
+// possono accelerare). Se il server non risponde, la prova è un avviso, non un errore.
+// ---------------------------------------------------------------
+
+async function testMultiplayer() {
+  section("Multiplayer (host + ospite)");
+  stageTitle.textContent = "App · Multiplayer";
+  const running = row("running", "Una manche in due", "in corso…");
+  const backup = Object.fromEntries(Object.keys(localStorage).map((k) => [k, localStorage.getItem(k)]));
+  const restore = () => { localStorage.clear(); for (const [k, v] of Object.entries(backup)) localStorage.setItem(k, v); };
+  localStorage.setItem("name", "Tester");
+  localStorage.setItem("music", "off");
+  localStorage.setItem("sound", "off");
+  localStorage.setItem("seen", JSON.stringify(["tocchi"]));
+  localStorage.setItem("config", JSON.stringify({ games: ["tocchi"], rounds: "tutti", difficulty: "normale", pack: null, auto: false, teams: 0, special: false, championship: false, mode: "punti" }));
+
+  const stamp = Date.now();
+  const mk = (cid) => el("iframe", { src: `index.html?tester=${stamp}&cid=${cid}`, title: cid, class: "half" });
+  const A = mk("host-" + stamp), B = mk("guest-" + stamp);
+  stage.replaceChildren(A, B);
+  const steps = [];
+  const errors = [];
+  let skip = null;
+  const load = (f) => new Promise((res, rej) => { f.onload = res; f.onerror = rej; });
+  const waitFor = async (what, test, ms) => {
+    const until = warp.realNow() + ms;
+    while (warp.realNow() < until) {
+      let v = null;
+      try { v = test(); } catch (_) { /* ancora niente */ }
+      if (v) return v;
+      await realSleep(100);
+    }
+    throw new Error(`aspettando: ${what}`);
+  };
+  const button = (doc, text) => [...doc.querySelectorAll("button")].find((b) => b.textContent.trim().startsWith(text));
+  const monkeys = [];
+  try {
+    await Promise.all([load(A), load(B)]);
+    const [wa, wb] = [A.contentWindow, B.contentWindow];
+    const [da, db] = [A.contentDocument, B.contentDocument];
+    for (const w of [wa, wb]) {
+      w.addEventListener("error", (ev) => errors.push(ev.message));
+      w.addEventListener("unhandledrejection", (ev) => errors.push(`promise: ${ev.reason?.message || ev.reason}`));
+    }
+    await waitFor("le home", () => button(da, "Crea una stanza") && button(db, "Entra con un codice"), 8000);
+    button(da, "Crea una stanza").click();
+    let code;
+    try {
+      code = await waitFor("il codice della stanza", () => da.querySelector(".code-big")?.textContent?.trim(), 20000);
+    } catch (e) {
+      skip = `server di collegamento non raggiunto (${da.querySelector(".status")?.textContent || e.message})`;
+      throw e;
+    }
+    steps.push(`stanza ${code}`);
+    button(db, "Entra con un codice").click();
+    const input = await waitFor("il campo del codice", () => db.querySelector("#app input"), 3000);
+    input.value = code;
+    input.dispatchEvent(new wb.Event("input", { bubbles: true }));
+    [...db.querySelectorAll("button")].find((b) => /^Entra/.test(b.textContent.trim()) && !/codice/.test(b.textContent)).click();
+    await waitFor("l'ospite in stanza", () => /In stanza \(2\)/.test(da.getElementById("app").textContent) && /In stanza \(2\)/.test(db.getElementById("app").textContent), 25000);
+    steps.push("ospite entrato");
+    button(da, "Inizia la sfida!").click();
+    await waitFor("il conto alla rovescia su entrambi", () => da.querySelector(".game-area .big") && db.querySelector(".game-area .big"), 8000);
+    steps.push("conto alla rovescia");
+    await waitFor("la manche su entrambi", () => da.querySelector(".game-shell") && db.querySelector(".game-shell"), 12000);
+    monkeys.push(makeMonkey(stage, da, da.body, ".game-area"), makeMonkey(stage, db, db.body, ".game-area"));
+    await waitFor("i risultati su entrambi", () => da.querySelector("#app .ranking") && db.querySelector("#app .ranking"), 40000);
+    monkeys.forEach((m) => m.stop());
+    steps.push("risultati");
+    const names = ["Tester", "Tester 2"];
+    for (const [who, doc] of [["host", da], ["ospite", db]]) {
+      const txt = doc.getElementById("app").textContent;
+      for (const n of names) if (!txt.includes(n)) errors.push(`${who}: nei risultati manca "${n}"`);
+    }
+    if (!da.querySelector(".ready-list") && !db.querySelector("#app .ranking")) errors.push("niente classifica");
+    (await waitFor("il pulsante del risultato finale", () => button(da, "Vedi il risultato finale"), 5000)).click();
+    await waitFor("il podio su entrambi", () => /Fine della sfida/.test(da.getElementById("app").textContent) && /Fine della sfida/.test(db.getElementById("app").textContent), 8000);
+    steps.push("podio");
+  } catch (e) {
+    if (!skip) errors.push(e.message);
+  }
+  monkeys.forEach((m) => m.stop());
+  await realSleep(300);
+  try { A.contentWindow.cellcittine?.state?.net?.leave(); } catch (_) { /* già chiuso */ }
+  try { B.contentWindow.cellcittine?.state?.net?.leave(); } catch (_) { /* già chiuso */ }
+  A.remove(); B.remove();
+  restore();
+  const path = steps.join(" → ");
+  if (skip) running.set("warn", `prova saltata: ${skip}`);
+  else if (errors.length) running.set("fail", `${path || "niente"} · ${[...new Set(errors)].join(" · ")}`);
+  else running.set("ok", path);
+}
+
+// ---------------------------------------------------------------
 // Avvio
 // ---------------------------------------------------------------
 
@@ -706,6 +801,7 @@ async function run() {
       await testAllenamento(pick, difficulty);
     }
     if (document.getElementById("optDaily")?.checked) await testSfidaDelGiorno();
+    if (document.getElementById("optMulti")?.checked) await testMultiplayer();
   } catch (e) {
     section("Tester");
     row("fail", "Il tester stesso ha avuto un errore", e.stack || e.message);

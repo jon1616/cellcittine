@@ -655,3 +655,7 @@
 /* Colore della categoria durante il minigioco: cornice sottile e titolo */
 .game-area.game-shell { box-shadow: inset 0 0 0 3px var(--cat, transparent); }
 .game-shell .game-title { color: var(--cat, inherit); }
+
+/* Spettatore (entrati a manche iniziata) */
+.game-area.spectate .game-done { margin-top: 8px; }
+.spectate-note { max-width: 340px; font-size: 15px; font-weight: 500; color: rgba(255,255,255,0.85); padding: 8px 14px; border-radius: 12px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); }

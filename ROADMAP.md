@@ -4,8 +4,8 @@ Qui si segna ogni aggiunta futura **prima** di farla, e la si spunta quando è o
 Una riga per idea: `- [ ] cosa` → `- [x] cosa (vX.Y.Z)`. Le decisioni prese stanno in CLAUDE.md.
 
 Roadmap riprogettata il 22/09/2026 (v0.34.2): le idee vecchie non ancora fatte sono state tolte e sostituite
-dalla lista proposta dall'agente e approvata dall'utente, da mettere in pratica a cicli continui senza il suo
-intervento. Rimandati a dopo, per scelta dell'utente: taratura dei riferimenti con le ragazze, minigiochi a due
+dalla lista proposta dall'agente e approvata dall'utente, messa in pratica a cicli continui senza il suo
+intervento (v0.35.0 → v0.43.0, tutto fatto il 22/09/2026). Rimandati a dopo, per scelta dell'utente: taratura dei riferimenti con le ragazze, minigiochi a due
 mani, tema Compleanno, QR code, inglese.
 
 ## A. La partita più viva
@@ -41,8 +41,8 @@ mani, tema Compleanno, QR code, inglese.
 
 ## F. Più avanti
 
-- [ ] **Tester del multiplayer**: nel tester una prova con due riquadri (host + ospite) che fanno una manche insieme. — M
-- [ ] **Modalità spettatore**: chi entra a sfida iniziata vede la manche in corso (nome, risultati in diretta) e gioca dalla successiva. — M
+- [x] **Tester del multiplayer**: nel tester una prova con due riquadri (host + ospite) che fanno una manche insieme. (v0.43.0)
+- [x] **Modalità spettatore**: chi entra a sfida iniziata vede la manche in corso (nome, risultati in diretta) e gioca dalla successiva. (v0.43.0)
 
 ## Idee parcheggiate
 

@@ -192,6 +192,14 @@ async function beginRound(msg) {
   if (!net.isHost) state.challenge.daily = msg.daily ? { key: msg.daily, group: true } : null;
   if (Array.isArray(msg.out)) { state.challenge.eliminated = new Map(msg.out.map((id) => [id, true])); }
 
+  // Entrati a manche iniziata: si guarda (risultati in diretta), si gioca dalla prossima
+  if (msg.spectate && !net.isHost) {
+    state.round = { index: msg.index, game: null, params: null, startAt: msg.startAt, difficulty: msg.difficulty, special: msg.special || null, scores: new Map(), records: new Set(), participants: [], deadline: null, ready: new Set(), spectator: true, live: [] };
+    showSpectator(getEntry(msg.gameId), msg);
+    try { const g = await loadGame(msg.gameId); if (state.round?.index === msg.index) state.round.game = g; renderLive(); } catch (_) { /* si vedrà ai risultati */ }
+    return;
+  }
+
   // Segnaposto subito (così i messaggi di questa manche non vengono scartati)…
   const myDifficulty = msg.difficulties?.[net.me.id] || msg.difficulty; // handicap personale
   state.round = { index: msg.index, game: null, params: null, startAt: msg.startAt, difficulty: myDifficulty, special: msg.special || null, duel: msg.duel || null, scores: new Map(), records: new Set(), participants: net.players.map((p) => p.id), deadline: null, ready: new Set() };
@@ -216,6 +224,21 @@ async function beginRound(msg) {
   if (state.round?.index !== msg.index) return; // nel frattempo è cambiato qualcosa
   state.round.game = game;
   state.round.params = game.createParams(seededRandom(msg.seed), state.round.difficulty);
+}
+
+// Spettatore: nome del minigioco in corso e lista di chi ha già finito (riempita da renderLive)
+function showSpectator(entry, msg) {
+  setScreen("spectate");
+  sfx.setScene("game");
+  const area = el("div", { class: "game-area spectate" }, [
+    el("div", { class: "hint", text: `Manche ${msg.index + 1} di ${msg.total} in corso` }),
+    gameIcon(entry, "countdown-icon"),
+    el("div", { text: entry?.title || msg.gameId }),
+    el("div", { class: "spectate-note", text: "👀 Manche già iniziata: la guardi da qui e giochi dalla prossima." }),
+    el("div", { class: "game-done" }, [el("div", { class: "hint", text: "In attesa dei risultati…" })]),
+  ]);
+  appRoot().replaceChildren(area);
+  syncBackGuard();
 }
 
 function duelName(id) {
@@ -377,7 +400,8 @@ export function renderLive() {
     if (d.id !== state.net.me.id) sfx.play("blip");
   }
   const total = round.participants.length;
-  box.querySelector(".hint").textContent = round.live.length >= total ? "Tutti hanno finito!" : `In attesa degli altri… (${round.live.length} su ${total})`;
+  if (round.spectator) box.querySelector(".hint").textContent = round.live.length ? `Hanno finito: ${round.live.length}` : "In attesa dei risultati…";
+  else box.querySelector(".hint").textContent = round.live.length >= total ? "Tutti hanno finito!" : `In attesa degli altri… (${round.live.length} su ${total})`;
 }
 
 export function checkRoundComplete() {
