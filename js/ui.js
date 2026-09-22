@@ -10,6 +10,8 @@ import { state } from "./state.js";
 import { syncBackGuard } from "./nav.js";
 import { DIFFICULTY_OPTIONS, getRecord } from "./storage.js";
 import { PACES, isNew } from "./games/catalog.js";
+import { starsFor } from "./stats.js";
+import { starsText } from "./rating.js";
 
 const app = document.getElementById("app");
 
@@ -113,6 +115,7 @@ export function colorDot(index, id = null) {
 // ---------------------------------------------------------------
 
 export function difficultyLabel(id) {
+  if (id === "adattiva") return "Adattiva";
   return DIFFICULTY_OPTIONS.find((d) => d.id === id)?.label || id;
 }
 
@@ -150,7 +153,7 @@ export function gameRow(g, { selected = null, onClick, onInfo, onFav = null, fav
         isNew(g) ? el("span", { class: "badge new", text: "NUOVO" }) : el("span"),
       ]),
       el("div", { class: "game-desc", text: g.description }),
-      el("div", { class: "game-meta", text: metaLine(g) + (rec ? ` · ★ ${rec.text}` : "") }),
+      el("div", { class: "game-meta", text: metaLine(g) + (rec ? ` · record ${rec.text}` : "") + (starsFor(g.id) ? ` · ${starsText(starsFor(g.id))}` : "") }),
     ]),
     onFav ? el("button", { class: `fav${fav ? " on" : ""}`, text: fav ? "★" : "☆", title: "Preferito", onclick: (ev) => { ev.stopPropagation(); onFav(); } }) : el("span"),
     onInfo ? el("button", { class: "info", text: "i", onclick: (ev) => { ev.stopPropagation(); onInfo(); } }) : el("span"),

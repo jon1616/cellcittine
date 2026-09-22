@@ -14,6 +14,7 @@ import { getStats, saveStats, getAchievements, saveAchievements, getHistory, get
 import { getDailyResults } from "./storage.js";
 import { dailyStreak, dailyGame } from "./daily.js";
 import { bumpWeekly, weeksDoneCount } from "./missions.js";
+import { starsOf } from "./rating.js";
 
 // Registra una manche giocata da chi guarda.
 //   pct: percentuale di prestazione (0-100) · won: ha vinto la manche (in gruppo) · solo: allenamento/giorno
@@ -23,6 +24,8 @@ export function recordRound(gameId, { pct = 0, won = false, solo = true, seconds
   const g = stats[gameId] || { n: 0, sum: 0, best: 0, wins: 0, solo: 0, sec: 0, perfect: 0 };
   // Verso Esperto: risultati oltre l'80% a Difficile (o già a Esperto)
   if ((difficulty === "difficile" || difficulty === "esperto") && pct >= 80) g.expert = (g.expert || 0) + 1;
+  // Stelle (da soli o in gruppo): restano le migliori mai prese in quel minigioco
+  g.stars = Math.max(g.stars || 0, starsOf(pct));
   // Missioni della settimana (il minigioco del giorno conta doppio)
   const w = gameId === dailyGame() ? 2 : 1;
   bumpWeekly("rounds", w);
@@ -45,6 +48,27 @@ export function recordRound(gameId, { pct = 0, won = false, solo = true, seconds
 
 export function gameStat(gameId) {
   return getStats()[gameId] || null;
+}
+
+// Stelle: per minigioco, totale, e il prossimo obiettivo (il minigioco giocato con meno stelle)
+export function starsFor(gameId) { return getStats()[gameId]?.stars || 0; }
+export function totalStars() { return Object.values(getStats()).reduce((s, g) => s + (g.stars || 0), 0); }
+export function nextGoal() {
+  const stats = getStats();
+  const played = CATALOG.filter((g) => stats[g.id]).sort((a, b) => (stats[a.id].stars || 0) - (stats[b.id].stars || 0) || (stats[b.id].best || 0) - (stats[a.id].best || 0));
+  const target = played.find((g) => (stats[g.id].stars || 0) < 3) || CATALOG.find((g) => !stats[g.id]) || null;
+  return target ? { id: target.id, stars: stats[target.id]?.stars || 0 } : null;
+}
+
+// Difficoltà adattiva (Giro veloce): dalle stelle già prese in quel minigioco
+export function adaptiveDifficulty(gameId) {
+  const g = getStats()[gameId];
+  if (!g) return "normale";
+  const s = g.stars || 0;
+  if (s >= 3) return isExpertUnlocked(gameId) ? "esperto" : "difficile";
+  if (s === 2) return "difficile";
+  if (s === 1) return "normale";
+  return "facile";
 }
 
 // Esperto sbloccato in questo minigioco? E quanti minigiochi lo hanno
@@ -79,6 +103,8 @@ export function summary() {
     records,
     weeks: weeksDoneCount(),
     experts: expertCount(),
+    stars: totalStars(),
+    starsMax: CATALOG.length * 3,
   };
 }
 
@@ -136,6 +162,8 @@ export const ACHIEVEMENTS = [
   { id: "giorno4000", icon: "🎯", title: "Giornata top", desc: "4000 punti in una Sfida del giorno", test: (s) => s.dailyBest >= 4000 },
   { id: "settimana", icon: "🗓️", title: "Settimana piena", desc: "Completa le 3 missioni di una settimana", test: (s) => s.weeks >= 1 },
   { id: "esperto1", icon: "🔓", title: "Esperto", desc: "Sblocca la difficoltà Esperto in un minigioco", test: (s) => s.experts >= 1 },
+  { id: "stelle30", icon: "✨", title: "Cielo stellato", desc: "Raccogli 30 stelle", test: (s) => s.stars >= 30 },
+  { id: "stelle100", icon: "🌌", title: "Via Lattea", desc: "Raccogli 100 stelle", test: (s) => s.stars >= 100 },
   { id: "esperto10", icon: "🎓", title: "Dieci volte esperto", desc: "Sblocca Esperto in 10 minigiochi", test: (s) => s.experts >= 10 },
   { id: "mese", icon: "📆", title: "Un mese di missioni", desc: "Completa le missioni di 4 settimane", test: (s) => s.weeks >= 4 },
 ];

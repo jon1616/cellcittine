@@ -23,7 +23,9 @@ import { recordRound, checkAchievements } from "../stats.js";
 import { checkMissions, bumpWeekly } from "../missions.js";
 import { challengeStory, storyText, revenge } from "../story.js";
 import { setExpert } from "../games/shell.js";
-import { isExpertUnlocked, expertProgress } from "../stats.js";
+import { isExpertUnlocked, expertProgress, starsFor, totalStars, nextGoal } from "../stats.js";
+import { starsOf, starsText } from "../rating.js";
+import { CATALOG } from "../games/catalog.js";
 import { EXPERT_UNLOCK } from "../storage.js";
 import { toast } from "../ui.js";
 import { commentRound, commentSolo } from "../commentary.js";
@@ -227,6 +229,12 @@ export async function showResults(msg) {
 
   if (solo) {
     const rec = getRecord(game.id, round?.difficulty || msg.difficulty);
+    const pct = ratingOf(game, round?.myScore, round?.params);
+    const got = starsOf(pct), best = starsFor(game.id);
+    cards.push(el("div", { class: "stars-line" }, [
+      el("span", { class: `stars${got >= 3 ? " full" : ""}`, text: starsText(got) }),
+      el("span", { class: "small", text: got >= 3 ? "Tre stelle: massimo!" : got === best && starsBefore(game.id, got) < got ? "Nuova stella per questo minigioco!" : `${pct}% · la prossima stella dal ${got === 0 ? 50 : got === 1 ? 75 : 95}%` }),
+    ]));
     cards.push(el("p", { text: rec ? `Il tuo record: ${rec.text}` : "" }));
   } else {
     if (msg.teamRanking) {
@@ -361,6 +369,23 @@ function revengeCard(meId) {
   const list = revenge(meId);
   if (!list.length) return el("span");
   return el("div", { class: "card revenge" }, list.map((r) => el("div", { class: "revenge-line", text: `🔁 Rivincita su ${r.name}!${r.balance ? ` Ora ${r.balance}.` : ""}` })));
+}
+
+// Da soli: stelle prese in questa sfida, totale, prossimo obiettivo
+function soloStarsCard(ch, meId) {
+  const rows = ch.history.map((h) => {
+    const game = getLoaded(h.gameId);
+    const pct = game ? ratingOf(game, h.myScore, h.myParams) : 0;
+    return { gameId: h.gameId, stars: starsOf(pct), pct };
+  });
+  const earned = rows.reduce((s, r) => s + r.stars, 0);
+  const total = totalStars();
+  const goal = nextGoal();
+  return el("div", { class: "card tone", style: "--c: var(--accent)" }, [
+    el("div", { class: "stars-big", text: "★".repeat(Math.min(earned, 15)) || "☆" }),
+    el("p", { text: `${earned} ${earned === 1 ? "stella" : "stelle"} in questa sfida · ${total} su ${CATALOG.length * 3} in tutto` }),
+    goal ? el("p", { class: "small", text: `Prossimo obiettivo: ${getEntry(goal.id)?.title || goal.id} (${starsText(goal.stars)})` }) : el("span"),
+  ]);
 }
 
 // Tre gradini per i primi tre (2º a sinistra, 1º al centro, 3º a destra)
@@ -504,6 +529,14 @@ function rememberChallenge(msg) {
   });
 }
 
+// Stelle di un minigioco prima di questa manche (per dire "nuova stella"): si legge dalla storia della sfida
+function starsBefore(gameId, got) {
+  const ch = state.challenge;
+  const earlier = (ch?.history || []).slice(0, -1).filter((h) => h.gameId === gameId);
+  if (!earlier.length) return ch?.starsAtStart?.[gameId] ?? (starsFor(gameId) < got ? 0 : got);
+  return got;
+}
+
 // Traguardi appena sbloccati: un avviso alla volta, dopo il podio
 function announceAchievements() {
   const ms = checkMissions();
@@ -562,7 +595,8 @@ export function showFinal(msg) {
   if (solo && ch.daily) {
     parts.push(...dailyFinal(ch));
   } else if (solo) {
-    parts.push(el("h2", { text: ch.quick ? "Prova finita!" : "Allenamento completato!" }));
+    parts.push(el("h2", { text: ch.quick ? "Prova finita!" : ch.adaptive ? "Giro veloce finito!" : "Allenamento completato!" }));
+    parts.push(soloStarsCard(ch, meId));
     parts.push(
       el("div", { class: "card" }, [
         el("ol", { class: "ranking" }, ch.history.map((h, i) => {
@@ -637,10 +671,10 @@ export function showFinal(msg) {
 
   const actions = net.isHost
     ? [
-        el("button", { text: ch.daily ? "🔁 Rigioca per allenarti" : ch.quick ? "🔁 Riprova" : "🔁 Rivincita (stessa sfida)", class: ch.daily ? "secondary" : "", onclick: () => replayChallenge() }),
+        el("button", { text: ch.daily ? "🔁 Rigioca per allenarti" : ch.quick ? "🔁 Riprova" : ch.adaptive ? "⚡ Ancora un giro" : "🔁 Rivincita (stessa sfida)", class: ch.daily ? "secondary" : "", onclick: () => replayChallenge() }),
         ch.quick ? el("button", { text: "Scheda del minigioco", class: "secondary", onclick: () => { const id = ch.rounds?.[0]?.gameId; leaveRoom(); const g = getEntry(id); g ? showGameInfo(g, showCatalog) : showCatalog(); } }) : el("span"),
         msg.championship ? el("button", { text: "🏆 Chiudi il campionato", class: "link", onclick: () => closeChampionship() }) : el("span"),
-        ch.daily || ch.quick ? el("span") : el("button", {
+        ch.daily || ch.quick || ch.adaptive ? el("span") : el("button", {
           text: solo ? "Cambia impostazioni" : msg.championship ? `Prossima giornata (${msg.championship.day + 1})` : "Nuova sfida",
           class: "secondary",
           onclick: () => {

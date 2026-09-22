@@ -371,3 +371,9 @@ input.room-name-input { font-size: 18px; padding: 10px 12px; }
 .step-pts { font-size: 12px; font-weight: 700; opacity: 0.85; }
 
 @media (prefers-reduced-motion: reduce) { .comment, .ranking.animated li, .ranking.reveal li, .ranking.reveal li .score, .ranking.reveal li .pts, .step, .story-line { animation: none !important; } }
+
+/* Stelle (da soli) */
+.stars-line { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.stars { font-size: 30px; letter-spacing: 4px; color: var(--accent); text-shadow: 0 0 14px var(--accent-glow); animation: bump 0.5s; }
+.stars.full { color: #fff6d5; }
+.stars-big { font-size: 28px; letter-spacing: 3px; text-align: center; color: var(--accent); text-shadow: 0 0 16px var(--accent-glow); line-height: 1.3; word-break: break-all; }

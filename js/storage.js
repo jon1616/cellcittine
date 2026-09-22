@@ -63,7 +63,10 @@ export const DIFFICULTIES = [
 // "esperto": come Difficile ma con il 25% di tempo in meno; vale solo nei minigiochi in cui è sbloccato
 // (tre volte oltre l'80% a Difficile), altrimenti si gioca Difficile. "crescente": da Facile a Difficile lungo la sfida.
 export const DIFFICULTY_OPTIONS = [...DIFFICULTIES, { id: "esperto", label: "Esperto" }, { id: "crescente", label: "Crescente" }];
-export const EXPERT_UNLOCK = 3; // risultati oltre l'80% a Difficile per sbloccare Esperto in un minigioco
+export const EXPERT_UNLOCK = 3;
+const KEY_QUICK_DIFF = "quickDifficulty";
+export function getQuickDifficulty() { try { const d = localStorage.getItem(KEY_QUICK_DIFF); return ["facile", "normale", "difficile", "esperto"].includes(d) ? d : "normale"; } catch (_) { return "normale"; } }
+export function setQuickDifficulty(d) { try { localStorage.setItem(KEY_QUICK_DIFF, d); } catch (_) { /* privato */ } } // risultati oltre l'80% a Difficile per sbloccare Esperto in un minigioco
 
 // "tutti" = una manche per ogni minigioco scelto
 export const ROUND_OPTIONS = [3, 5, 7, 10, 15, 20, "tutti"];

@@ -9,7 +9,8 @@ import { state, setScreen } from "../state.js";
 import { show, statusLine, setStatus, toast } from "../ui.js";
 import { CATALOG } from "../games/catalog.js";
 import { availableThemes, getChoice, setChoice, seasonalTheme } from "../theme.js";
-import { createRoom, playSolo, joinRoom, playDaily } from "../room.js";
+import { createRoom, playSolo, joinRoom, playDaily, playQuickRound } from "../room.js";
+import { totalStars } from "../stats.js";
 import { dailyKey, dailyLabel, todayResult, dailyStreak, formatPoints, shareText, DAILY_ROUNDS } from "../daily.js";
 import { showJoin } from "./join.js";
 import { showRecords } from "./records.js";
@@ -63,7 +64,8 @@ export function showHome(message = "", isError = !!message) {
       el("div", { class: "play-grid" }, [
         big("🎮", "Crea una stanza", "Invita gli altri con il codice o il link", "", () => requireName() && createRoom()),
         big("🔑", "Entra con un codice", "Quattro lettere da chi ha creato la stanza", "secondary", () => requireName() && showJoin()),
-        big("🏋️", "Allenamento", "Da soli, contro i tuoi record", "secondary", () => requireName() && playSolo()),
+        big("🏋️", "Allenamento", "Da soli: scegli tu minigiochi e regole", "secondary", () => requireName() && playSolo()),
+        big("⚡", "Giro veloce", `5 minigiochi a caso, difficoltà che si adatta a te · ★ ${totalStars()}`, "secondary", () => requireName() && playQuickRound()),
       ]),
     ]),
     dailyCard(requireName),

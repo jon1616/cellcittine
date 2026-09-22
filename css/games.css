@@ -702,3 +702,7 @@
 .game-header { padding: 6px 10px; border-radius: 12px; background: rgba(0,0,0,0.22); }
 .game-timer { font-size: 22px; }
 .game-hint { font-size: 16px; color: rgba(255,255,255,0.88); }
+
+/* Pulsante "Pronto" alla prima volta */
+.game-area .ready-btn { font-size: 20px; padding: 16px 22px; border-radius: 16px; background: var(--ok); color: var(--ink); box-shadow: 0 8px 22px rgba(61,220,132,0.35); animation: pop-in 0.3s; }
+.game-area .ready-btn:disabled { opacity: 0.7; background: rgba(255,255,255,0.15); color: #fff; box-shadow: none; }

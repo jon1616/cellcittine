@@ -18,10 +18,11 @@ import { setStatus, gameIcon, difficultyLabel, appRoot, colorDot, toast } from "
 import { syncBackGuard } from "./nav.js";
 import { getEntry, getCategory, loadGame, preloadGames } from "./games/catalog.js";
 import { shuffle } from "./games/shell.js";
+import { randomSelection } from "./packs.js";
 import { updateRecord, markSeen, getGroupRecord, saveGroupRecord } from "./storage.js";
 import { ratingOf } from "./rating.js";
 import { bumpWeekly } from "./missions.js";
-import { isExpertUnlocked } from "./stats.js";
+import { isExpertUnlocked, adaptiveDifficulty } from "./stats.js";
 import { setExpert } from "./games/shell.js";
 import { showLobby } from "./screens/lobby.js";
 import { showResults, showFinal } from "./screens/results.js";
@@ -32,7 +33,8 @@ import { addDay, endChampionship, isChampionship, startChampionship } from "./ch
 import { showChampion, showReaction } from "./screens/results.js";
 
 const COUNTDOWN_MS = 3500; // dal messaggio "start" al via
-const INTRO_MS = 7000;     // …quando per qualcuno è la prima volta: si legge come si gioca
+const INTRO_MS = 7000;     // (non più usato per il conto: alla prima volta si aspetta il pulsante "Pronto")
+const READY_MAX_MS = 90000; // dopo tanto l'host fa partire comunque la manche
 const GRACE_SECONDS = 8;   // margine oltre maxSeconds prima di chiudere la manche
 
 // ---------------------------------------------------------------
@@ -89,6 +91,7 @@ export async function startChallenge(opts = {}) {
     history: [],
     daily: opts.daily || null, // { key } nella Sfida del giorno
     quick: opts.quick === true,
+    adaptive: opts.adaptive === true, // Giro veloce: difficoltà per manche dalle stelle
     mode: isSolo() || cfg.teams || opts.daily ? "punti" : cfg.mode, // "eliminazione": ogni manche l'ultimo esce
     eliminated: new Map(),     // id -> manche in cui è uscito
   };
@@ -139,7 +142,7 @@ export function nextRound() {
     total: ch.total,
     gameId: r.gameId,
     seed: r.seed,
-    difficulty: special?.difficulty || roundDifficulty(ch.difficulty, ch.index, ch.total),
+    difficulty: special?.difficulty || (ch.adaptive ? adaptiveDifficulty(r.gameId) : roundDifficulty(ch.difficulty, ch.index, ch.total)),
     difficulties,
     challengeDifficulty: ch.difficulty,
     special: special ? special.id : null,
@@ -149,7 +152,8 @@ export function nextRound() {
     daily: ch.daily?.key || null,
     out: [...ch.eliminated.keys()],
     intro,
-    startAt: net.now() + (intro ? INTRO_MS : COUNTDOWN_MS),
+    // Prima volta per qualcuno: si legge "come si gioca" e si parte quando tutti hanno premuto Pronto (startAt arriva col messaggio "go")
+    startAt: intro ? null : net.now() + COUNTDOWN_MS,
   };
   net.broadcast(msg);
   beginRound(msg);
@@ -162,7 +166,8 @@ export function replayChallenge() {
   if (!games?.length) return;
   state.round = null;
   // La Sfida del giorno si rigioca identica (stessi semi): vale come allenamento
-  startChallenge(ch.daily ? { games, seeds: ch.rounds.map((r) => r.seed), difficulty: ch.difficulty, daily: ch.daily } : { games, quick: ch.quick });
+  if (ch.adaptive) { startChallenge({ games: randomSelection(5), adaptive: true, difficulty: "adattiva" }); return; }
+  startChallenge(ch.daily ? { games, seeds: ch.rounds.map((r) => r.seed), difficulty: ch.difficulty, daily: ch.daily } : { games, quick: ch.quick, ...(ch.quick ? { difficulty: ch.difficulty } : {}) });
 }
 
 export function finishChallenge() {
@@ -263,10 +268,12 @@ async function beginRound(msg) {
   let myDifficulty = msg.difficulties?.[net.me.id] || msg.difficulty; // handicap personale
   if (myDifficulty === "esperto" && !isExpertUnlocked(msg.gameId)) myDifficulty = "difficile"; // Esperto solo dove è sbloccato
   state.round = { index: msg.index, game: null, params: null, startAt: msg.startAt, difficulty: myDifficulty, special: msg.special || null, duel: msg.duel || null, scores: new Map(), records: new Set(), participants: net.players.map((p) => p.id).filter((id) => !sitOut.includes(id)), deadline: null, ready: new Set() };
+  state.round.waitReady = !msg.startAt; // alla prima volta si aspetta il pulsante
   showCountdown(getEntry(msg.gameId), msg);
   // "Sono pronto": l'host raccoglie e rimanda a tutti la lista di chi ha il conto alla rovescia a schermo
-  if (net.isHost) markReady(net.me.id, msg.index);
-  else net.sendToHost({ type: "ready", index: msg.index });
+  // (alla prima volta, invece, ognuno preme il pulsante quando ha finito di leggere)
+  if (!state.round.waitReady) sayReady(msg.index);
+  else if (net.isHost) state.round.readyTimer = setTimeout(() => goRound(msg.index), READY_MAX_MS);
 
   // …poi il codice del minigioco, caricato a richiesta.
   let game;
@@ -301,11 +308,31 @@ function showSpectator(entry, msg, why = "👀 Manche già iniziata: la guardi d
   syncBackGuard();
 }
 
+// "✓ Ho letto, sono pronto": alla prima volta il conto parte quando tutti l'hanno premuto
+function readyButton(index) {
+  const btn = el("button", { class: "ready-btn", text: "✓ Ho letto, sono pronto!" });
+  btn.addEventListener("click", () => {
+    btn.disabled = true;
+    btn.textContent = isSolo() ? "Via!" : "Aspetto gli altri…";
+    sayReady(index);
+  });
+  return btn;
+}
+
 function duelName(id) {
   return state.net?.players.find((p) => p.id === id)?.name || "?";
 }
 
-// Host: una persona è pronta per la manche `index`; tutti ricevono la lista aggiornata
+// Io sono pronto (host: segna e diffonde; ospite: lo dice all'host)
+function sayReady(index) {
+  const net = state.net;
+  if (!net) return;
+  if (net.isHost) markReady(net.me.id, index);
+  else net.sendToHost({ type: "ready", index });
+}
+
+// Host: una persona è pronta per la manche `index`; tutti ricevono la lista aggiornata.
+// Alla prima volta, quando tutti i partecipanti presenti hanno premuto Pronto, si parte.
 function markReady(id, index) {
   const round = state.round;
   const net = state.net;
@@ -314,6 +341,24 @@ function markReady(id, index) {
   const ids = [...round.ready];
   net.broadcast({ type: "ready", index, ids });
   renderReady(ids);
+  if (round.waitReady && !round.startAt) {
+    const present = new Set(net.players.map((p) => p.id));
+    const waiting = round.participants.filter((pid) => present.has(pid) && !round.ready.has(pid));
+    if (waiting.length === 0) goRound(index);
+  }
+}
+
+// Host: via alla manche (dopo il "Pronto" di tutti o allo scadere dell'attesa)
+function goRound(index) {
+  const round = state.round;
+  const net = state.net;
+  if (!round || round.index !== index || !net?.isHost || round.startAt) return;
+  clearTimeout(round.readyTimer);
+  const startAt = net.now() + COUNTDOWN_MS;
+  round.startAt = startAt;
+  document.querySelector(".ready-btn")?.remove();
+  if (net.lastBroadcast?.type === "start" && net.lastBroadcast.index === index) net.lastBroadcast.startAt = startAt; // chi rientra parte col conto
+  net.broadcast({ type: "go", index, startAt });
 }
 
 // Lista dei nomi nel conto alla rovescia: ✓ a chi è pronto
@@ -349,6 +394,7 @@ function showCountdown(entry, msg) {
       ? el("div", { class: "howto-intro" }, [el("div", { class: "howto-label", text: "Come si gioca" }), el("div", { text: entry?.howTo || entry?.description || "" })])
       : el("div", { class: "hint", text: entry?.description || "" }),
     number,
+    msg.startAt ? el("span") : readyButton(msg.index),
     isSolo() ? el("span") : el("div", { class: "ready-list" }),
   ]);
   const cat = getCategory(entry?.category);
@@ -360,7 +406,8 @@ function showCountdown(entry, msg) {
 
   const tick = () => {
     if (state.round?.index !== msg.index || !state.net) return; // manche annullata
-    const remaining = msg.startAt - net.now();
+    if (!state.round.startAt) { number.textContent = ""; setTimeout(tick, 150); return; } // si aspetta il "Pronto" di tutti
+    const remaining = state.round.startAt - net.now();
     if (remaining <= 0) {
       if (!state.round.game) {
         number.textContent = "…"; // codice non ancora arrivato: aspetta
@@ -500,6 +547,7 @@ function publishResults() {
   const net = state.net;
   if (!round || !round.game || state.screen === "results") return;
   clearTimeout(round.deadline);
+  clearTimeout(round.readyTimer);
 
   const infoOf = (id) => net.players.find((p) => p.id === id) || ch.standings.get(id) || { name: "?", color: 0 };
   const order = round.game.order;
@@ -670,6 +718,7 @@ export function handleMessage(msg, fromId) {
     return;
   }
   if (msg.type === "ready") { if (state.round?.index === msg.index && state.screen === "countdown") renderReady(msg.ids || []); return; }
+  if (msg.type === "go") { if (state.round?.index === msg.index && !state.round.startAt) { state.round.startAt = msg.startAt; document.querySelector(".ready-btn")?.remove(); } return; }
   if (msg.type === "progress") { if (state.round?.index === msg.index) { state.round.live = msg.done || []; renderLive(); } return; }
   if (msg.type === "react") { showReaction(msg.id, msg.emoji); return; }
   if (msg.type === "bonus") { applyBonus(msg); return; }

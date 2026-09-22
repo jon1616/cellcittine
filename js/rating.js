@@ -44,6 +44,14 @@ export function hasReference(game, params = null) {
   return (Number.isFinite(max) && max > 0 && game.order !== "asc") || REFS[game.id] !== undefined;
 }
 
+// Stelle di una manche (per giocare da soli): ★ dal 50%, ★★ dal 75%, ★★★ dal 95%
+export function starsOf(pct) {
+  return pct >= 95 ? 3 : pct >= 75 ? 2 : pct >= 50 ? 1 : 0;
+}
+export function starsText(n) {
+  return "★".repeat(n) + "☆".repeat(3 - n);
+}
+
 // Cinque quadratini stile "Wordle": 🟩 pieno ogni 20%, 🟨 mezzo, ⬜ vuoto
 export function ratingBar(pct) {
   let out = "";

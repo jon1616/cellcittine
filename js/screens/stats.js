@@ -38,6 +38,7 @@ export function showStats() {
     el("p", { class: "small", text: t.why }),
     el("div", { class: "hist-summary" }, [stat(s.rounds, s.rounds === 1 ? "manche" : "manche"), stat(s.challenges, s.challenges === 1 ? "sfida" : "sfide"), stat(s.victories, s.victories === 1 ? "vittoria" : "vittorie")]),
     el("div", { class: "hist-summary" }, [stat(s.records, "record"), stat(s.perfect, s.perfect === 1 ? "perfetta" : "perfette"), stat(minutes(s.seconds), "di gioco")]),
+    el("p", { class: "small", text: `✨ Stelle raccolte: ${s.stars} su ${s.starsMax}${s.experts ? ` · Esperto sbloccato in ${s.experts} ${s.experts === 1 ? "minigioco" : "minigiochi"}` : ""}` }),
     s.weeks ? el("p", { class: "small", text: `🗓️ Settimane con tutte le missioni: ${s.weeks}` }) : el("span"),
     s.dailies ? el("p", { class: "small", text: `Sfida del giorno: ${s.dailies} ${s.dailies === 1 ? "fatta" : "fatte"} · miglior totale ${formatPoints(s.dailyBest)}${s.streak > 1 ? ` · 🔥 ${s.streak} giorni di fila` : ""}` }) : el("span"),
   ]);

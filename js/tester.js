@@ -531,7 +531,7 @@ async function testAllenamento(gameId, difficulty) {
     const number = await waitFor("il conto alla rovescia", () => doc.querySelector("#app .game-area .big"), 3000);
     steps.push("conto alla rovescia");
     // Il conto alla rovescia sparisce quando il minigioco parte (o quando si torna alla lobby con un errore)
-    await waitFor("la fine del conto alla rovescia", () => !doc.contains(number), 6000 / getFactor() + 3000);
+    await waitFor("la fine del conto alla rovescia", () => { doc.querySelector(".ready-btn")?.click(); return !doc.contains(number); }, 6000 / getFactor() + 3000);
     const status = doc.querySelector("#app .status.error")?.textContent;
     if (status) throw new Error(`invece del minigioco è comparso: "${status}"`);
     if (!doc.querySelector("#app .game-area")) throw new Error("dopo il conto alla rovescia non c'è nessun minigioco a schermo");
@@ -621,7 +621,7 @@ async function testSfidaDelGiorno() {
       const game = await loadGame(plan.games[i]);
       const number = await waitFor(`il conto alla rovescia ${i + 1}`, () => doc.querySelector("#app .game-area .big"), 5000);
       tstep(`countdown ${i + 1} trovato: "${number.textContent}" in ${number.parentElement?.className}`);
-      await waitFor("la fine del conto alla rovescia", () => !doc.contains(number), 8000 / getFactor() + 3000);
+      await waitFor("la fine del conto alla rovescia", () => { doc.querySelector(".ready-btn")?.click(); return !doc.contains(number); }, 8000 / getFactor() + 3000);
       tstep(`countdown ${i + 1} finito; screen ${win.cellcittine?.state?.screen}`);
       const monkey = makeMonkey(stage, doc, doc.body, ".game-area");
       try {
@@ -727,7 +727,7 @@ async function testMultiplayer() {
     button(da, "Inizia la sfida!").click();
     await waitFor("il conto alla rovescia su entrambi", () => da.querySelector(".game-area .big") && db.querySelector(".game-area .big"), 8000);
     steps.push("conto alla rovescia");
-    await waitFor("la manche su entrambi", () => da.querySelector(".game-shell") && db.querySelector(".game-shell"), 12000);
+    await waitFor("la manche su entrambi", () => { da.querySelector(".ready-btn")?.click(); db.querySelector(".ready-btn")?.click(); return da.querySelector(".game-shell") && db.querySelector(".game-shell"); }, 12000);
     monkeys.push(makeMonkey(stage, da, da.body, ".game-area"), makeMonkey(stage, db, db.body, ".game-area"));
     await waitFor("i risultati su entrambi", () => da.querySelector("#app .ranking") && db.querySelector("#app .ranking"), 40000);
     monkeys.forEach((m) => m.stop());

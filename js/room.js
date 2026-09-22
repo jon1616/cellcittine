@@ -11,6 +11,7 @@ import { showHome } from "./screens/home.js";
 import { showLobby, broadcastConfig } from "./screens/lobby.js";
 import { handleMessage, checkRoundComplete, startChallenge, resumeAfterHandover } from "./challenge.js";
 import { dailyPlan } from "./daily.js";
+import { randomSelection } from "./packs.js";
 import { saveLastRoom, forgetLastRoom } from "./storage.js";
 import { setExpert } from "./games/shell.js";
 import { smallestTeam, teamCount } from "./teams.js";
@@ -241,11 +242,19 @@ export function playSolo() {
 }
 
 // Prova subito: un solo minigioco da soli, dalla sua scheda (senza passare dalla stanza)
-export function playQuick(gameId) {
+export function playQuick(gameId, difficulty = null) {
   state.net = makeNet();
   state.net.solo(state.name || "Tu");
   keepScreenOn();
-  startChallenge({ games: [gameId], quick: true });
+  startChallenge({ games: [gameId], quick: true, ...(difficulty ? { difficulty } : {}) });
+}
+
+// Giro veloce: 5 minigiochi a caso, da soli, con la difficoltà che si adatta alle stelle già prese
+export function playQuickRound() {
+  state.net = makeNet();
+  state.net.solo(state.name || "Tu");
+  keepScreenOn();
+  startChallenge({ games: randomSelection(5), adaptive: true, difficulty: "adattiva" });
 }
 
 // Sfida del giorno: da soli, subito, con il piano di oggi (uguale per tutti)

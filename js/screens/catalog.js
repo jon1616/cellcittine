@@ -8,7 +8,10 @@ import { state, setScreen } from "../state.js";
 import { show, gameIcon, gameRow } from "../ui.js";
 import { CATALOG, CATEGORIES, getCategory, getEntry, isNew, PACES } from "../games/catalog.js";
 import { DIFFICULTIES, getRecord, EXPERT_UNLOCK } from "../storage.js";
-import { isExpertUnlocked, expertProgress } from "../stats.js";
+import { isExpertUnlocked, expertProgress, starsFor } from "../stats.js";
+import { getQuickDifficulty, setQuickDifficulty } from "../storage.js";
+import { segmented } from "../ui.js";
+import { starsText } from "../rating.js";
 import { showHome } from "./home.js";
 import { showLobby } from "./lobby.js";
 import { playQuick } from "../room.js";
@@ -67,10 +70,26 @@ export function showGameInfo(g, back) {
       el("div", { class: "info-row" }, [el("span", { class: "info-k", text: k }), el("span", { class: "info-v", text: v })])
     )),
     el("div", { class: "card" }, [el("div", { class: "label", text: "I tuoi record" }), el("p", { class: "small", text: records }), el("p", { class: "small", text: expert })]),
-    state.net ? el("span") : el("button", { text: "▶ Prova subito", onclick: () => playQuick(g.id) }),
+    state.net ? el("span") : quickCard(g),
     el("div", { class: "spacer" }),
     el("button", { text: "Indietro", class: "secondary", onclick: back })
   );
+}
+
+// Prova subito: scelta della difficoltà (Esperto solo dove è sbloccato) e stelle prese
+function quickCard(g) {
+  const opts = [...DIFFICULTIES, ...(isExpertUnlocked(g.id) ? [{ id: "esperto", label: "Esperto" }] : [])];
+  let current = getQuickDifficulty();
+  if (!opts.some((o) => o.id === current)) current = "normale";
+  const wrap = el("div", { class: "card tone", style: "--c: var(--ok)" });
+  const render = () => wrap.replaceChildren(
+    el("div", { class: "label", text: "Prova subito" }),
+    el("p", { class: "small", text: `Stelle prese: ${starsText(starsFor(g.id))} · ★ dal 50%, ★★ dal 75%, ★★★ dal 95%` }),
+    segmented(opts, current, (d) => { current = d; setQuickDifficulty(d); render(); }),
+    el("button", { text: "▶ Prova subito", onclick: () => playQuick(g.id, current) })
+  );
+  render();
+  return wrap;
 }
 
 // Elenco di sola lettura dei minigiochi della sfida (per chi è ospite).
