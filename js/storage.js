@@ -32,7 +32,9 @@ export const AUTO_MAX = 20;
 // teams: 0 = nessuna squadra, 2 o 3 = numero di squadre (l'host assegna le persone in stanza)
 // special: manche speciali (punti doppi, tutto o niente, rimonta…) decise dall'host a ogni sfida
 // championship: le sfide di questa stanza fanno classifica cumulativa a giornate
-const DEFAULT_CONFIG = { games: [], rounds: 5, difficulty: "normale", pack: null, auto: false, autoDelay: 8, teams: 0, special: false, championship: false };
+// mode: "punti" (classifica a punti) | "eliminazione" (ogni manche l'ultimo esce, vince chi resta)
+const DEFAULT_CONFIG = { games: [], rounds: 5, difficulty: "normale", pack: null, auto: false, autoDelay: 8, teams: 0, special: false, championship: false, mode: "punti" };
+export const MODE_OPTIONS = [{ id: "punti", label: "A punti" }, { id: "eliminazione", label: "A eliminazione" }];
 
 function read(key, fallback) {
   try {
@@ -79,6 +81,7 @@ export function loadConfig(allGameIds) {
   cfg.teams = [0, 2, 3].includes(cfg.teams) ? cfg.teams : 0;
   cfg.special = cfg.special === true;
   cfg.championship = cfg.championship === true;
+  cfg.mode = MODE_OPTIONS.some((m) => m.id === cfg.mode) ? cfg.mode : "punti";
   return cfg;
 }
 

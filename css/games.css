@@ -619,3 +619,6 @@
    Plurali (plurali.js) — usa .quiz-answers
    --------------------------------------------------------------- */
 .plur-target { letter-spacing: 1px; text-transform: none; }
+
+/* Chi è fuori (modalità a eliminazione) al conto alla rovescia */
+.out-banner { max-width: 340px; padding: 8px 14px; border-radius: 12px; font-size: 15px; font-weight: 600; color: #ffb4b4; background: rgba(255,77,109,0.18); border: 1px solid rgba(255,77,109,0.5); }

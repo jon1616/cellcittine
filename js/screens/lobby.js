@@ -9,7 +9,7 @@ import { state, setScreen, isSolo } from "../state.js";
 import { show, statusLine, segmented, difficultyLabel, colorDot } from "../ui.js";
 import { CATALOG, CATEGORIES, getEntry } from "../games/catalog.js";
 import { BUILTIN_PACKS, getBuiltinPack, resolvePack, randomSelection, sameSelection } from "../packs.js";
-import { DIFFICULTY_OPTIONS, ROUND_OPTIONS, AUTO_MIN, AUTO_MAX, saveConfig, getUserPacks, saveUserPack, deleteUserPack } from "../storage.js";
+import { MODE_OPTIONS, DIFFICULTY_OPTIONS, ROUND_OPTIONS, AUTO_MIN, AUTO_MAX, saveConfig, getUserPacks, saveUserPack, deleteUserPack } from "../storage.js";
 import { exitButton, shareInvite } from "../room.js";
 import { startChallenge } from "../challenge.js";
 import { showHome } from "./home.js";
@@ -27,7 +27,7 @@ export function broadcastConfig() {
   const cfg = state.config;
   state.net?.broadcast({
     type: "config",
-    config: { games: cfg.games, rounds: cfg.rounds, difficulty: cfg.difficulty, packName: packName(cfg), auto: cfg.auto, autoDelay: cfg.autoDelay, teams: cfg.teams, special: cfg.special, championship: cfg.championship, championshipDay: state.championship?.day || 0 },
+    config: { games: cfg.games, rounds: cfg.rounds, difficulty: cfg.difficulty, packName: packName(cfg), auto: cfg.auto, autoDelay: cfg.autoDelay, teams: cfg.teams, special: cfg.special, championship: cfg.championship, championshipDay: state.championship?.day || 0, mode: cfg.teams ? "punti" : cfg.mode },
   });
 }
 
@@ -143,6 +143,7 @@ function savePackForm() {
 
 function configPanel() {
   const cfg = state.config;
+  const net = state.net;
   const name = packName(cfg);
   const n = cfg.games.length;
 
@@ -189,6 +190,11 @@ function configPanel() {
       el("div", { class: "label", text: "Squadre" }),
       segmented(TEAM_OPTIONS, cfg.teams, (teams) => setTeams(teams)),
       cfg.teams ? el("p", { class: "small", text: "Tocca la squadra accanto a un nome per cambiarla. Conta la media dei punti dei membri." }) : el("span"),
+      el("div", { class: "label", text: "Modalità" }),
+      cfg.teams
+        ? el("p", { class: "small", text: "Con le squadre si gioca a punti." })
+        : segmented(MODE_OPTIONS, cfg.mode, (mode) => updateConfig({ mode })),
+      !cfg.teams && cfg.mode === "eliminazione" ? el("p", { class: "small", text: `Ogni manche chi arriva ultimo è fuori (continua a giocare, ma senza punti). Vince chi resta. Con ${net.players.length} in stanza servono ${Math.max(1, net.players.length - 1)} manche.` }) : el("span"),
       el("div", { class: "label", text: "Manche speciali" }),
       segmented([{ id: false, label: "No" }, { id: true, label: "Sì" }], cfg.special, (special) => updateConfig({ special })),
       el("p", { class: "small", text: cfg.special ? "A sorpresa: 🔥 punti doppi, 🎯 tutto o niente, 🚀 rimonta, ⚡ manche difficile, 🍃 manche facile; l'ultima vale doppio 🏁." : "Tutte le manche valgono uguale." }),
@@ -287,7 +293,7 @@ function configSummary(cfg) {
   const n = cfg.games.length;
   return el("div", { class: "card" }, [
     el("h2", { text: "La sfida" }),
-    el("p", { text: `${cfg.packName ? `Pacchetto ${cfg.packName} · ` : ""}${roundsLabel(cfg)} · ${difficultyLabel(cfg.difficulty)}${cfg.auto ? ` · manche automatiche (${cfg.autoDelay} s)` : ""}${cfg.teams ? ` · ${cfg.teams} squadre` : ""}${cfg.special ? " · manche speciali" : ""}${cfg.championship ? ` · campionato${cfg.championshipDay ? ` (giornata ${cfg.championshipDay + 1})` : ""}` : ""}` }),
+    el("p", { text: `${cfg.packName ? `Pacchetto ${cfg.packName} · ` : ""}${roundsLabel(cfg)} · ${difficultyLabel(cfg.difficulty)}${cfg.auto ? ` · manche automatiche (${cfg.autoDelay} s)` : ""}${cfg.teams ? ` · ${cfg.teams} squadre` : ""}${cfg.special ? " · manche speciali" : ""}${cfg.championship ? ` · campionato${cfg.championshipDay ? ` (giornata ${cfg.championshipDay + 1})` : ""}` : ""}${cfg.mode === "eliminazione" ? " · a eliminazione" : ""}` }),
     el("p", { class: "small", text: n ? `${n} ${n === 1 ? "minigioco" : "minigiochi"}: ${categoryBreakdown(cfg.games)}` : "" }),
     el("button", { text: "Vedi i minigiochi", class: "link", onclick: () => showSelectionList(cfg.games) }),
   ]);

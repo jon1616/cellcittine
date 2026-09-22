@@ -530,3 +530,8 @@ input.code { letter-spacing: 8px; text-transform: uppercase; font-weight: 700; f
 .card.champ { border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
 .champ-table li { grid-template-columns: 36px 1fr auto auto; animation: award-in 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; animation-delay: calc(0.2s + var(--i, 0) * 0.08s); }
 .champ-table .score { font-size: 13px; }
+
+/* Eliminazione */
+.ranking li.out { opacity: 0.55; }
+.ranking li.eliminated { border-color: color-mix(in srgb, var(--danger) 60%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--danger) 35%, transparent); }
+.out-tag { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: var(--danger); background: color-mix(in srgb, var(--danger) 16%, transparent); border-radius: 999px; padding: 2px 8px; margin-left: 4px; }

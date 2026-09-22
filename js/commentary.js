@@ -28,10 +28,18 @@ function pointsLeft(remaining, players, hasSpecials) {
   return players * remaining * (hasSpecials ? 2 : 1);
 }
 
-export function commentRound({ history, standings, meId, total, hasSpecials = false }) {
+export function commentRound({ history, standings, meId, total, hasSpecials = false, eliminated = [], alive = null }) {
   const out = [];
   const rounds = history.length;
   if (!rounds || standings.length < 2) return out;
+  // Eliminazione: chi esce e chi resta
+  if (eliminated.length) {
+    const names = listNames(eliminated.map((e) => e.name));
+    out.push({ icon: "💀", text: alive === 1 ? `${names} fuori! Vince ${standings[0]?.name}: l'ultima persona rimasta in gara.` : `${names} fuori! ${alive ? `Restano in ${alive}.` : ""}`, mine: eliminated.some((e) => e.id === meId) });
+    if (alive === 1) return out;
+  } else if (alive !== null && alive !== undefined && rounds > 1) {
+    out.push({ icon: "🛡️", text: "Pari merito in fondo: nessuno esce, stavolta.", mine: false });
+  }
   const last = history[rounds - 1];
   const ids = standings.map((s) => s.id);
   const name = (id) => standings.find((s) => s.id === id)?.name || "?";

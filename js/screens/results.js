@@ -83,9 +83,10 @@ function standingsList(standings, meId, prev = null) {
       const arrow = !p ? el("span") : el("span", { class: `delta ${delta > 0 ? "up" : delta < 0 ? "down" : "same"}`, text: delta > 0 ? `▲${delta}` : delta < 0 ? `▼${-delta}` : "=" });
       const score = el("span", { class: "score", text: `${p ? p.points : s.points} pt` });
       if (p && p.points !== s.points) countUp(score, p.points, s.points);
-      return el("li", { class: s.id === meId ? "me" : "", style: `--i: ${i}` }, [
-        el("span", { class: "pos", text: String(i + 1) }),
-        el("span", { class: "who" }, [colorDot(s.color), el("span", { text: s.name }), arrow]),
+      const out = s.out !== null && s.out !== undefined;
+      return el("li", { class: `${s.id === meId ? "me" : ""}${out ? " out" : ""}`, style: `--i: ${i}` }, [
+        el("span", { class: "pos", text: out ? "💀" : String(i + 1) }),
+        el("span", { class: "who" }, [colorDot(s.color), el("span", { text: s.name }), out ? el("span", { class: "out-tag", text: `fuori alla ${s.out + 1}ª` }) : arrow]),
         score,
       ]);
     })
@@ -164,7 +165,7 @@ export async function showResults(msg) {
 
   if (!net.isHost && state.challenge) {
     state.challenge.standings = new Map(msg.standings.map((s) => [s.id, { name: s.name, color: s.color, points: s.points }]));
-    state.challenge.history.push({ gameId: msg.gameId, ranking: msg.ranking, special: msg.special || null });
+    state.challenge.history.push({ gameId: msg.gameId, ranking: msg.ranking, special: msg.special || null, eliminated: (msg.eliminated || []).map((e) => e.id) });
   }
   const last = state.challenge?.history[state.challenge.history.length - 1];
   if (last && round) { last.myDetail = round.myDetail; last.myMax = round.myMax; last.myScore = round.myScore; last.myParams = round.params; }
@@ -183,22 +184,23 @@ export async function showResults(msg) {
   const cfg0 = net.isHost ? state.config : state.hostConfig;
   const lines = solo
     ? [commentSolo({ game, score: round?.myScore, record: getRecord(game.id, round?.difficulty || msg.difficulty), isRecord: round?.isRecord, pct: ratingOf(game, round?.myScore, round?.params) })].filter(Boolean)
-    : commentRound({ history: ch.history, standings: msg.standings, meId, total: ch.total, hasSpecials: !!cfg0?.special });
+    : commentRound({ history: ch.history, standings: msg.standings, meId, total: ch.total, hasSpecials: !!cfg0?.special, eliminated: msg.eliminated || [], alive: msg.alive });
   if (!solo && lines.some((l) => l.mine) && !round?.isRecord) setTimeout(() => sfx.play("cheer"), 500);
 
   const roundList = el(
     "ol",
     { class: "ranking" },
     msg.ranking.map((r, i) =>
-      el("li", { class: r.id === meId ? "me" : "" }, [
-        el("span", { class: "pos", text: solo ? "" : i === 0 ? "🏆" : String(i + 1) }),
+      el("li", { class: `${r.id === meId ? "me" : ""}${r.out ? " out" : ""}${r.eliminatedNow ? " eliminated" : ""}` }, [
+        el("span", { class: "pos", text: solo ? "" : r.out ? "💀" : r.eliminatedNow ? "❌" : i === 0 ? "🏆" : String(i + 1) }),
         el("span", { class: "who" }, [
           solo ? el("span") : colorDot(r.color),
           el("span", { text: r.name }),
           r.id === meId && round?.isRecord ? el("span", { class: "badge", text: "★ record" }) : el("span"),
+          r.eliminatedNow ? el("span", { class: "out-tag", text: "eliminato" }) : el("span"),
         ]),
         el("span", { class: "score", text: r.score === null ? "—" : game.formatScore(r.score) }),
-        solo ? el("span") : el("span", { class: "pts", text: `+${r.points}` }),
+        solo ? el("span") : el("span", { class: "pts", text: r.out ? "" : `+${r.points}` }),
       ])
     )
   );

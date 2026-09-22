@@ -82,6 +82,8 @@ export async function startChallenge(opts = {}) {
     teams: isSolo() ? 0 : cfg.teams,
     history: [],
     daily: opts.daily || null, // { key } nella Sfida del giorno
+    mode: isSolo() || cfg.teams || opts.daily ? "punti" : cfg.mode, // "eliminazione": ogni manche l'ultimo esce
+    eliminated: new Map(),     // id -> manche in cui è uscito
   };
 
   setStatus("Preparo i minigiochi…");
@@ -118,6 +120,8 @@ export function nextRound() {
     difficulty: special?.difficulty || roundDifficulty(ch.difficulty, ch.index, ch.total),
     challengeDifficulty: ch.difficulty,
     special: special ? special.id : null,
+    mode: ch.mode,
+    out: [...ch.eliminated.keys()],
     intro,
     startAt: net.now() + (intro ? INTRO_MS : COUNTDOWN_MS),
   };
@@ -166,9 +170,11 @@ async function beginRound(msg) {
 
   // Un guest arrivato a sfida iniziata crea la propria vista della sfida qui.
   if (!net.isHost && (!state.challenge || msg.index === 0)) {
-    state.challenge = { total: msg.total, difficulty: msg.challengeDifficulty || msg.difficulty, index: msg.index, standings: new Map(), history: [] };
+    state.challenge = { total: msg.total, difficulty: msg.challengeDifficulty || msg.difficulty, index: msg.index, standings: new Map(), history: [], eliminated: new Map() };
   }
   state.challenge.index = msg.index;
+  if (msg.mode) state.challenge.mode = msg.mode;
+  if (Array.isArray(msg.out)) { state.challenge.eliminated = new Map(msg.out.map((id) => [id, true])); }
 
   // Segnaposto subito (così i messaggi di questa manche non vengono scartati)…
   state.round = { index: msg.index, game: null, params: null, startAt: msg.startAt, difficulty: msg.difficulty, special: msg.special || null, scores: new Map(), records: new Set(), participants: net.players.map((p) => p.id), deadline: null };
@@ -199,11 +205,13 @@ function showCountdown(entry, msg) {
   const number = el("div", { class: "big", text: "" });
   const special = msg.special ? SPECIALS[msg.special] : null;
   if (special) sfx.play("special");
+  const amOut = state.challenge?.eliminated?.has(net.me.id);
   const area = el("div", { class: `game-area${msg.intro ? " intro" : ""}` }, [
     el("div", { class: "hint", text: `Manche ${msg.index + 1} di ${msg.total} · ${difficultyLabel(msg.difficulty)}` }),
     special
       ? el("div", { class: "special-banner" }, [el("div", { class: "special-title", text: `${special.icon} ${special.label}` }), el("div", { class: "special-desc", text: special.desc })])
       : el("span"),
+    amOut ? el("div", { class: "out-banner", text: "💀 Sei fuori: gioca per divertimento, senza punti" }) : el("span"),
     gameIcon(entry, "countdown-icon"),
     el("div", { text: entry?.title || msg.gameId }),
     msg.intro
@@ -302,21 +310,37 @@ function publishResults() {
   const infoOf = (id) => net.players.find((p) => p.id === id) || ch.standings.get(id) || { name: "?", color: 0 };
   const order = round.game.order;
 
+  const elimination = ch.mode === "eliminazione";
+  const isOut = (id) => elimination && ch.eliminated.has(id);
   const ranking = round.participants
-    .map((id) => ({ id, name: infoOf(id).name, color: infoOf(id).color, score: round.scores.has(id) ? round.scores.get(id) : null, record: round.records.has(id) }))
+    .map((id) => ({ id, name: infoOf(id).name, color: infoOf(id).color, score: round.scores.has(id) ? round.scores.get(id) : null, record: round.records.has(id), out: isOut(id) }))
     .sort((a, b) => {
+      if (a.out !== b.out) return a.out ? 1 : -1; // chi è fuori in fondo
       if (a.score === null) return 1;
       if (b.score === null) return -1;
       return order === "asc" ? a.score - b.score : b.score - a.score;
     });
 
-  // Punti per posizione: primo = N, secondo = N-1… A pari punteggio, pari punti.
-  const n = ranking.length;
+  // Punti per posizione tra chi è in gara: primo = N, secondo = N-1… A pari punteggio, pari punti.
+  const alive = ranking.filter((r) => !r.out);
+  const n = alive.length;
   let pos = 0;
-  ranking.forEach((r, i) => {
-    if (i === 0 || r.score !== ranking[i - 1].score) pos = i;
+  alive.forEach((r, i) => {
+    if (i === 0 || r.score !== alive[i - 1].score) pos = i;
     r.points = r.score === null ? 0 : n - pos;
   });
+  ranking.forEach((r) => { if (r.out) r.points = 0; });
+
+  // Eliminazione: l'ultimo tra chi è in gara esce (a pari merito escono tutti, ma mai tutti quanti)
+  let eliminatedNow = [];
+  if (elimination && n > 1) {
+    const worst = alive[alive.length - 1].score;
+    const losers = alive.filter((r) => r.score === worst || (r.score === null && worst === null));
+    if (losers.length < n) {
+      eliminatedNow = losers.map((r) => ({ id: r.id, name: r.name, color: r.color }));
+      for (const l of losers) { ch.eliminated.set(l.id, round.index); l.eliminatedNow = true; }
+    }
+  }
   // Manche speciale: punti doppi, tutto o niente, rimonta…
   if (round.special) applySpecial(round.special, ranking, standingsArray());
 
@@ -329,7 +353,7 @@ function publishResults() {
     if (Number.isInteger(team)) entry.team = team;
     ch.standings.set(r.id, entry);
   }
-  ch.history.push({ gameId: round.game.id, ranking, special: round.special || null });
+  ch.history.push({ gameId: round.game.id, ranking, special: round.special || null, eliminated: eliminatedNow.map((e) => e.id) });
 
   // Squadre: media dei punti dei membri, poi punti per posizione tra squadre
   let teamRanking = null;
@@ -350,7 +374,10 @@ function publishResults() {
     standings: standingsArray(),
     teamRanking,
     teamStandings: teamStandingsArray(),
-    last: round.index === ch.total - 1,
+    mode: ch.mode,
+    eliminated: eliminatedNow,
+    alive: elimination ? ranking.filter((r) => !ch.eliminated.has(r.id)).length : null,
+    last: round.index === ch.total - 1 || (elimination && ranking.filter((r) => !ch.eliminated.has(r.id)).length <= 1),
   };
   net.broadcast(msg);
   showResults(msg);
@@ -363,9 +390,16 @@ export function teamStandingsArray() {
 }
 
 export function standingsArray() {
-  return [...state.challenge.standings.entries()]
-    .map(([id, e]) => ({ id, name: e.name, color: e.color, points: e.points }))
-    .sort((a, b) => b.points - a.points);
+  const ch = state.challenge;
+  const outAt = (id) => (ch.mode === "eliminazione" && ch.eliminated.has(id) ? ch.eliminated.get(id) : null);
+  return [...ch.standings.entries()]
+    .map(([id, e]) => ({ id, name: e.name, color: e.color, points: e.points, out: outAt(id) }))
+    .sort((a, b) => {
+      const ao = a.out !== null && a.out !== undefined, bo = b.out !== null && b.out !== undefined;
+      if (ao !== bo) return ao ? 1 : -1;       // chi è in gara prima
+      if (ao && bo) return b.out - a.out;       // tra gli eliminati, chi è durato di più prima
+      return b.points - a.points;
+    });
 }
 
 // ---------------------------------------------------------------
@@ -395,7 +429,10 @@ export function handleMessage(msg, fromId) {
     case "results":
       if (state.screen === "results" && state.round?.index === msg.index) return;
       // Arrivati (o rientrati) a pagina nuova: la vista della sfida si ricostruisce da qui
-      if (!state.challenge) state.challenge = { total: msg.total || msg.index + 1, difficulty: msg.challengeDifficulty || msg.difficulty || null, index: msg.index, standings: new Map(), history: [] };
+      if (!state.challenge) state.challenge = { total: msg.total || msg.index + 1, difficulty: msg.challengeDifficulty || msg.difficulty || null, index: msg.index, standings: new Map(), history: [], eliminated: new Map() };
+      if (msg.mode) state.challenge.mode = msg.mode;
+      if (!state.challenge.eliminated) state.challenge.eliminated = new Map();
+      for (const s of msg.standings) if (s.out !== null && s.out !== undefined) state.challenge.eliminated.set(s.id, s.out);
       showResults(msg);
       break;
     case "final":

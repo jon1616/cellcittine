@@ -73,6 +73,8 @@ tools/tester.mjs     esegue test.html in Chrome headless e stampa il rapporto (n
 
 Difficoltà: `config.difficulty` può essere anche "crescente"; la difficoltà VERA di una manche è `msg.difficulty` del messaggio "start" (`state.round.difficulty`), da usare per mount, record e "Il tuo record". Le manche speciali viaggiano come `msg.special` (id in SPECIALS) e l'host applica `applySpecial` ai punti in `publishResults`.
 
+Modalità: `config.mode` = "punti" | "eliminazione" (challenge.mode; `ch.eliminated` Map id → manche di uscita; nei messaggi "start" viaggiano `mode` e `out`, in "results" `eliminated`/`alive`; `standingsArray` mette in fondo chi è fuori con il campo `out`).
+
 Rete: i partecipanti sono identificati dall'id stabile del telefono (`getClientId`), mai dall'id PeerJS; i messaggi di fase (start/results/final/lobby) devono poter arrivare due volte senza effetti (guardie in `handleMessage`). In locale `window.cellcittine.state` espone lo stato per le prove.
 
 Regole di dipendenza tra i moduli: le schermate importano `state`, `ui`, i dati (catalog, storage,
