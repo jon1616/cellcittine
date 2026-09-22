@@ -78,7 +78,7 @@ Idee già discusse, tutte con suoni, prestazione e icona nello stile delle altre
 
 ## 4. Grafica, audio, temi
 
-- [ ] Origine e autore della musica in `assets/music/LICENSE.txt` (oggi "da indicare"). — S
+- [x] Origine e autore della musica in `assets/music/LICENSE.txt`: brano generato con IA dall'autore del progetto (v0.25.2)
 - [ ] Una musica per tema (Halloween, Natale, Estate), stesso trattamento CC0 + FFmpeg. — S per brano
 - [ ] Effetti sonori registrati (CC0) al posto di alcuni sintetizzati, sempre dal solo `audio.js`. — M
 - [ ] `theme-color` (barra di stato Android) che segue il tema. Come: `theme.js`. — S

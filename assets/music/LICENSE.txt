@@ -1,8 +1,9 @@
 sottofondo.mp3 — musica di sottofondo dei menu
 
-Licenza: CC0 1.0 (dominio pubblico), come dichiarato da chi l'ha fornita.
-Origine / autore: (da indicare)
-Brano sostituito il 22/09/2026 (file fornito come "sottofondo_new.mp3", 2:01, 192 kbps).
+Origine / autore: brano generato con intelligenza artificiale da jon1616 (autore del progetto)
+apposta per Cellcittine, il 22/09/2026.
+Licenza: uso libero nel progetto (CC0 1.0, dominio pubblico), come deciso dall'autore.
 Elaborazione: volume normalizzato (-18 LUFS, picco -1,5 dB), dissolvenza in entrata (1 s)
-e in uscita (2 s), MP3 112 kbps 44,1 kHz.
-Gli originali (il nuovo e il precedente) sono conservati fuori dal repository in assets/music/originale/.
+e in uscita (2 s), MP3 112 kbps 44,1 kHz (dal file originale a 192 kbps, 2:01).
+Gli originali (il nuovo e il brano precedente, CC0 di origine non indicata) sono conservati
+fuori dal repository in assets/music/originale/.
