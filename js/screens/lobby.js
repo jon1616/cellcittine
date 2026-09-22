@@ -215,7 +215,7 @@ function configPanel() {
     ),
     el("div", { class: "label", text: "Difficoltà" }),
     segmented(DIFFICULTY_OPTIONS, cfg.difficulty, (difficulty) => updateConfig({ difficulty })),
-    cfg.difficulty === "crescente" ? el("p", { class: "small", text: "Le manche partono facili e diventano difficili verso la fine." }) : el("span"),
+    cfg.difficulty === "crescente" ? el("p", { class: "small", text: "Le manche partono facili e diventano difficili verso la fine." }) : cfg.difficulty === "esperto" ? el("p", { class: "small", text: "Esperto: come Difficile con il 25% di tempo in meno, solo nei minigiochi in cui ognuno l'ha sbloccato (tre risultati oltre l'80% a Difficile); altrove si gioca Difficile." }) : el("span"),
     el("div", { class: "label", text: "Tra una manche e l'altra" }),
     segmented(
       [{ id: false, label: "A mano" }, { id: true, label: "Automatico" }],

@@ -8,6 +8,10 @@ import { el } from "../utils.js";
 import { sfx } from "../audio.js";
 
 let currentShell = null; // la cornice del minigioco in corso: runTimer le aggiorna la barra del tempo
+let expertMode = false;  // Esperto: tempi dei conti alla rovescia ridotti del 25%, distintivo nell'intestazione
+export const EXPERT_TIME = 0.75;
+export function setExpert(on) { expertMode = !!on; }
+export function isExpert() { return expertMode; }
 
 export function createShell(container, { title, hint = "", color = "#26254a" }) {
   const timerEl = el("span", { class: "game-timer" });
@@ -16,7 +20,7 @@ export function createShell(container, { title, hint = "", color = "#26254a" }) 
   const bar = el("i");
   const progress = el("div", { class: "game-progress" }, [bar]);
   const area = el("div", { class: "game-area game-shell" }, [
-    el("div", { class: "game-header" }, [el("span", { class: "game-title", text: title }), timerEl]),
+    el("div", { class: "game-header" }, [el("span", { class: "game-title", text: title }), expertMode ? el("span", { class: "expert-badge", text: "ESPERTO" }) : el("span"), timerEl]),
     progress,
     hintEl,
     body,
@@ -54,6 +58,7 @@ export function createShell(container, { title, hint = "", color = "#26254a" }) 
 
 // Conto alla rovescia in secondi. Ritorna una funzione per fermarlo.
 export function runTimer(seconds, onTick, onEnd) {
+  if (expertMode) seconds = Math.max(3, Math.round(seconds * EXPERT_TIME));
   const endAt = performance.now() + seconds * 1000;
   let stopped = false;
   let lastWhole = Math.ceil(seconds);

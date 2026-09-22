@@ -12,6 +12,7 @@ import { showLobby, broadcastConfig } from "./screens/lobby.js";
 import { handleMessage, checkRoundComplete, startChallenge } from "./challenge.js";
 import { dailyPlan } from "./daily.js";
 import { saveLastRoom, forgetLastRoom } from "./storage.js";
+import { setExpert } from "./games/shell.js";
 import { smallestTeam, teamCount } from "./teams.js";
 
 // ---------------------------------------------------------------
@@ -78,6 +79,7 @@ function makeNet() {
 // Chiude tutto: rete, manche in corso, sfida. Non cambia schermata.
 export function leaveRoom() {
   letScreenSleep();
+  setExpert(false);
   state.round?.game?.unmount();
   clearTimeout(state.round?.deadline);
   state.net?.leave();

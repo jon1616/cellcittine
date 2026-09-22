@@ -7,7 +7,8 @@ import { el } from "../utils.js";
 import { state, setScreen } from "../state.js";
 import { show, gameIcon, gameRow } from "../ui.js";
 import { CATALOG, CATEGORIES, getCategory, getEntry, isNew, PACES } from "../games/catalog.js";
-import { DIFFICULTIES, getRecord } from "../storage.js";
+import { DIFFICULTIES, getRecord, EXPERT_UNLOCK } from "../storage.js";
+import { isExpertUnlocked, expertProgress } from "../stats.js";
 import { showHome } from "./home.js";
 import { showLobby } from "./lobby.js";
 import { playQuick } from "../room.js";
@@ -49,10 +50,11 @@ export function showGameInfo(g, back) {
     ["Arrivato il", new Date(g.added).toLocaleDateString("it-IT")],
     ["Tag", g.tags.join(", ")],
   ];
-  const records = DIFFICULTIES.map((d) => {
+  const records = [...DIFFICULTIES, { id: "esperto", label: "Esperto" }].map((d) => {
     const r = getRecord(g.id, d.id);
-    return `${d.label}: ${r ? r.text : "—"}`;
-  }).join(" · ");
+    return d.id === "esperto" && !r && !isExpertUnlocked(g.id) ? null : `${d.label}: ${r ? r.text : "—"}`;
+  }).filter(Boolean).join(" · ");
+  const expert = isExpertUnlocked(g.id) ? "🔓 Esperto sbloccato: come Difficile, con il 25% di tempo in meno." : `🔒 Esperto: ${expertProgress(g.id)} su ${EXPERT_UNLOCK} risultati oltre l'80% a Difficile.`;
 
   show(
     el("div", { class: "info-head" }, [
@@ -64,7 +66,7 @@ export function showGameInfo(g, back) {
     el("div", { class: "card" }, rows.map(([k, v]) =>
       el("div", { class: "info-row" }, [el("span", { class: "info-k", text: k }), el("span", { class: "info-v", text: v })])
     )),
-    el("div", { class: "card" }, [el("div", { class: "label", text: "I tuoi record" }), el("p", { class: "small", text: records })]),
+    el("div", { class: "card" }, [el("div", { class: "label", text: "I tuoi record" }), el("p", { class: "small", text: records }), el("p", { class: "small", text: expert })]),
     state.net ? el("span") : el("button", { text: "▶ Prova subito", onclick: () => playQuick(g.id) }),
     el("div", { class: "spacer" }),
     el("button", { text: "Indietro", class: "secondary", onclick: back })

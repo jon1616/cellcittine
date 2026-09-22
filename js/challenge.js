@@ -21,6 +21,8 @@ import { shuffle } from "./games/shell.js";
 import { updateRecord, markSeen, getGroupRecord, saveGroupRecord } from "./storage.js";
 import { ratingOf } from "./rating.js";
 import { bumpWeekly } from "./missions.js";
+import { isExpertUnlocked } from "./stats.js";
+import { setExpert } from "./games/shell.js";
 import { showLobby } from "./screens/lobby.js";
 import { showResults, showFinal } from "./screens/results.js";
 import { computeAwards } from "./awards.js";
@@ -214,7 +216,8 @@ async function beginRound(msg) {
   }
 
   // Segnaposto subito (così i messaggi di questa manche non vengono scartati)…
-  const myDifficulty = msg.difficulties?.[net.me.id] || msg.difficulty; // handicap personale
+  let myDifficulty = msg.difficulties?.[net.me.id] || msg.difficulty; // handicap personale
+  if (myDifficulty === "esperto" && !isExpertUnlocked(msg.gameId)) myDifficulty = "difficile"; // Esperto solo dove è sbloccato
   state.round = { index: msg.index, game: null, params: null, startAt: msg.startAt, difficulty: myDifficulty, special: msg.special || null, duel: msg.duel || null, scores: new Map(), records: new Set(), participants: net.players.map((p) => p.id).filter((id) => !sitOut.includes(id)), deadline: null, ready: new Set() };
   showCountdown(getEntry(msg.gameId), msg);
   // "Sono pronto": l'host raccoglie e rimanda a tutti la lista di chi ha il conto alla rovescia a schermo
@@ -236,7 +239,7 @@ async function beginRound(msg) {
   }
   if (state.round?.index !== msg.index) return; // nel frattempo è cambiato qualcosa
   state.round.game = game;
-  state.round.params = game.createParams(seededRandom(msg.seed), state.round.difficulty);
+  state.round.params = game.createParams(seededRandom(msg.seed), state.round.difficulty === "esperto" ? "difficile" : state.round.difficulty);
 }
 
 // Spettatore: nome del minigioco in corso e lista di chi ha già finito (riempita da renderLive)
@@ -287,7 +290,7 @@ function showCountdown(entry, msg) {
   if (special) sfx.play("special");
   const amOut = state.challenge?.eliminated?.has(net.me.id);
   const area = el("div", { class: `game-area${msg.intro ? " intro" : ""}` }, [
-    el("div", { class: "hint", text: `Manche ${msg.index + 1} di ${msg.total} · ${difficultyLabel(state.round?.difficulty || msg.difficulty)}${msg.difficulties?.[net.me.id] ? " (la tua difficoltà)" : ""}` }),
+    el("div", { class: "hint", text: `Manche ${msg.index + 1} di ${msg.total} · ${difficultyLabel(state.round?.difficulty || msg.difficulty)}${msg.difficulties?.[net.me.id] ? " (la tua difficoltà)" : msg.difficulty === "esperto" && state.round?.difficulty !== "esperto" ? " (Esperto non ancora sbloccato qui)" : ""}` }),
     special
       ? el("div", { class: "special-banner" }, [
           el("div", { class: "special-title", text: `${special.icon} ${special.label}` }),
@@ -338,6 +341,7 @@ function mountGame() {
   const round = state.round;
   const net = state.net;
   markSeen(round.game.id);
+  setExpert(round.difficulty === "esperto");
 
   if (net.isHost) {
     // Scadenza di sicurezza: se qualcuno non risponde, si chiude comunque.
@@ -346,7 +350,7 @@ function mountGame() {
 
   round.game.mount(appRoot(), {
     params: round.params,
-    difficulty: round.difficulty,
+    difficulty: round.difficulty === "esperto" ? "difficile" : round.difficulty,
     me: net.me,
     now: () => net.now(),
     onFinish: (score, detail) => submitScore(score, detail),

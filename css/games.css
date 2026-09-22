@@ -694,3 +694,6 @@
 .stima-value { text-align: center; font-size: 22px; font-weight: 800; color: var(--accent); min-height: 30px; }
 .stima-ok { margin-top: 8px; }
 .stima-ok.tap { background: var(--ok); color: var(--ink); font-size: 26px; padding: 26px; }
+
+/* Distintivo Esperto nell'intestazione del minigioco */
+.expert-badge { font-size: 11px; font-weight: 800; letter-spacing: 1px; padding: 3px 8px; border-radius: 999px; color: var(--ink); background: var(--accent); box-shadow: 0 0 10px var(--accent-glow); margin-left: auto; margin-right: 10px; }

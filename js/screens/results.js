@@ -22,6 +22,9 @@ import { positionsAfter } from "../awards.js";
 import { recordRound, checkAchievements } from "../stats.js";
 import { checkMissions, bumpWeekly } from "../missions.js";
 import { challengeStory, storyText, revenge } from "../story.js";
+import { setExpert } from "../games/shell.js";
+import { isExpertUnlocked, expertProgress } from "../stats.js";
+import { EXPERT_UNLOCK } from "../storage.js";
 import { toast } from "../ui.js";
 import { commentRound, commentSolo } from "../commentary.js";
 import { DAILY_ROUNDS, DAILY_ROUND_MAX, dailyLabel, formatPoints, todayResult, recordDaily, dailyStreak, shareText } from "../daily.js";
@@ -165,6 +168,7 @@ export async function showResults(msg) {
   const round = state.round;
   round?.game?.unmount();
 
+  setExpert(false);
   const game = round?.game?.id === msg.gameId ? round.game : await loadGame(msg.gameId);
   if (!state.net) return;
 
@@ -183,7 +187,10 @@ export async function showResults(msg) {
   if (round && round.myScore !== undefined) {
     const best = msg.ranking.find((r) => r.score !== null && r.score !== undefined);
     const mine = msg.ranking.find((r) => r.id === meId);
-    recordRound(msg.gameId, { pct: ratingOf(game, round.myScore, round.params), won: !solo && !!mine && !!best && mine.score === best.score, solo, seconds: getEntry(msg.gameId)?.duration || 0 });
+    const wasUnlocked = isExpertUnlocked(msg.gameId);
+    recordRound(msg.gameId, { pct: ratingOf(game, round.myScore, round.params), won: !solo && !!mine && !!best && mine.score === best.score, solo, seconds: getEntry(msg.gameId)?.duration || 0, difficulty: round.difficulty });
+    if (!wasUnlocked && isExpertUnlocked(msg.gameId)) setTimeout(() => { toast(`🔓 Esperto sbloccato in ${getEntry(msg.gameId)?.title || msg.gameId}!`); sfx.play("cheer"); }, 1200);
+    else if (!wasUnlocked && round.difficulty === "difficile" && expertProgress(msg.gameId) > 0 && ratingOf(game, round.myScore, round.params) >= 80) setTimeout(() => toast(`Verso Esperto: ${expertProgress(msg.gameId)} su ${EXPERT_UNLOCK} in ${getEntry(msg.gameId)?.title}`), 1200);
   }
   const prev = solo ? null : previousStandings(ch.history, msg.standings);
   const cfg0 = net.isHost ? state.config : state.hostConfig;

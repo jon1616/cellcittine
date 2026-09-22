@@ -10,17 +10,19 @@
 */
 
 import { CATALOG, CATEGORIES, getEntry } from "./games/catalog.js";
-import { getStats, saveStats, getAchievements, saveAchievements, getHistory, getRecord, DIFFICULTIES } from "./storage.js";
+import { getStats, saveStats, getAchievements, saveAchievements, getHistory, getRecord, DIFFICULTIES, EXPERT_UNLOCK } from "./storage.js";
 import { getDailyResults } from "./storage.js";
 import { dailyStreak, dailyGame } from "./daily.js";
 import { bumpWeekly, weeksDoneCount } from "./missions.js";
 
 // Registra una manche giocata da chi guarda.
 //   pct: percentuale di prestazione (0-100) · won: ha vinto la manche (in gruppo) · solo: allenamento/giorno
-export function recordRound(gameId, { pct = 0, won = false, solo = true, seconds = 0 } = {}) {
+export function recordRound(gameId, { pct = 0, won = false, solo = true, seconds = 0, difficulty = null } = {}) {
   const stats = getStats();
   const isNew = !stats[gameId];
   const g = stats[gameId] || { n: 0, sum: 0, best: 0, wins: 0, solo: 0, sec: 0, perfect: 0 };
+  // Verso Esperto: risultati oltre l'80% a Difficile (o già a Esperto)
+  if ((difficulty === "difficile" || difficulty === "esperto") && pct >= 80) g.expert = (g.expert || 0) + 1;
   // Missioni della settimana (il minigioco del giorno conta doppio)
   const w = gameId === dailyGame() ? 2 : 1;
   bumpWeekly("rounds", w);
@@ -45,6 +47,17 @@ export function gameStat(gameId) {
   return getStats()[gameId] || null;
 }
 
+// Esperto sbloccato in questo minigioco? E quanti minigiochi lo hanno
+export function isExpertUnlocked(gameId) {
+  return (getStats()[gameId]?.expert || 0) >= EXPERT_UNLOCK;
+}
+export function expertProgress(gameId) {
+  return Math.min(EXPERT_UNLOCK, getStats()[gameId]?.expert || 0);
+}
+export function expertCount() {
+  return Object.values(getStats()).filter((g) => (g.expert || 0) >= EXPERT_UNLOCK).length;
+}
+
 // Totali generali
 export function summary() {
   const stats = getStats();
@@ -65,6 +78,7 @@ export function summary() {
     streak: dailyStreak(),
     records,
     weeks: weeksDoneCount(),
+    experts: expertCount(),
   };
 }
 
@@ -121,6 +135,8 @@ export const ACHIEVEMENTS = [
   { id: "serie7", icon: "☄️", title: "Una settimana", desc: "Sfida del giorno per 7 giorni di fila", test: (s) => s.streak >= 7 },
   { id: "giorno4000", icon: "🎯", title: "Giornata top", desc: "4000 punti in una Sfida del giorno", test: (s) => s.dailyBest >= 4000 },
   { id: "settimana", icon: "🗓️", title: "Settimana piena", desc: "Completa le 3 missioni di una settimana", test: (s) => s.weeks >= 1 },
+  { id: "esperto1", icon: "🔓", title: "Esperto", desc: "Sblocca la difficoltà Esperto in un minigioco", test: (s) => s.experts >= 1 },
+  { id: "esperto10", icon: "🎓", title: "Dieci volte esperto", desc: "Sblocca Esperto in 10 minigiochi", test: (s) => s.experts >= 10 },
   { id: "mese", icon: "📆", title: "Un mese di missioni", desc: "Completa le missioni di 4 settimane", test: (s) => s.weeks >= 4 },
 ];
 

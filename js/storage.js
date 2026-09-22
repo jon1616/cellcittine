@@ -60,7 +60,10 @@ export const DIFFICULTIES = [
   { id: "difficile", label: "Difficile" },
 ];
 // Opzioni della stanza: le tre difficoltà più "Crescente" (da Facile a Difficile lungo la sfida)
-export const DIFFICULTY_OPTIONS = [...DIFFICULTIES, { id: "crescente", label: "Crescente" }];
+// "esperto": come Difficile ma con il 25% di tempo in meno; vale solo nei minigiochi in cui è sbloccato
+// (tre volte oltre l'80% a Difficile), altrimenti si gioca Difficile. "crescente": da Facile a Difficile lungo la sfida.
+export const DIFFICULTY_OPTIONS = [...DIFFICULTIES, { id: "esperto", label: "Esperto" }, { id: "crescente", label: "Crescente" }];
+export const EXPERT_UNLOCK = 3; // risultati oltre l'80% a Difficile per sbloccare Esperto in un minigioco
 
 // "tutti" = una manche per ogni minigioco scelto
 export const ROUND_OPTIONS = [3, 5, 7, 10, 15, 20, "tutti"];
