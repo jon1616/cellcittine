@@ -1285,6 +1285,7 @@ export const CATALOG = [
   },
   {
     id: "corsa",
+    image: "assets/icons/corsa.webp",
     title: "Corsa",
     icon: "🏎️",
     description: "Tre corsie, ostacoli sempre più veloci: cambia corsia e resisti.",
@@ -1304,6 +1305,7 @@ export const CATALOG = [
   },
   {
     id: "ricalco",
+    image: "assets/icons/ricalco.webp",
     title: "Ricalco",
     icon: "✏️",
     description: "Ripassa la forma tratteggiata col dito, senza staccarlo.",
@@ -1323,6 +1325,7 @@ export const CATALOG = [
   },
   {
     id: "battito",
+    image: "assets/icons/battito.webp",
     title: "Battito",
     icon: "🥁",
     description: "Le note scendono verso la linea: tocca quando ci passano sopra.",
@@ -1342,6 +1345,7 @@ export const CATALOG = [
   },
   {
     id: "differenze",
+    image: "assets/icons/differenze.webp",
     title: "Differenze",
     icon: "🔎",
     description: "Due griglie quasi uguali: trova le 3 caselle diverse in quella di destra.",
@@ -1361,6 +1365,7 @@ export const CATALOG = [
   },
   {
     id: "verofalso",
+    image: "assets/icons/verofalso.webp",
     title: "Vero o falso",
     icon: "✅",
     description: "Una frase alla volta: VERO o FALSO, il più in fretta possibile.",
@@ -1380,6 +1385,7 @@ export const CATALOG = [
   },
   {
     id: "stima",
+    image: "assets/icons/stima.webp",
     title: "Stima",
     icon: "📏",
     description: "A occhio: quanto è lunga la linea, che angolo è, quanti secondi sono passati?",

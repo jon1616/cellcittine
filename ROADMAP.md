@@ -31,7 +31,7 @@ QR code, inglese.
 
 ## 4. Minigiochi
 
-- [x] **Sei minigiochi nuovi** con meccaniche che mancano: corsa a scorrimento continuo (ostacoli), disegno (ricalca la forma, somiglianza), ritmo con barra che scorre, trova le differenze tra due griglie, lettura veloce (vero/falso), stima (tempo/lunghezza). Icone da foglio 6×1. (v0.48.0: Corsa, Ricalco, Battito, Differenze, Vero o falso, Stima; icone emoji in attesa del foglio)
+- [x] **Sei minigiochi nuovi** con meccaniche che mancano: corsa a scorrimento continuo (ostacoli), disegno (ricalca la forma, somiglianza), ritmo con barra che scorre, trova le differenze tra due griglie, lettura veloce (vero/falso), stima (tempo/lunghezza). Icone da foglio 6×1. (v0.48.0: Corsa, Ricalco, Battito, Differenze, Vero o falso, Stima; icone dal foglio assets/game-icons-5.png in v1.0.1, Stima disegnata da codice)
 - [x] **Difficoltà Esperto**: quarta difficoltà per i minigiochi, che si apre quando si supera l'80% a Difficile tre volte in quel minigioco (una porta, non una moneta). (v0.49.0)
 
 ## 5. Rifiniture
