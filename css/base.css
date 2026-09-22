@@ -227,3 +227,10 @@ h2.with-icon { width: 100%; }
   .screen, .code-big, .podium-trophy, .confetti i, .award { animation: none !important; }
   button, .chip { transition: none; }
 }
+
+/* Preferenze di lettura (interruttori in home) */
+html.reduce-motion *, html.reduce-motion *::before, html.reduce-motion *::after { animation: none !important; transition: none !important; }
+html.high-contrast { --text: #ffffff; --muted: #e6e2ff; --line: rgba(255,255,255,0.28); --line-strong: rgba(255,255,255,0.4); --glass: rgba(30, 31, 52, 0.92); --glass-2: rgba(30, 31, 52, 0.95); }
+html.high-contrast body { background-image: none; }
+html.high-contrast .card, html.high-contrast .players li, html.high-contrast .ranking li { backdrop-filter: none; -webkit-backdrop-filter: none; }
+html.onehand .game-body { justify-content: flex-end; padding-bottom: 8px; }

@@ -39,3 +39,25 @@ export function vibrate(pattern) {
   if (!isVibrationEnabled()) return;
   try { navigator.vibrate?.(pattern); } catch (_) { /* non supportato */ }
 }
+
+// Vibrazioni "parlanti" per i momenti della sfida
+const BUZZ = {
+  win: [40, 30, 40, 30, 140],       // manche vinta
+  record: [60, 40, 60, 40, 220],    // record personale
+  out: [220, 70, 220],              // eliminazione
+  duelLost: [120, 50, 120],         // duello perso
+  duelWon: [50, 30, 50, 30, 50, 30, 180],
+  bonus: [30, 30, 30],
+};
+export function buzz(kind) { if (BUZZ[kind]) vibrate(BUZZ[kind]); }
+
+// Preferenze di lettura: una mano (comandi in basso), meno movimento, contrasto alto
+const PREFS = { onehand: "onehand", motion: "reducemotion", contrast: "highcontrast" };
+export function getPref(key) { try { return localStorage.getItem(PREFS[key]) === "on"; } catch (_) { return false; } }
+export function setPref(key, on) { try { localStorage.setItem(PREFS[key], on ? "on" : "off"); } catch (_) { /* privato */ } applyPrefs(); }
+export function applyPrefs() {
+  const root = document.documentElement;
+  root.classList.toggle("onehand", getPref("onehand"));
+  root.classList.toggle("reduce-motion", getPref("motion"));
+  root.classList.toggle("high-contrast", getPref("contrast"));
+}

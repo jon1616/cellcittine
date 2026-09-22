@@ -12,12 +12,14 @@ import { VERSION } from "./version.js";
 import { sfx } from "./audio.js";
 import { applyTheme } from "./theme.js";
 import { state } from "./state.js";
+import { applyPrefs } from "./utils.js";
 import { detectPack } from "./screens/lobby.js";
 import { showHome } from "./screens/home.js";
 import { readInviteFromUrl, joinRoom, leaveRoom } from "./room.js";
 
 document.getElementById("version").textContent = `v${VERSION}`;
 applyTheme();
+applyPrefs();
 
 // Se la selezione salvata coincide con un pacchetto, mostralo col suo nome.
 if (!state.config.pack) state.config.pack = detectPack(state.config.games);

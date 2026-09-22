@@ -611,3 +611,8 @@ input.room-name-input { font-size: 18px; padding: 10px 12px; }
 .screen button.bonus-btn { font-size: 13px; padding: 6px 8px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 20%, transparent); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 50%, transparent); box-shadow: none; text-shadow: none; }
 .screen button.bonus-btn:disabled { opacity: 0.35; }
 .ranking li:has(.bonus-btn) { grid-template-columns: 36px 1fr auto auto; }
+
+/* Qualità della linea in stanza */
+.link-q { font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 999px; margin-left: 4px; }
+.link-q.slow { color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, transparent); }
+.link-q.bad { color: var(--danger); background: color-mix(in srgb, var(--danger) 18%, transparent); }

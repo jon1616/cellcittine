@@ -36,10 +36,10 @@ QR code, inglese.
 
 ## 5. Rifiniture
 
-- [ ] **Vibrazione con pattern diversi** per vittoria di manche, record, eliminazione, sconfitta al duello. — S
-- [ ] **Modalità una mano**: opzione che tiene i comandi in basso nei minigiochi a tastierino/risposte. — S
-- [ ] **Meno movimento e contrasto alto**: interruttori in home (oltre all'impostazione del telefono). — S
-- [ ] **Prova del collegamento in stanza**: indicatore "linea buona / lenta / assente" per ogni persona, dal ping periodico. — M
+- [x] **Vibrazione con pattern diversi** per vittoria di manche, record, eliminazione, sconfitta al duello. (v0.50.0)
+- [x] **Modalità una mano**: opzione che tiene i comandi in basso nei minigiochi a tastierino/risposte. (v0.50.0)
+- [x] **Meno movimento e contrasto alto**: interruttori in home (oltre all'impostazione del telefono). (v0.50.0)
+- [x] **Prova del collegamento in stanza**: indicatore "linea buona / lenta / assente" per ogni persona, dal ping periodico. (v0.50.0)
 
 ## 6. Rete
 

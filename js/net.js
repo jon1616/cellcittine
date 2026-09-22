@@ -385,6 +385,21 @@ export class Net {
     }
     this._pongResolve = null;
     this.timeOffset = best ? best.offset : 0;
+    this._startLinkCheck(conn);
+  }
+
+  // Ogni 5 s un ping: la qualità della linea (buona/lenta/assente) va all'host, che la mostra in stanza
+  _startLinkCheck(conn) {
+    clearInterval(this._linkTimer);
+    this._linkTimer = setInterval(async () => {
+      if (this._leaving || this.hostConn !== conn || !conn.open) return;
+      const t0 = Date.now();
+      const pong = await new Promise((res) => { this._pongResolve = res; try { conn.send({ type: "ping", t0 }); } catch (_) { res(null); } setTimeout(() => res(null), 3000); });
+      this._pongResolve = null;
+      const rtt = pong ? Date.now() - pong.t0 : null;
+      const quality = rtt === null ? "bad" : rtt < 180 ? "good" : rtt < 600 ? "slow" : "bad";
+      if (quality !== this._lastQuality) { this._lastQuality = quality; this.sendToHost({ type: "link", quality, rtt }); }
+    }, 5000);
   }
 
   // Guest → host (in coda se la linea è momentaneamente persa)
@@ -399,6 +414,8 @@ export class Net {
   leave() {
     this._leaving = true;
     this.reconnecting = false;
+    clearInterval(this._linkTimer);
+    this._lastQuality = null;
     try { this.peer?.destroy(); } catch (_) { /* ignora */ }
     this.peer = null;
     this.conns.clear();

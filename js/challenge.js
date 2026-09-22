@@ -570,6 +570,16 @@ export function react(emoji) {
 }
 export { REACTIONS };
 
+// Host: qualità della linea di una persona ("good" | "slow" | "bad"), mostrata in stanza
+export function setLink(id, quality) {
+  const net = state.net;
+  const p = net?.players.find((x) => x.id === id);
+  if (!p || !["good", "slow", "bad"].includes(quality) || p.link === quality) return;
+  if (quality === "good") delete p.link; else p.link = quality;
+  net.broadcastPlayers();
+  net.handlers.onPlayers?.(net.players);
+}
+
 // Host: chi ha l'app in secondo piano (💤 in stanza)
 export function setPresence(id, away) {
   const net = state.net;
@@ -612,6 +622,7 @@ export function handleMessage(msg, fromId) {
     else if (msg.type === "ready") markReady(fromId, msg.index);
     else if (msg.type === "presence") setPresence(fromId, msg.away === true);
     else if (msg.type === "react") sendReaction(fromId, msg.emoji);
+    else if (msg.type === "link") setLink(fromId, msg.quality);
     return;
   }
   if (msg.type === "ready") { if (state.round?.index === msg.index && state.screen === "countdown") renderReady(msg.ids || []); return; }

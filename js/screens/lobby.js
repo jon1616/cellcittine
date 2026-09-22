@@ -416,7 +416,7 @@ function playersList(players, meId, { teams = 0, canEdit = false } = {}) {
     { class: "players" },
     players.map((p) =>
       el("li", { class: p.id === meId ? "me" : "" }, [
-        el("span", { class: "who" }, [colorDot(p.color, p.id), el("span", { text: p.name }), p.away ? el("span", { class: "away", title: "App in secondo piano", text: "💤" }) : el("span")]),
+        el("span", { class: "who" }, [colorDot(p.color, p.id), el("span", { text: p.name }), p.away ? el("span", { class: "away", title: "App in secondo piano", text: "💤" }) : el("span"), p.link ? el("span", { class: `link-q ${p.link}`, title: p.link === "slow" ? "Linea lenta" : "Linea assente", text: p.link === "slow" ? "📶 lenta" : "📶 assente" }) : el("span")]),
         el("span", { class: "player-right" }, [
           handicapPill(p, canEdit),
           teams ? teamPill(p, canEdit) : el("span"),

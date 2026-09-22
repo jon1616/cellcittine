@@ -3,7 +3,7 @@
   (record, catalogo, suoni, musica) e scelta del tema.
 */
 
-import { el, isVibrationEnabled, setVibrationEnabled, vibrate } from "../utils.js";
+import { el, isVibrationEnabled, setVibrationEnabled, vibrate, getPref, setPref } from "../utils.js";
 import { sfx } from "../audio.js";
 import { state, setScreen } from "../state.js";
 import { show, statusLine, setStatus, toast } from "../ui.js";
@@ -87,6 +87,9 @@ export function showHome(message = "", isError = !!message) {
         class: "link",
         onclick: () => { setVibrationEnabled(!isVibrationEnabled()); vibrate(30); showHome(); },
       }),
+      el("button", { text: getPref("onehand") ? "🖐️ Una mano" : "🖐️ Una mano (off)", class: "link", title: "Comandi in basso nei minigiochi a tastierino", onclick: () => { setPref("onehand", !getPref("onehand")); showHome(); } }),
+      el("button", { text: getPref("motion") ? "🐢 Meno movimento" : "🐢 Meno movimento (off)", class: "link", onclick: () => { setPref("motion", !getPref("motion")); showHome(); } }),
+      el("button", { text: getPref("contrast") ? "🔆 Contrasto alto" : "🔆 Contrasto alto (off)", class: "link", onclick: () => { setPref("contrast", !getPref("contrast")); showHome(); } }),
     ]),
     themeRow(),
     installRow(),

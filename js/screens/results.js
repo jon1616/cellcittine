@@ -3,7 +3,7 @@
   personale) e podio finale (o riepilogo dell'allenamento).
 */
 
-import { el } from "../utils.js";
+import { el, buzz } from "../utils.js";
 import { sfx } from "../audio.js";
 import { state, setScreen, isSolo } from "../state.js";
 import { show, gameIcon, gameHeading, confetti, colorDot, playerColor } from "../ui.js";
@@ -183,6 +183,11 @@ export async function showResults(msg) {
   const meId = net.me.id;
   sfx.play(round?.isRecord ? "record" : "roundEnd");
   const ch = state.challenge;
+  if (round?.isRecord) buzz("record");
+  else if (!solo && (msg.eliminated || []).some((e) => e.id === meId)) buzz("out");
+  else if (!solo && msg.specialOutcome?.loser === meId) buzz("duelLost");
+  else if (!solo && msg.specialOutcome?.winner === meId) buzz("duelWon");
+  else if (!solo && msg.ranking[0]?.id === meId && msg.ranking[0].score !== null) buzz("win");
   // Statistiche personali: questa manche
   if (round && round.myScore !== undefined) {
     const best = msg.ranking.find((r) => r.score !== null && r.score !== undefined);
