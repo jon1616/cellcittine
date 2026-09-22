@@ -206,6 +206,12 @@ export class Net {
     if (!p) return;
     if (team === null) delete p.team; else p.team = team;
   }
+  // Host: difficoltà personale (handicap): "facile" | "normale" | "difficile" | null = quella della sfida
+  setHandicap(id, difficulty) {
+    const p = this.players.find((x) => x.id === id);
+    if (!p) return;
+    if (difficulty) p.handicap = difficulty; else delete p.handicap;
+  }
   broadcastPlayers() {
     this.broadcast({ type: "players", players: this.players });
   }

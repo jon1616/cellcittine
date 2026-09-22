@@ -566,3 +566,9 @@ input.code { letter-spacing: 8px; text-transform: uppercase; font-weight: 700; f
 .reaction-fly { position: absolute; bottom: 60%; font-size: 28px; pointer-events: none; animation: reaction-fly 1.3s ease-out forwards; z-index: 5; }
 @keyframes reaction-fly { 0% { opacity: 0; transform: translateY(10px) scale(0.6); } 20% { opacity: 1; transform: translateY(-6px) scale(1.2); } 100% { opacity: 0; transform: translateY(-70px) scale(1); } }
 .ranking li { position: relative; }
+
+/* Difficoltà personale (handicap) in stanza */
+.diff-pill { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 8px; border-radius: 999px; color: var(--muted); background: rgba(255,255,255,0.06); border: 1px solid var(--line); box-shadow: none; text-shadow: none; font-family: inherit; line-height: 1.2; }
+.diff-pill.on { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 55%, transparent); background: color-mix(in srgb, var(--accent) 16%, transparent); }
+.screen button.diff-pill { padding: 6px 10px; cursor: pointer; background: rgba(255,255,255,0.06); color: var(--muted); }
+.screen button.diff-pill.on { color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, transparent); }

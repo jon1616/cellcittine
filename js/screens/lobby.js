@@ -265,6 +265,21 @@ function cycleTeam(id) {
   showLobby();
 }
 
+// Pillola della difficoltà personale (handicap): l'host la cambia toccandola (Auto → Facile → Normale → Difficile)
+const HANDICAPS = [null, "facile", "normale", "difficile"];
+function handicapPill(p, canEdit) {
+  const label = p.handicap ? difficultyLabel(p.handicap) : "Auto";
+  const attrs = { class: `diff-pill${p.handicap ? " on" : ""}`, text: label, title: "Difficoltà personale" };
+  if (!canEdit) return p.handicap ? el("span", attrs) : el("span");
+  return el("button", { ...attrs, onclick: () => {
+    const net = state.net;
+    const next = HANDICAPS[(HANDICAPS.indexOf(p.handicap || null) + 1) % HANDICAPS.length];
+    net.setHandicap(p.id, next);
+    net.broadcastPlayers();
+    showLobby();
+  } });
+}
+
 // Pillola con il nome della squadra (per l'host è un pulsante che la cambia)
 function teamPill(p, canEdit) {
   const t = teamInfo(p.team);
@@ -329,6 +344,7 @@ function playersList(players, meId, { teams = 0, canEdit = false } = {}) {
       el("li", { class: p.id === meId ? "me" : "" }, [
         el("span", { class: "who" }, [colorDot(p.color), el("span", { text: p.name }), p.away ? el("span", { class: "away", title: "App in secondo piano", text: "💤" }) : el("span")]),
         el("span", { class: "player-right" }, [
+          handicapPill(p, canEdit),
           teams ? teamPill(p, canEdit) : el("span"),
           el("span", { class: "tag", text: p.isHost ? "host" : "" }),
         ]),
@@ -361,6 +377,7 @@ export function showLobby() {
       el("div", { class: "card" }, [
         el("h2", { text: `In stanza (${net.players.length})` }),
         playersList(net.players, net.me.id, { teams, canEdit: net.isHost }),
+        net.isHost ? el("p", { class: "small", text: "Tocca “Auto” accanto a un nome per dare una difficoltà personale (handicap): chi ha la stessa difficoltà gioca gli stessi parametri." }) : el("span"),
         net.isHost && teams ? el("button", { text: "🎲 Mescola le squadre", class: "secondary small-btn", onclick: shuffleTeams }) : el("span"),
       ])
     );

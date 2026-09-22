@@ -111,6 +111,9 @@ export function nextRound() {
   // Se per qualcuno in stanza è la prima volta, presentazione più lunga per tutti
   const intro = net.players.some((p) => !net.hasSeen(p.id, r.gameId));
   const special = r.special ? SPECIALS[r.special] : null;
+  // Handicap: chi ha una difficoltà personale la usa (salvo le manche speciali Difficile/Facile, uguali per tutti)
+  const difficulties = {};
+  for (const p of net.players) if (p.handicap && !special?.difficulty) difficulties[p.id] = p.handicap;
   const msg = {
     type: "start",
     index: ch.index,
@@ -118,6 +121,7 @@ export function nextRound() {
     gameId: r.gameId,
     seed: r.seed,
     difficulty: special?.difficulty || roundDifficulty(ch.difficulty, ch.index, ch.total),
+    difficulties,
     challengeDifficulty: ch.difficulty,
     special: special ? special.id : null,
     mode: ch.mode,
@@ -177,7 +181,8 @@ async function beginRound(msg) {
   if (Array.isArray(msg.out)) { state.challenge.eliminated = new Map(msg.out.map((id) => [id, true])); }
 
   // Segnaposto subito (così i messaggi di questa manche non vengono scartati)…
-  state.round = { index: msg.index, game: null, params: null, startAt: msg.startAt, difficulty: msg.difficulty, special: msg.special || null, scores: new Map(), records: new Set(), participants: net.players.map((p) => p.id), deadline: null, ready: new Set() };
+  const myDifficulty = msg.difficulties?.[net.me.id] || msg.difficulty; // handicap personale
+  state.round = { index: msg.index, game: null, params: null, startAt: msg.startAt, difficulty: myDifficulty, special: msg.special || null, scores: new Map(), records: new Set(), participants: net.players.map((p) => p.id), deadline: null, ready: new Set() };
   showCountdown(getEntry(msg.gameId), msg);
   // "Sono pronto": l'host raccoglie e rimanda a tutti la lista di chi ha il conto alla rovescia a schermo
   if (net.isHost) markReady(net.me.id, msg.index);
@@ -198,7 +203,7 @@ async function beginRound(msg) {
   }
   if (state.round?.index !== msg.index) return; // nel frattempo è cambiato qualcosa
   state.round.game = game;
-  state.round.params = game.createParams(seededRandom(msg.seed), msg.difficulty);
+  state.round.params = game.createParams(seededRandom(msg.seed), state.round.difficulty);
 }
 
 // Host: una persona è pronta per la manche `index`; tutti ricevono la lista aggiornata
@@ -230,7 +235,7 @@ function showCountdown(entry, msg) {
   if (special) sfx.play("special");
   const amOut = state.challenge?.eliminated?.has(net.me.id);
   const area = el("div", { class: `game-area${msg.intro ? " intro" : ""}` }, [
-    el("div", { class: "hint", text: `Manche ${msg.index + 1} di ${msg.total} · ${difficultyLabel(msg.difficulty)}` }),
+    el("div", { class: "hint", text: `Manche ${msg.index + 1} di ${msg.total} · ${difficultyLabel(state.round?.difficulty || msg.difficulty)}${msg.difficulties?.[net.me.id] ? " (la tua difficoltà)" : ""}` }),
     special
       ? el("div", { class: "special-banner" }, [el("div", { class: "special-title", text: `${special.icon} ${special.label}` }), el("div", { class: "special-desc", text: special.desc })])
       : el("span"),

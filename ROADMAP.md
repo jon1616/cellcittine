@@ -15,7 +15,7 @@ mani, tema Compleanno, QR code, inglese.
 - [x] **Risultati in diretta**: chi ha finito vede, nella schermata "In attesa degli altri…", chi ha già finito e con che punteggio, uno alla volta. Come: messaggio `progress` dall'host a ogni punteggio ricevuto; lista nella schermata di fine minigioco. (v0.36.0)
 - [x] **Classifica di manche animata**: righe che entrano una alla volta con il punteggio che si svela, come la classifica generale. (v0.35.0)
 - [x] **Reazioni con le faccine**: nei risultati e sul podio, un tocco su 👏 😂 😱 🔥 ❤️ e tutti vedono la faccina volare sul nome di chi l'ha mandata (una al secondo a persona). Come: `react` ospite → host → tutti. (v0.36.0)
-- [ ] **Handicap per persona**: l'host può dare Facile/Normale/Difficile a ognuno dalla stanza (pillola accanto al nome); i parametri restano uguali tra chi ha la stessa difficoltà; i record si salvano con la difficoltà vera. Come: `config.handicaps`, campo `difficulties` nel messaggio `start`. — M
+- [x] **Handicap per persona**: l'host può dare Facile/Normale/Difficile a ognuno dalla stanza (pillola accanto al nome); i parametri restano uguali tra chi ha la stessa difficoltà; i record si salvano con la difficoltà vera. Come: `config.handicaps`, campo `difficulties` nel messaggio `start`. (v0.37.0)
 
 ## B. Più varietà nelle sfide
 
