@@ -3,6 +3,7 @@
   personale) e podio finale (o riepilogo dell'allenamento).
 */
 
+import { shareButtons } from "../share.js";
 import { el, buzz } from "../utils.js";
 import { sfx } from "../audio.js";
 import { state, setScreen, isSolo } from "../state.js";
@@ -707,5 +708,5 @@ export function showFinal(msg) {
       ]
     : [el("p", { text: "Aspetta che l'host prepari una nuova sfida…" })];
 
-  show(...parts, ...actions, solo ? el("span") : reactionBar(), el("div", { class: "spacer" }), exitButton());
+  show(...parts, ...actions, solo ? el("span") : reactionBar(), el("div", { class: "share-final" }, [el("div", { class: "small", text: "Ti è piaciuto? Fallo provare a qualcuno:" }), shareButtons()]), el("div", { class: "spacer" }), exitButton());
 }

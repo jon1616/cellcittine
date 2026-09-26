@@ -5,7 +5,7 @@
   salvata l'ultima volta.
 */
 
-const CACHE_VERSION = "1.2.0"; // tenere allineato a js/version.js
+const CACHE_VERSION = "1.3.0"; // tenere allineato a js/version.js
 const CACHE = `cellcittine-${CACHE_VERSION}`;
 
 const PRECACHE = [
@@ -33,6 +33,7 @@ const PRECACHE = [
   "./js/championship.js",
   "./js/missions.js",
   "./js/story.js",
+  "./js/share.js",
   "./js/screens/stats.js",
   "./js/screens/home.js",
   "./js/screens/join.js",

@@ -24,6 +24,7 @@ import { dailyGame } from "../daily.js";
 import { getEntry } from "../games/catalog.js";
 import { gameIcon } from "../ui.js";
 import { playQuick } from "../room.js";
+import { shareCard } from "../share.js";
 
 // message: riga di stato (per default in rosso: è quasi sempre un errore)
 export function showHome(message = "", isError = !!message) {
@@ -84,6 +85,7 @@ export function showHome(message = "", isError = !!message) {
       setting(getPref("motion"), "🐢", "Meno movimento", () => { setPref("motion", !getPref("motion")); showHome(); }),
       setting(getPref("contrast"), "🔆", "Contrasto alto", () => { setPref("contrast", !getPref("contrast")); showHome(); }),
     ]),
+    shareCard(),
     themeRow(),
     installRow(),
     status

@@ -380,3 +380,13 @@ input.room-name-input { font-size: 18px; padding: 10px 12px; }
 
 /* Podio di una serie di Prova subito */
 .series-big { font-size: 24px; font-weight: 900; text-align: center; }
+
+/* Far conoscere il gioco (home e podio finale): WhatsApp, Email, Altro */
+.share-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.share-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 12px 6px; border-radius: 14px; font: inherit; font-size: 15px; font-weight: 800; text-decoration: none; color: #fff; background: var(--card-2); border: 1px solid var(--line); box-shadow: none; cursor: pointer; }
+.share-btn .si { font-size: 24px; line-height: 1; }
+.share-btn.wa { background: #1f9d55; border-color: transparent; }
+.share-btn.mail { background: #2f6fd6; border-color: transparent; }
+.share-btn:active { transform: scale(0.97); }
+.share-final { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; text-align: center; }
+.screen .share-btn.other { background: var(--violet); color: #fff; border-color: transparent; box-shadow: none; }

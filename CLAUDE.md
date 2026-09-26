@@ -60,6 +60,7 @@ js/net.js            P2P (PeerJS): host(), join(), broadcast(), sendToHost(), no
 js/audio.js          effetti sintetizzati (sfx.play/pad/step/inflate*) + musica (sfx.setScene("menu"|"game"))
 js/storage.js        localStorage: config sfida, record {score,text}, pacchetti personali, getClientId() (id stabile), storico, minigiochi già visti, risultati della Sfida del giorno
 js/packs.js          pacchetti integrati (alcuni calcolati dal catalogo) + utilità
+js/share.js          far conoscere il gioco: shareCard (home) e shareButtons (podio) con WhatsApp (wa.me), Email (mailto) e menu del telefono/copia link
 js/theme.js          temi: Classico = sfondo da codice; stagionali con immagine (assets/bg-<id>.webp) per data o a scelta
 js/games/catalog.js  CATALOGO: scheda di ogni minigioco + loadGame(id) con import() a richiesta
 js/games/shell.js    cornice comune: createShell, runTimer, runStopwatch, shuffle, fitCanvas, canvasPoint
