@@ -91,6 +91,7 @@ export function leaveRoom() {
   state.challenge = null;
   state.hostConfig = null;
   state.championship = null;
+  state.sessionPlayed = new Set(); // nuova stanza o allenamento = nuova sessione
 }
 
 export function exitButton(text = "Esci") {
@@ -266,7 +267,7 @@ export function playQuickRound() {
   state.net = makeNet();
   state.net.solo(state.name || "Tu");
   keepScreenOn();
-  startChallenge({ games: randomSelection(5), adaptive: true, difficulty: "adattiva" });
+  startChallenge({ games: randomSelection(5, undefined, state.sessionPlayed), adaptive: true, difficulty: "adattiva" });
 }
 
 // Sfida del giorno: da soli, subito, con il piano di oggi (uguale per tutti)

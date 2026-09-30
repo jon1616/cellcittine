@@ -15,7 +15,7 @@ import { nextRound, finishChallenge, replayChallenge, closeChampionship, react, 
 import { showLobby as showLobbyScreen, championshipTable } from "./lobby.js";
 import { showCatalog, showGameInfo } from "./catalog.js";
 import { showHome } from "./home.js";
-import { showLobby } from "./lobby.js";
+import { showLobby, refreshRandomSelection } from "./lobby.js";
 import { teamInfo, formatAvg } from "../teams.js";
 import { ratingOf, ratingBar, ratingLabel } from "../rating.js";
 import { SPECIALS } from "../specials.js";
@@ -701,6 +701,7 @@ export function showFinal(msg) {
           onclick: () => {
             state.challenge = null;
             state.round = null;
+            refreshRandomSelection();
             net.broadcast({ type: "lobby" });
             showLobby();
           },

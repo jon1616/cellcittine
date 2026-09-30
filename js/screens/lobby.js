@@ -37,6 +37,7 @@ export function broadcastConfig() {
 export function updateConfig(patch, { rerender = true } = {}) {
   state.config = { ...state.config, ...patch };
   if (patch.games && !patch.pack) state.config.pack = detectPack(state.config.games);
+  if (patch.games && patch.random === undefined) state.config.random = false; // scelta a mano: non si ripesca
   saveConfig(state.config);
   broadcastConfig();
   if (rerender) showLobby();
@@ -67,7 +68,36 @@ function applyPack(pack, type) {
 }
 
 function roundsLabel(cfg) {
-  return cfg.rounds === "tutti" ? `${cfg.games.length} manche (tutti i minigiochi scelti)` : `${cfg.rounds} manche`;
+  const n = new Set(cfg.games).size;
+  if (cfg.rounds === "tutti") return `${n} manche (tutti i minigiochi scelti)`;
+  if (cfg.rounds > n) return `${n} manche (i minigiochi scelti sono ${n}: nessuno si ripete)`;
+  return `${cfg.rounds} manche`;
+}
+
+// Selezione casuale (Sorprendimi, Mix equilibrato) ripescata tra i minigiochi non ancora usciti nella sessione
+function drawRandom(cfg) {
+  const theme = THEMES.find((t) => t.id === cfg.themeId && !t.fixed);
+  if (theme) return themeGames(theme, state.sessionPlayed);
+  return randomSelection(cfg.rounds === "tutti" ? 7 : cfg.rounds, undefined, state.sessionPlayed);
+}
+// A fine sfida (Nuova sfida / Cambia impostazioni): se la selezione era casuale, se ne pesca una nuova
+export function refreshRandomSelection() {
+  const cfg = state.config;
+  if (!cfg.random) return;
+  state.config = { ...cfg, games: drawRandom(cfg), pack: null };
+  saveConfig(state.config);
+}
+
+// Quanti dei minigiochi scelti sono già usciti in questa stanza/allenamento
+function sessionNote(cfg) {
+  const played = state.sessionPlayed;
+  if (!played.size || !cfg.games.length) return el("span");
+  const already = [...new Set(cfg.games)].filter((id) => played.has(id)).length;
+  if (!already) return el("div", { class: "session-note", text: "✨ Tutti nuovi per questa sessione" });
+  const fresh = new Set(cfg.games).size - already;
+  return el("div", { class: "session-note", text: fresh > 0
+    ? `🔁 ${already} già usciti in questa sessione: si giocano prima gli altri ${fresh}`
+    : "🔁 Sono già usciti tutti in questa sessione: tocca “🎲 Sorprendimi” o cambia pacchetto per minigiochi nuovi" });
 }
 
 // "⚡ 3  🧠 2  …"
@@ -138,7 +168,7 @@ function themesRow() {
     class: `chip pack${cfg.themeId === t.id ? " on" : ""}`,
     text: `${t.icon} ${t.name}`,
     title: t.description,
-    onclick: () => updateConfig({ games: themeGames(t), pack: null, themeId: t.id }),
+    onclick: () => updateConfig({ games: themeGames(t, state.sessionPlayed), pack: null, themeId: t.id, random: !t.fixed }),
   })));
   const active = THEMES.find((t) => t.id === cfg.themeId);
   const preview = active && sameList(cfg.games, active)
@@ -187,6 +217,7 @@ function configPanel() {
     el("div", { class: "sel-summary" }, [
       el("div", { class: "sel-main", text: name ? `${name} · ${n} di ${CATALOG.length}` : `Selezione personalizzata · ${n} di ${CATALOG.length}` }),
       el("div", { class: "sel-cats", text: n ? categoryBreakdown(cfg.games) : "Nessun minigioco scelto" }),
+      sessionNote(cfg),
     ]),
     el("button", { text: "Scegli i minigiochi ›", class: "secondary", onclick: () => showPicker() }),
     el("div", { class: "label", text: "Pacchetti" }),
@@ -199,7 +230,7 @@ function configPanel() {
         class: "secondary small-btn",
         onclick: () => {
           const count = cfg.rounds === "tutti" ? 7 : cfg.rounds;
-          updateConfig({ games: randomSelection(count), pack: null });
+          updateConfig({ games: randomSelection(count, undefined, state.sessionPlayed), pack: null, themeId: null, random: true });
         },
       }),
     ]),

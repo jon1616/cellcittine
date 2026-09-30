@@ -18,7 +18,7 @@ import { setStatus, gameIcon, difficultyLabel, appRoot, colorDot, toast } from "
 import { syncBackGuard } from "./nav.js";
 import { getEntry, getCategory, loadGame, preloadGames, getLoaded } from "./games/catalog.js";
 import { shuffle } from "./games/shell.js";
-import { randomSelection } from "./packs.js";
+import { randomSelection, freshFirst } from "./packs.js";
 import { updateRecord, markSeen, getGroupRecord, saveGroupRecord } from "./storage.js";
 import { ratingOf } from "./rating.js";
 import { bumpWeekly } from "./missions.js";
@@ -57,23 +57,18 @@ export async function startChallenge(opts = {}) {
   const rng = seededRandom(Math.floor(Math.random() * 2 ** 31));
   const sameGames = Array.isArray(opts.games) && opts.games.length ? opts.games : null;
 
-  // "Tutti": ogni minigioco scelto una volta, in ordine casuale.
-  // Altrimenti: cicla su quelli scelti, mescolati, evitando ripetizioni vicine.
-  const total = sameGames ? sameGames.length : cfg.rounds === "tutti" ? cfg.games.length : cfg.rounds;
+  // Ogni minigioco al massimo una volta per sfida (le manche non superano i minigiochi scelti), e prima
+  // quelli non ancora usciti in questa stanza/allenamento. "Tutti": ogni minigioco scelto, in ordine casuale.
+  const uniqueGames = [...new Set(cfg.games)];
+  const total = sameGames ? sameGames.length : cfg.rounds === "tutti" ? uniqueGames.length : Math.min(cfg.rounds, uniqueGames.length);
   const rounds = [];
-  let pool = [];
+  const pool = sameGames ? [] : freshFirst(uniqueGames, state.sessionPlayed, (list) => shuffle(list, rng));
   while (rounds.length < total) {
     if (sameGames) {
       const i = rounds.length;
       const seed = Array.isArray(opts.seeds) && Number.isInteger(opts.seeds[i]) ? opts.seeds[i] : Math.floor(rng() * 2 ** 31);
       rounds.push({ gameId: sameGames[i], seed });
       continue;
-    }
-    if (pool.length === 0) {
-      pool = shuffle(cfg.games, rng);
-      if (rounds.length > 0 && pool.length > 1 && pool[0] === rounds[rounds.length - 1].gameId) {
-        pool.push(pool.shift());
-      }
     }
     rounds.push({ gameId: pool.shift(), seed: Math.floor(rng() * 2 ** 31) });
   }
@@ -126,6 +121,7 @@ export function nextRound() {
   // Serie senza fine: la partita successiva nasce qui (stesso minigioco, seme nuovo)
   if (ch.series === "infinita" && ch.index >= ch.rounds.length) ch.rounds.push({ gameId: ch.rounds[0].gameId, seed: Math.floor(Math.random() * 2 ** 31), special: null });
   const r = ch.rounds[ch.index];
+  state.sessionPlayed.add(r.gameId); // già uscito in questa sessione: nelle prossime sfide va in fondo
   // Se per qualcuno in stanza è la prima volta, presentazione più lunga per tutti
   const intro = net.players.some((p) => !net.hasSeen(p.id, r.gameId));
   // Duello: due persone in gara sorteggiate ora (serve sapere chi c'è); se non si può, la manche è normale
@@ -174,7 +170,7 @@ export function replayChallenge() {
   if (!games?.length) return;
   state.round = null;
   // La Sfida del giorno si rigioca identica (stessi semi): vale come allenamento
-  if (ch.adaptive) { startChallenge({ games: randomSelection(5), adaptive: true, difficulty: "adattiva" }); return; }
+  if (ch.adaptive) { startChallenge({ games: randomSelection(5, undefined, state.sessionPlayed), adaptive: true, difficulty: "adattiva" }); return; }
   // Prova subito a serie: si riparte con la stessa serie (senza fine: una partita, le altre nascono strada facendo)
   if (ch.quick) { startChallenge({ games: ch.series === "infinita" ? [games[0]] : games, quick: true, difficulty: ch.difficulty, ...(ch.series ? { series: ch.series } : {}) }); return; }
   startChallenge(ch.daily ? { games, seeds: ch.rounds.map((r) => r.seed), difficulty: ch.difficulty, daily: ch.daily } : { games });
@@ -292,6 +288,7 @@ export function resumeAfterHandover() {
   }
   const done = ch.history.length;
   const cfg = state.config;
+  for (const h of ch.history) state.sessionPlayed.add(h.gameId); // il nuovo host eredita cosa è già uscito
   const pool = cfg.games?.length ? cfg.games : [...new Set(ch.history.map((h) => h.gameId))];
   const rng = seededRandom(Math.floor(Math.random() * 2 ** 31));
   const rounds = ch.history.map((h) => ({ gameId: h.gameId, seed: 0 }));

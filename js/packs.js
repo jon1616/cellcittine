@@ -89,10 +89,10 @@ export const THEMES = [
   { id: "canvas", name: "Solo azione", icon: "🕹️", description: "Destrezza e riflessi: si muove tutto.", fixed: true, games: () => ids((g) => ["destrezza", "riflessi"].includes(g.category) && g.pace !== "tranquillo") },
   { id: "riflessi", name: "Riflessi puri", icon: "⚡", description: "Solo reazione.", fixed: true, games: () => ids((g) => g.category === "riflessi") },
   { id: "memoria", name: "Memoria di ferro", icon: "🧠", description: "Solo memoria.", fixed: true, games: () => ids((g) => g.category === "memoria") },
-  { id: "mix", name: "Mix equilibrato", icon: "🎨", description: "Due minigiochi a caso per ogni categoria.", fixed: false, games: () => ["riflessi", "memoria", "attenzione", "destrezza", "calcolo", "parole"].flatMap((c) => randomSelection(2, ids((g) => g.category === c))) },
+  { id: "mix", name: "Mix equilibrato", icon: "🎨", description: "Due minigiochi a caso per ogni categoria.", fixed: false, games: (avoid) => ["riflessi", "memoria", "attenzione", "destrezza", "calcolo", "parole"].flatMap((c) => randomSelection(2, ids((g) => g.category === c), avoid)) },
 ];
-export function themeGames(theme) {
-  return theme.games().filter((id) => ALL_GAME_IDS.includes(id));
+export function themeGames(theme, avoid = null) {
+  return theme.games(avoid).filter((id) => ALL_GAME_IDS.includes(id));
 }
 
 export function getBuiltinPack(id) {
@@ -105,14 +105,30 @@ export function resolvePack(pack) {
   return list.filter((id) => ALL_GAME_IDS.includes(id));
 }
 
-// Sceglie n giochi a caso (tra quelli indicati, o tutti).
-export function randomSelection(n, from = ALL_GAME_IDS) {
-  const pool = [...from];
+// Mescola a caso (Math.random: qui si sceglie COSA giocare, non i parametri della manche)
+function mixed(list) {
+  const pool = [...list];
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
+  return pool;
+}
+
+// Sceglie n giochi a caso (tra quelli indicati, o tutti), senza doppioni.
+// avoid: minigiochi già usciti nella sessione, presi solo se quelli nuovi non bastano.
+export function randomSelection(n, from = ALL_GAME_IDS, avoid = null) {
+  const list = [...new Set(from)];
+  const pool = avoid?.size ? [...mixed(list.filter((id) => !avoid.has(id))), ...mixed(list.filter((id) => avoid.has(id)))] : mixed(list);
   return pool.slice(0, Math.max(1, Math.min(n, pool.length)));
+}
+
+// Ordine delle manche: prima i minigiochi non ancora usciti nella sessione, poi gli altri (ognuno una volta sola)
+export function freshFirst(games, avoid, shuffleFn) {
+  const list = [...new Set(games)];
+  const fresh = list.filter((id) => !avoid?.has(id));
+  const old = list.filter((id) => avoid?.has(id));
+  return [...shuffleFn(fresh), ...shuffleFn(old)];
 }
 
 // Due selezioni sono uguali se contengono gli stessi giochi (in qualsiasi ordine).

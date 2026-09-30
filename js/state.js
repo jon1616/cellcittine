@@ -23,6 +23,7 @@ export const state = {
   pendingDaily: null,               // arrivo da un link alla Sfida del giorno (?giorno=AAAA-MM-GG): data del link
   installPrompt: null,              // evento beforeinstallprompt (Android/Chrome), se il browser lo offre
   championship: null,               // host: { day, table: Map } quando il campionato è attivo (championship.js)
+  sessionPlayed: new Set(),         // host/da soli: minigiochi già usciti in questa stanza o allenamento (si azzera uscendo)
 };
 
 export function setScreen(name) {

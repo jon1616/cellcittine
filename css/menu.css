@@ -390,3 +390,6 @@ input.room-name-input { font-size: 18px; padding: 10px 12px; }
 .share-btn:active { transform: scale(0.97); }
 .share-final { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; text-align: center; }
 .screen .share-btn.other { background: var(--violet); color: #fff; border-color: transparent; box-shadow: none; }
+
+/* Stanza: minigiochi già usciti in questa sessione */
+.session-note { font-size: 13px; color: var(--muted); margin-top: 4px; }
